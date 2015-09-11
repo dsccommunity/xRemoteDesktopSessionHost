@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/master)
+﻿[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/master)
 
 # xRemoteDesktopSessionHost
 
@@ -78,6 +78,10 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 * **ShowInWebAccess**: Specifies whether to show the RemoteApp program in the RD Web Access server, and in RemoteApp and Desktop Connections that the user subscribes to.
 
 ## Versions
+
+### 1.1.0.0
+
+* Fixed encoding
 
 ### 1.0.1
 
