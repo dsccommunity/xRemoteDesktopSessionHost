@@ -79,6 +79,8 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 
 ## Versions
 
+### Unreleased
+
 ### 1.1.0.0
 
 * Fixed encoding
