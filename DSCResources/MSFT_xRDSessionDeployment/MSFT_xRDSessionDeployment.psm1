@@ -1,4 +1,4 @@
-if ([Environment]::OSVersion.Version -lt (new-object 'Version' 6,2,9200,0)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
 Import-Module RemoteDesktop
 
 #######################################################################
