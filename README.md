@@ -81,6 +81,8 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 
 ### Unreleased
 
+*  Fixed an issue with version checks where OS version greater than 9 would fail (Windows 10/Server 2016)
+
 ### 1.1.0.0
 
 * Fixed encoding
@@ -95,6 +97,8 @@ To allow all users to see a RemoteApp program, provide a value of Null.
     * **xRDSessionCollectionConfiguration**
     * **xRDRemoteApp**
 
+
+	
 ## Examples
 
 ### End to End  
