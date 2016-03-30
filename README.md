@@ -1,4 +1,4 @@
-﻿[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/master)
 
 # xRemoteDesktopSessionHost
 
@@ -71,13 +71,19 @@ This path resolves to the same location as the value of the FilePath parameter, 
 * **FolderName**: Specifies the name of the folder that the RemoteApp program appears in on the Remote Desktop Web Access (RD Web Access) webpage and in the Start menu for subscribed RemoteApp and Desktop Connections.
 * **CommandLineSetting**: Specifies whether the RemoteApp program accepts command-line arguments from the client at connection time.
 * **RequiredCommandLine**: Specifies a string that contains command-line arguments that the client can use at connection time with the RemoteApp program.
-* **IconIndex**: Specifies the index within the icon file (specified by the IconPath parameter) where the RemoteApp program’s icon can be found.
+* **IconIndex**: Specifies the index within the icon file (specified by the IconPath parameter) where the RemoteApp program�s icon can be found.
 * **IconPath**: Specifies the path to a file containing the icon to display for the RemoteApp program identified by the Alias parameter.
 * **UserGroups**: Specifies a domain group that can view the RemoteApp in RD Web Access, and in RemoteApp and Desktop Connections.
 To allow all users to see a RemoteApp program, provide a value of Null.
 * **ShowInWebAccess**: Specifies whether to show the RemoteApp program in the RD Web Access server, and in RemoteApp and Desktop Connections that the user subscribes to.
 
 ## Versions
+
+### Unreleased
+
+### 1.2.0.0
+
+*  Fixed an issue with version checks where OS version greater than 9 would fail (Windows 10/Server 2016)
 
 ### 1.1.0.0
 
@@ -93,6 +99,8 @@ To allow all users to see a RemoteApp program, provide a value of Null.
     * **xRDSessionCollectionConfiguration**
     * **xRDRemoteApp**
 
+
+	
 ## Examples
 
 ### End to End  
