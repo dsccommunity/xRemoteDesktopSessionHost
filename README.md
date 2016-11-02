@@ -83,6 +83,8 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 ## Versions
 
 ### Unreleased
+
+### 1.3.0.0
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 
 ### 1.2.0.0
