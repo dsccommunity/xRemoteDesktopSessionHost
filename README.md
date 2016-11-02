@@ -5,6 +5,9 @@
 The **xRemoteDesktopSessionHost** module contains the **xRDSessionDeployment**, **xRDSessionCollection**, **xRDSessionCollectionConfiguration**, and **xRDRemoteApp** resources, allowing creation and configuration of a Remote Desktop Session Host (RDSH) instance.
 
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
 ## Contributing
 Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
@@ -80,6 +83,9 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 ## Versions
 
 ### Unreleased
+
+### 1.3.0.0
+* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 
 ### 1.2.0.0
 
