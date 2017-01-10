@@ -12,7 +12,8 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (    
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [parameter(Mandatory)]
         [string] $SessionHost,
@@ -39,7 +40,8 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (    
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [parameter(Mandatory)]
         [string] $SessionHost,
@@ -66,7 +68,8 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [parameter(Mandatory)]
         [string] $SessionHost,

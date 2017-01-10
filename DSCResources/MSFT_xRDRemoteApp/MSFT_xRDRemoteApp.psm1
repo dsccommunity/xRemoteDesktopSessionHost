@@ -12,7 +12,8 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName = "Tenant",
         [parameter(Mandatory)]
         [string] $DisplayName = "Calculator",
@@ -59,7 +60,8 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [parameter(Mandatory)]
         [string] $DisplayName,
@@ -97,7 +99,8 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [parameter(Mandatory)]
         [string] $DisplayName,
