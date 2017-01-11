@@ -45,15 +45,6 @@ try
                         -Alias = 'alias' `
                      } | should throw
                 }
-
-                It "Should not error when the CollectionName length is less than 15" {
-                    {Get-TargetResource `
-                        -CollectionName = 'valid name' `
-                        -DisplayName = 'name' `
-                        -FilePath = 'path' `
-                        -Alias = 'alias' `
-                    } | should not throw
-                }
             }
         }
         #endregion
@@ -70,15 +61,6 @@ try
                         -Alias = 'alias' `
                      } | should throw
                 }
-
-                It "Should not error when the CollectionName length is less than 15" {
-                    {Set-TargetResource `
-                        -CollectionName = 'valid name' `
-                        -DisplayName = 'name' `
-                        -FilePath = 'path' `
-                        -Alias = 'alias' `
-                    } | should not throw
-                }
             }
         }
         #endregion
@@ -93,17 +75,8 @@ try
                         -DisplayName = 'name' `
                         -FilePath = 'path' `
                         -Alias = 'alias' `
-                     } | should throw
-                }
-
-                It "Should not error when the CollectionName length is less than 15" {
-                    {Test-TargetResource `
-                        -CollectionName = 'valid name' `
-                        -DisplayName = 'name' `
-                        -FilePath = 'path' `
-                        -Alias = 'alias' `
-                    } | should not throw
-                }
+                    } | should throw
+                }            
             }
         }
         #endregion

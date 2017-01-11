@@ -29,7 +29,6 @@ try
         # TODO: Optopnal Load Mock for use in Pester tests here...
         #endregion
 
-        $testCollectionName = 'Name'
         $testInvalidCollectionName = 'InvalidCollectionName longer than 15'
         
         Import-Module RemoteDesktop -Force
@@ -41,11 +40,6 @@ try
                 It "Should error when CollectionName length is greater than 15" {
                     {Get-TargetResource -CollectionName $testInvalidCollectionName} `
                         | should throw
-                }
-
-                It "Should not error when the CollectionName length is less than 15" {
-                    {Get-TargetResource -CollectionName $testCollectionName} `
-                        | should not throw
                 }
             }
         }
@@ -59,11 +53,6 @@ try
                     {Set-TargetResource -CollectionName $testInvalidCollectionName} `
                         | should throw
                 }
-
-                It "Should not error when the CollectionName length is less than 15" {
-                    {Set-TargetResource -CollectionName $testCollectionName} `
-                        | should not throw
-                }
             }
         }
         #endregion
@@ -75,11 +64,6 @@ try
                 It "Should error when CollectionName length is greater than 15" {
                     {Test-TargetResource -CollectionName $testInvalidCollectionName} `
                         | should throw
-                }
-
-                It "Should not error when the CollectionName length is less than 15" {
-                    {Test-TargetResource -CollectionName $testCollectionName} `
-                        | should not throw
                 }
             }
         }
