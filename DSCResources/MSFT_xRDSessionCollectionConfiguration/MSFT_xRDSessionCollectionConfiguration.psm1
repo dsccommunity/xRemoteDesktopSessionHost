@@ -13,7 +13,8 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [uint32] $ActiveSessionLimitMin,
         [boolean] $AuthenticateUsingNLA,
@@ -74,7 +75,8 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [uint32] $ActiveSessionLimitMin,
         [boolean] $AuthenticateUsingNLA,
@@ -111,7 +113,8 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory)]
+        [ValidateLength(1,15)]
         [string] $CollectionName,
         [uint32] $ActiveSessionLimitMin,
         [boolean] $AuthenticateUsingNLA,
