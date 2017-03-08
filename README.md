@@ -83,6 +83,8 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 ## Versions
 
 ### Unreleased
+
+### 1.4.0.0
 * Updated CollectionName parameter to validate length between 1 and 15 characters, and added tests to verify.
 
 ### 1.3.0.0
