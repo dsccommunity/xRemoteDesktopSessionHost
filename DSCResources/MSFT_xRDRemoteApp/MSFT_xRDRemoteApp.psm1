@@ -27,7 +27,7 @@ function Get-TargetResource
         [string] $RequiredCommandLine,
         [uint32] $IconIndex,
         [string] $IconPath,
-        [string] $UserGroups,
+        [string[]] $UserGroups,
         [boolean] $ShowInWebAccess
     )
         Write-Verbose "Getting published RemoteApp program $DisplayName, if one exists."
@@ -75,7 +75,7 @@ function Set-TargetResource
         [string] $RequiredCommandLine,
         [uint32] $IconIndex,
         [string] $IconPath,
-        [string] $UserGroups,
+        [string[]] $UserGroups,
         [boolean] $ShowInWebAccess
     )
     Write-Verbose "Making updates to RemoteApp."
@@ -114,7 +114,7 @@ function Test-TargetResource
         [string] $RequiredCommandLine,
         [uint32] $IconIndex,
         [string] $IconPath,
-        [string] $UserGroups,
+        [string[]] $UserGroups,
         [boolean] $ShowInWebAccess
     )
     Write-Verbose "Testing if RemoteApp is published."
