@@ -21,7 +21,7 @@ function Get-TargetResource
         [string] $ConnectionBroker
     )
     Write-Verbose "Getting information about RDSH collection."
-        $Collection = Get-RDSessionCollection -ErrorAction SilentlyContinue
+        $Collection = Get-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
         @{
         "CollectionName" = $Collection.CollectionName;
         "CollectionDescription" = $Collection.CollectionDescription
