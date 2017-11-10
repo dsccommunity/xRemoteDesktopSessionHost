@@ -53,7 +53,7 @@ function Set-TargetResource
         New-RDSessionCollection @PSBoundParameters
         }
     else {
-        $PSBoundParameters.Remove("Description")
+        $PSBoundParameters.Remove("CollectionDescription")
         Add-RDSessionHost @PSBoundParameters
         }
 }
