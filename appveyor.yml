@@ -53,7 +53,7 @@ deploy_script:
           # You can add other artifacts here
           $zipFilePath,
           $nuGetPackagePath
-      ) | % { 
+      ) | ForEach-Object { 
           Write-Host "Pushing package $_ as Appveyor artifact"
           Push-AppveyorArtifact $_
         }
