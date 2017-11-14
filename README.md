@@ -83,6 +83,7 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 ## Versions
 
 ### Unreleased
+* **Potential BREAKING CHANGE** xRDSessionCollection TestScript will now fail unless the Collection named in the configuration exists.  Previously the TestScript would pass if at least one Collection was present, regardless of the Collection name.
 
 ### 1.4.0.0
 * Updated CollectionName parameter to validate length between 1 and 15 characters, and added tests to verify.
