@@ -89,6 +89,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* Fix issue where DSC configuration gets into a reboot loop because sessionhost does not match (casing) and RDMS service is not started in time
+
 ### 1.4.0.0
 
 * Updated CollectionName parameter to validate length between 1 and 15 characters, and added tests to verify.
