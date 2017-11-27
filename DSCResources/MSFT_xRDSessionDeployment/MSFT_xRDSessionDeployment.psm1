@@ -11,11 +11,11 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $SessionHost,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $WebAccessServer
     )
 
@@ -26,9 +26,9 @@ function Get-TargetResource
 
         $Deployed = Get-RDServer -ErrorAction SilentlyContinue
         @{
-        "SessionHost" = $Deployed | ? Roles -contains "RDS-RD-SERVER" | % Server;
-        "ConnectionBroker" = $Deployed | ? Roles -contains "RDS-CONNECTION-BROKER" | % Server;
-        "WebAccessServer" = $Deployed | ? Roles -contains "RDS-WEB-ACCESS" | % Server;
+        "SessionHost" = $Deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server;
+        "ConnectionBroker" = $Deployed | Where-Object Roles -contains "RDS-CONNECTION-BROKER" | ForEach-Object Server;
+        "WebAccessServer" = $Deployed | Where-Object Roles -contains "RDS-WEB-ACCESS" | ForEach-Object Server;
         }
 }
 
@@ -39,14 +39,15 @@ function Get-TargetResource
 function Set-TargetResource
 
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "global:DSCMachineStatus")]
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $SessionHost,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $WebAccessServer
     )
 
@@ -65,11 +66,11 @@ function Test-TargetResource
       [OutputType([System.Boolean])]
       param
     (
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $SessionHost,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string] $WebAccessServer
     )
     Write-Verbose "Checking RDSH role is deployed on this node."
