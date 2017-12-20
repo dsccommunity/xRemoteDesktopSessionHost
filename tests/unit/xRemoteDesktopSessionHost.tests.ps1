@@ -1,32 +1,32 @@
-<#
-.Synopsis
-   Tests for common module for xRemoteDesktopSessionHost
-.DESCRIPTION
-   Tests for common module for xRemoteDesktopSessionHost
-
-.NOTES
-   Code in HEADER and FOOTER regions are standard and may be moved into DSCResource.Tools in
-   Future and therefore should not be altered if possible.
-#>
-
-
-
 #region HEADER
-[String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+
+# Unit Test Template Version: 1.2.1
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+Write-Output @('clone','https://github.com/PowerShell/DscResource.Tests.git',"'"+(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests')+"'")
+
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'),'--verbose')
 }
-else
-{
-    & git @('-C',(Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'),'pull')
-}
+
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
 Import-module "$moduleRoot\xRemoteDesktopSessionHostCommon.psm1" -force
 Write-Verbose -Message "$moduleRoot\DscResources\*.psm1" -Verbose
 $global:resourceModules = Get-ChildItem -Path "$moduleRoot\DscResources\*.psm1" -Recurse
 Write-Verbose -Message "$($resourceModules.Count)" -Verbose 
+
+#endregion HEADER
+
+function Invoke-TestSetup {
+
+}
+
+function Invoke-TestCleanup {
+
+}
+
 #endregion
 
 # TODO: Other Optional Init Code Goes Here...
@@ -34,17 +34,12 @@ Write-Verbose -Message "$($resourceModules.Count)" -Verbose
 # Begin Testing
 try
 {
-
     #region Pester Tests
+    Invoke-TestSetup
 
     # The InModuleScope command allows you to perform white-box unit testing on the internal
     # (non-exported) code of a Script Module.
     InModuleScope xRemoteDesktopSessionHostCommon {
-
-        #region Pester Test Initialization
-            
-        #endregion
-
 
         #region Function Test-xRemoteDesktopSessionHostOsRequirement
         Describe "Test-xRemoteDesktopSessionHostOsRequirement" {
@@ -85,7 +80,7 @@ try
                 Mock Get-OsVersion -MockWith {return (new-object 'Version' 10,1,1,1)} -ModuleName xRemoteDesktopSessionHost
                 foreach($resourceModule in $global:resourceModules)
                 {
-                    # The resource does not check if the remote desktop module existis before it loads it 
+                    # The resource does not check if the remote desktop module exists before it loads it 
                     # so this always fails.  Pending this test for this issue
                     # https://github.com/PowerShell/xRemoteDesktopSessionHost/issues/6
                     it "$($resourceModule.Name) should not throw when imported" -Pending {
@@ -106,8 +101,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    #endregion
-
-    # TODO: Other Optional Cleanup Code Goes Here...
+    Invoke-TestCleanup
 }

@@ -1,20 +1,36 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/master)
-
 # xRemoteDesktopSessionHost
 
 The **xRemoteDesktopSessionHost** module contains the **xRDSessionDeployment**, **xRDSessionCollection**, **xRDSessionCollectionConfiguration**, and **xRDRemoteApp** resources, allowing creation and configuration of a Remote Desktop Session Host (RDSH) instance.
 
-
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-## Contributing
-Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
+## Branches
 
+### master
+
+[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/xRemoteDesktopSessionHost/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xRemoteDesktopSessionHost/branch/master)
+
+This is the branch containing the latest release - no contributions should be made
+directly to this branch.
+
+### dev
+
+[![Build status](https://ci.appveyor.com/api/projects/status/ly6w6vaavkshrpg8/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xremotedesktopsessionhost/branch/dev)
+[![codecov](https://codecov.io/gh/PowerShell/xRemoteDesktopSessionHost/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xRemoteDesktopSessionHost/branch/dev)
+
+This is the development branch to which contributions should be proposed by contributors
+as pull requests. This development branch will periodically be merged to the master
+branch, and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
+
+## Contributing
+
+Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
 ## Resources
 
-* **xRDSessionDeployment** creates and configures a deployment in RDSH. 
+* **xRDSessionDeployment** creates and configures a deployment in RDSH.
 * **xRDSessionCollection** creates an RDSH collection.
 * **xRDSessionCollectionConfiguration** configures an RDSH collection.
 * **xRDRemoteApp** publishes applications for your RDSH collection.
@@ -35,64 +51,59 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ### xRDSessionCollectionConfiguration
 
 * **CollectionName**: Specifies the name for the session collection.
-* **ActiveSessionLimitMin**: Specifies the maximum time, in minutes, an active session runs.
-After this period, the RD Session Host server ends the session.
-* **AuthenticateUsingNLA**: Indicates whether to use Network Level Authentication (NLA).
-If this value is $True, Remote Desktop uses NLA to authenticate a user before the user sees a logon screen.
+* **ActiveSessionLimitMin**: Specifies the maximum time, in minutes, an active session runs.  After this period, the RD Session Host server ends the session.
+* **AuthenticateUsingNLA**: Indicates whether to use Network Level Authentication (NLA).  If this value is $True, Remote Desktop uses NLA to authenticate a user before the user sees a logon screen.
 * **AutomaticReconnectionEnabled**: Indicates whether the Remote Desktop client attempts to reconnect after a connection interruption.
 * **BrokenConnectionAction**: Specifies an action for an RD Session Host server to take after a connection interruption.
 * **ClientDeviceRedirectionOptions**: Specifies a type of client device to be redirected to an RD Session Host server in this session collection.
-* **ClientPrinterAsDefault**: Indicates whether to use the client printer or server printer as the default printer.
-If this value is $True, use the client printer as default.
-If this value is $False, use the server as default.
+* **ClientPrinterAsDefault**: Indicates whether to use the client printer or server printer as the default printer.  If this value is $True, use the client printer as default.  If this value is $False, use the server as default.
 * **ClientPrinterRedirected**: Indicates whether to use client printer redirection, which routes print jobs from the Remote Desktop session to a printer attached to the client computer.
 * **CollectionDescription**: Specifies a description of the session collection.
 * **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
 * **CustomRdpProperty**: Specifies Remote Desktop Protocol (RDP) settings to include in the .rdp files for all Windows Server 2012 RemoteApp programs and remote desktops published in this collection.
-* **DisconnectedSessionLimitMin**: Specifies a length of time, in minutes.
-After client disconnection from a session for this period, the RD Session Host ends the session.
+* **DisconnectedSessionLimitMin**: Specifies a length of time, in minutes.  After client disconnection from a session for this period, the RD Session Host ends the session.
 * **EncryptionLevel**: Specifies the level of data encryption used for a Remote Desktop session.
 * **IdleSessionLimitMin**: Specifies the length of time, in minutes, to wait before an RD Session Host logs off or disconnects an idle session.
-* The BrokenConnectionAction parameter determines whether to log off or disconnect.
-* **MaxRedirectedMonitors**: Specifies the maximum number of client monitors that an RD Session Host server can redirect to a remote session.
-The maximum value for this parameter is 16.
+* **MaxRedirectedMonitors**: Specifies the maximum number of client monitors that an RD Session Host server can redirect to a remote session.  The maximum value for this parameter is 16.
 * **RDEasyPrintDriverEnabled**: Specifies whether to enable the Remote Desktop Easy Print driver.
 * **SecurityLayer**: Specifies which security protocol to use.
 * **TemporaryFoldersDeletedOnExit**: Whether to delete temporary folders from the RD Session Host server for a disconnected session.
 * **UserGroup**: Specifies a domain group authorized to connect to the RD Session Host servers in a session collection.
 
-### xRDRemoteApp 
+### xRDRemoteApp
 
 * **Alias**: Specifies an alias for the RemoteApp program.
-* **CollectionName**: Specifies the name of the personal virtual desktop collection or session collection.
-The cmdlet publishes the RemoteApp program to this collection.
+* **CollectionName**: Specifies the name of the personal virtual desktop collection or session collection.  The cmdlet publishes the RemoteApp program to this collection.
 * **DisplayName**: Specifies a name to display to users for the RemoteApp program.
-* **FilePath**: Specifies a path for the executable file for the application.
-Note: Do not include any environment variables.
-* **FileVirtualPath**: Specifies a path for the application executable file.
-This path resolves to the same location as the value of the FilePath parameter, but it can include environment variables.
+* **FilePath**: Specifies a path for the executable file for the application.  Note: Do not include any environment variables.
+* **FileVirtualPath**: Specifies a path for the application executable file.  This path resolves to the same location as the value of the FilePath parameter, but it can include environment variables.
 * **FolderName**: Specifies the name of the folder that the RemoteApp program appears in on the Remote Desktop Web Access (RD Web Access) webpage and in the Start menu for subscribed RemoteApp and Desktop Connections.
 * **CommandLineSetting**: Specifies whether the RemoteApp program accepts command-line arguments from the client at connection time.
 * **RequiredCommandLine**: Specifies a string that contains command-line arguments that the client can use at connection time with the RemoteApp program.
 * **IconIndex**: Specifies the index within the icon file (specified by the IconPath parameter) where the RemoteApp program's icon can be found.
 * **IconPath**: Specifies the path to a file containing the icon to display for the RemoteApp program identified by the Alias parameter.
-* **UserGroups**: Specifies a domain group that can view the RemoteApp in RD Web Access, and in RemoteApp and Desktop Connections.
-To allow all users to see a RemoteApp program, provide a value of Null.
+* **UserGroups**: Specifies a domain group that can view the RemoteApp in RD Web Access, and in RemoteApp and Desktop Connections.  To allow all users to see a RemoteApp program, provide a value of Null.
 * **ShowInWebAccess**: Specifies whether to show the RemoteApp program in the RD Web Access server, and in RemoteApp and Desktop Connections that the user subscribes to.
 
 ## Versions
 
 ### Unreleased
 
+### 1.5.0.0
+
+* Fix issue where DSC configuration gets into a reboot loop because sessionhost does not match (casing) and RDMS service is not started in time
+
 ### 1.4.0.0
+
 * Updated CollectionName parameter to validate length between 1 and 15 characters, and added tests to verify.
 
 ### 1.3.0.0
+
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 
 ### 1.2.0.0
 
-*  Fixed an issue with version checks where OS version greater than 9 would fail (Windows 10/Server 2016)
+* Fixed an issue with version checks where OS version greater than 9 would fail (Windows 10/Server 2016)
 
 ### 1.1.0.0
 
@@ -102,18 +113,16 @@ To allow all users to see a RemoteApp program, provide a value of Null.
 
 ### 1.0.0.0
 
-* Initial release with the following resources 
-    * **xRDSessionDeployment**
-    * **xRDSessionCollection**
-    * **xRDSessionCollectionConfiguration**
-    * **xRDRemoteApp**
+* Initial release with the following resources
+  * **xRDSessionDeployment**
+  * **xRDSessionCollection**
+  * **xRDSessionCollectionConfiguration**
+  * **xRDRemoteApp**
 
-
-    
 ## Examples
 
-### End to End  
- 
+### End to End
+
 ```powershell
 param (
 [string]$brokerFQDN,
@@ -225,7 +234,7 @@ Configuration RemoteDesktopSessionHost
         {
         CollectionName = $collectionName
         CollectionDescription = $collectionDescription
-        ConnectionBroker = if ($ConnectionBroker) {$ConnectionBroker} else {$localhost}        
+        ConnectionBroker = if ($ConnectionBroker) {$ConnectionBroker} else {$localhost}
         TemporaryFoldersDeletedOnExit = $false
         SecurityLayer = "SSL"
         DependsOn = "[xRDSessionCollection]Collection"
