@@ -27,13 +27,13 @@ function Get-TargetResource
 
     $result = $null
 
-    write-verbose "Getting RD License server configuration from broker '$ConnectionBroker'..."    
+    Write-Verbose "Getting RD License server configuration from broker '$ConnectionBroker'..."    
     
     $config = Get-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -ea SilentlyContinue
 
     if ($config)   # Microsoft.RemoteDesktopServices.Management.LicensingSetting 
     {
-    write-verbose "configuration retrieved successfully:"
+    Write-Verbose "configuration retrieved successfully:"
     }
 
     $result = 
@@ -43,12 +43,12 @@ function Get-TargetResource
         "LicenseMode"      = $config.Mode.ToString()  # Microsoft.RemoteDesktopServices.Management.LicensingMode  .ToString()
     }
 
-    write-verbose ">> RD License mode:     $($result.LicenseMode)"
-    write-verbose ">> RD License servers:  $($result.LicenseServers -join '; ')"
+    Write-Verbose ">> RD License mode:     $($result.LicenseMode)"
+    Write-Verbose ">> RD License servers:  $($result.LicenseServers -join '; ')"
 
     else 
     {
-        write-verbose "Failed to retrieve RD License configuration from broker '$ConnectionBroker'."
+        Write-Verbose "Failed to retrieve RD License configuration from broker '$ConnectionBroker'."
     }
 
     $result
@@ -77,23 +77,23 @@ function Set-TargetResource
         $LicenseMode
     )
     
-    write-verbose "Starting RD License server configuration..."
-    write-verbose ">> RD Connection Broker:  $($ConnectionBroker.ToLower())"
+    Write-Verbose "Starting RD License server configuration..."
+    Write-Verbose ">> RD Connection Broker:  $($ConnectionBroker.ToLower())"
 
     if ($LicenseServers) 
     {
-        write-verbose ">> RD License servers:    $($LicenseServers -join '; ')"
+        Write-Verbose ">> RD License servers:    $($LicenseServers -join '; ')"
 
-        "calling Set-RDLicenseConfiguration cmdlet..."
+        Write-Verbose "calling Set-RDLicenseConfiguration cmdlet..."
         Set-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -LicenseServer $LicenseServers -Mode $LicenseMode -Force
     }
     else 
     {
-        "calling Set-RDLicenseConfiguration cmdlet..."
+        Write-Verbose "calling Set-RDLicenseConfiguration cmdlet..."
         Set-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -Mode $LicenseMode -Force
     }
 
-    write-verbose "Set-RDLicenseConfiguration done."
+    Write-Verbose "Set-RDLicenseConfiguration done."
 }
 
 
@@ -123,17 +123,17 @@ function Test-TargetResource
     
     if ($config) 
     {
-        write-verbose "verifying RD Licensing mode..."
+        Write-Verbose "verifying RD Licensing mode..."
 
         $result = ($config.LicenseMode -eq $LicenseMode)
     }
     else 
     {
-        write-verbose "Failed to retrieve RD License server configuration from broker '$ConnectionBroker'."
+        Write-Verbose "Failed to retrieve RD License server configuration from broker '$ConnectionBroker'."
         $result = $false
     }
 
-    write-verbose "Test-TargetResource returning:  $result"
+    Write-Verbose "Test-TargetResource returning:  $result"
     return $result
 }
 

@@ -105,7 +105,6 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **UseCachedCredentials** When GatewayMode is custom, configures the use of cached credentials.
 * **BypassLocal**: When GatewayMode is custom, configues bypassing for local network addresses.
 
-
 ### xRDLicenseConfiguration
 
 * **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
