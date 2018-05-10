@@ -34,6 +34,9 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xRDSessionCollection** creates an RDSH collection.
 * **xRDSessionCollectionConfiguration** configures an RDSH collection.
 * **xRDRemoteApp** publishes applications for your RDSH collection.
+* **xRDServer** adds RD Server features to your RDSH deployment.
+* **xRDGatewayConfiguration** creates and configures RD Gateway.
+* **xRDLicenseConfiguration** creates and configures RD Licensing server.
 
 ### xRDSessionDeployment
 
@@ -85,9 +88,37 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **UserGroups**: Specifies a domain group that can view the RemoteApp in RD Web Access, and in RemoteApp and Desktop Connections.  To allow all users to see a RemoteApp program, provide a value of Null.
 * **ShowInWebAccess**: Specifies whether to show the RemoteApp program in the RD Web Access server, and in RemoteApp and Desktop Connections that the user subscribes to.
 
+### xRDServer
+
+* **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **Server**: The FQDN of a server to configure a role on.
+* **Role**: The name of the Windows RDS feature to add to the server.
+* **GatewayExternalFqdn**: The external FQDN for the RD Gateway server. Only needed for the RDS-Gateway feature.
+
+### xRDGatewayConfiguration
+
+* **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **GatewayServer**: The server to configure as an RD Gateway.
+* **ExternalFqdn**: The external FQDN for the RD Gateway server. Only needed for the RDS-Gateway feature.
+* **GatewayMode**: Set to DoNotUse, Automatic, or Custom
+* **LogonMethod**: When GatewayMode is custom, sets the logon method for the Gateway.
+* **UseCachedCredentials** When GatewayMode is custom, configures the use of cached credentials.
+* **BypassLocal**: When GatewayMode is custom, configues bypassing for local network addresses.
+
+
+### xRDLicenseConfiguration
+
+* **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **LicenseServers**: An array of servers to use for RD licensing
+* **LicenseMode**: The RD licensing mode to use. PerUser, PerDevice, or NotConfigured.
+
 ## Versions
 
 ### Unreleased
+
+### 1.6.0.0
+
+* Add additional resources, copied from the Azure RDS quickstart template.
 
 ### 1.5.0.0
 
