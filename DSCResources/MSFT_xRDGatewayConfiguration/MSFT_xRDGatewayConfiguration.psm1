@@ -11,23 +11,37 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (    
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $ConnectionBroker,
+        [string] 
+        $ConnectionBroker,
         
-        [string] $GatewayServer,
+        [Parameter()]
+        [string] 
+        $GatewayServer,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string] $ExternalFqdn,
+        [string] 
+        $ExternalFqdn,
 
+        [Parameter()]
         [ValidateSet("DoNotUse","Custom","Automatic")]
-        [string] $GatewayMode,
+        [string] 
+        $GatewayMode,
 
+        [Parameter()]
         [ValidateSet("Password","Smartcard","AllowUserToSelectDuringConnection")]
-        [string] $LogonMethod,
+        [string] 
+        $LogonMethod,
 
-        [bool] $UseCachedCredentials,
-        [bool] $BypassLocal
+        [Parameter()]
+        [bool] 
+        $UseCachedCredentials,
+        
+        [Parameter()]
+        [bool] 
+        $BypassLocal
     )
 
 
@@ -80,14 +94,26 @@ function ValidateCustomModeParameters
 {
     param
     (  
+        [Parameter()]
         [ValidateSet("DoNotUse","Custom","Automatic")]
-        [string] $mode,
+        [string] 
+        $mode,
 
-        [string] $ExternalFqdn,
-        [string] $LogonMethod,
+        [Parameter()]
+        [string] 
+        $ExternalFqdn,
+        
+        [Parameter()]
+        [string] 
+        $LogonMethod,
 
-        [bool] $UseCachedCredentials,
-        [bool] $BypassLocal
+        [Parameter()]
+        [bool] 
+        $UseCachedCredentials,
+        
+        [Parameter()]
+        [bool] 
+        $BypassLocal
     )
 
     write-verbose "validating parameters..."
@@ -98,7 +124,7 @@ function ValidateCustomModeParameters
     {
         # ensure all 4 parameters were passed in, otherwise Set-RdDeploymentGatewayConfiguration will fail
 
-        $nulls = $customModeParams.getenumerator() | Where-Object { $_.value -eq $null  }
+        $nulls = $customModeParams.getenumerator() | Where-Object { $null -eq $_.value }
 
         if ($nulls.count -gt 0)
         {
@@ -131,22 +157,36 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (    
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $ConnectionBroker,
+        [string] 
+        $ConnectionBroker,
         
-        [string] $GatewayServer,
+        [Parameter()]
+        [string] 
+        $GatewayServer,
 
+        [Parameter()]
         [ValidateSet("DoNotUse","Custom","Automatic")]
-        [string] $GatewayMode,
+        [string] 
+        $GatewayMode,
 
-        [string] $ExternalFqdn,
+        [Parameter()]
+        [string] 
+        $ExternalFqdn,
 
+        [Parameter()]
         [ValidateSet("Password","Smartcard","AllowUserToSelectDuringConnection")]
-        [string] $LogonMethod,
+        [string] 
+        $LogonMethod,
 
-        [bool] $UseCachedCredentials,
-        [bool] $BypassLocal
+        [Parameter()]
+        [bool] 
+        $UseCachedCredentials,
+        
+        [Parameter()]
+        [bool] 
+        $BypassLocal
     )
 
     write-verbose "Starting RD Gateway configuration for the RD deployment at broker '$ConnectionBroker'..."
@@ -229,23 +269,37 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (    
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string] $ConnectionBroker,
+        [string]
+        $ConnectionBroker,
         
-        [string] $GatewayServer,
+        [Parameter()]
+        [string]
+        $GatewayServer,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string] $ExternalFqdn,
+        [string]
+        $ExternalFqdn,
 
+        [Parameter()]
         [ValidateSet("DoNotUse","Custom","Automatic")]
-        [string] $GatewayMode,
+        [string]
+        $GatewayMode,
 
+        [Parameter()]
         [ValidateSet("Password","Smartcard","AllowUserToSelectDuringConnection")]
-        [string] $LogonMethod,
-
-        [bool] $UseCachedCredentials,
-        [bool] $BypassLocal
+        [string]
+        $LogonMethod,
+        
+        [Parameter()]
+        [bool]
+        $UseCachedCredentials,
+        
+        [Parameter()]
+        [bool]
+        $BypassLocal
     )
 
 
