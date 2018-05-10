@@ -17,6 +17,7 @@ function Get-TargetResource
         
         [string[]] $LicenseServers,
         
+        [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
         [string] $LicenseMode
     )
 
