@@ -102,11 +102,11 @@ function ValidateCustomModeParameters
     {
         # ensure GatewayExternalFqdn was passed in, otherwise Add-RDServer will fail
 
-        $nulls = $customParams.getenumerator() | where { $_.value -eq $null  }
+        $nulls = $customParams.getenumerator() | Where-Object { $_.value -eq $null  }
 
         if ($nulls.count -gt 0)
         {
-            $nulls | % { write-verbose ">> '$($_.Key)' parameter is empty" }
+            $nulls | ForEach-Object { write-verbose ">> '$($_.Key)' parameter is empty" }
 
             write-warning "[PARAMETER VALIDATION FAILURE] i'm gonna throw, right now..."
 
@@ -117,11 +117,11 @@ function ValidateCustomModeParameters
     {
         # give warning about incorrect usage of the resource (do not fail)
 
-        $parametersWithValues = $customParams.getenumerator() | where { $_.value }
+        $parametersWithValues = $customParams.getenumerator() | Where-Object { $_.value }
 
         if ($parametersWithValues.count -gt 0)
         {
-            $parametersWithValues | % { write-verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
+            $parametersWithValues | ForEach-Object { write-verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
 
             write-warning ("[WARNING]: Requested server role is '$Role', the following parameter can only be used with server role 'RDS-Gateway': " + 
                             "$($parametersWithValues.Key -join ', '). The parameter will be ignored in the call to Add-RDServer to avoid error!")

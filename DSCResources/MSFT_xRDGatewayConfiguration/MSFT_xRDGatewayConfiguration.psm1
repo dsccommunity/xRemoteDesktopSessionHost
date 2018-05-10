@@ -86,7 +86,7 @@ function ValidateCustomModeParameters
         [string] $ExternalFqdn,
         [string] $LogonMethod,
 
-        $UseCachedCredentials,
+        [bool] $UseCachedCredentials,
         $BypassLocal
     )
 
@@ -98,11 +98,11 @@ function ValidateCustomModeParameters
     {
         # ensure all 4 parameters were passed in, otherwise Set-RdDeploymentGatewayConfiguration will fail
 
-        $nulls = $customModeParams.getenumerator() | where { $_.value -eq $null  }
+        $nulls = $customModeParams.getenumerator() | Where-Object { $_.value -eq $null  }
 
         if ($nulls.count -gt 0)
         {
-            $nulls | % { write-verbose ">> '$($_.Key)' parameter is empty" }
+            $nulls | ForEach-Object { write-verbose ">> '$($_.Key)' parameter is empty" }
 
             write-warning "[PARAMETER VALIDATION FAILURE] i'm gonna throw, right now..."
 
@@ -113,11 +113,11 @@ function ValidateCustomModeParameters
     {
         # give warning about incorrect usage of the resource (do not fail)
 
-        $parametersWithValues = $customModeParams.getenumerator() | where { $_.value }
+        $parametersWithValues = $customModeParams.getenumerator() | Where-Object { $_.value }
 
         if ($parametersWithValues.count -gt 0)
         {
-            $parametersWithValues | % { write-verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
+            $parametersWithValues | ForEach-Object { write-verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
 
             write-warning ("[WARNING]: Requested gateway mode is '$mode', the following parametera can only be used with Gateway mode 'Custom': " + 
                             "$($parametersWithValues.Key -join ', '). These parameters will be ignored in the call to Set-RdDeploymentGatewayConfiguration to avoid error!")
@@ -145,7 +145,7 @@ function Set-TargetResource
         [ValidateSet("Password","Smartcard","AllowUserToSelectDuringConnection")]
         [string] $LogonMethod,
 
-        $UseCachedCredentials,
+        [bool] $UseCachedCredentials,
         $BypassLocal
     )
 
@@ -161,7 +161,7 @@ function Set-TargetResource
 
         write-verbose "checking if the server is part of the deployment, getting list of servers..."
 
-        $servers = Get-RDServer -ConnectionBroker $ConnectionBroker | where Roles -eq RDS-Gateway
+        $servers = Get-RDServer -ConnectionBroker $ConnectionBroker | Where-Object Roles -eq RDS-Gateway
 
         if ($servers)
         {
