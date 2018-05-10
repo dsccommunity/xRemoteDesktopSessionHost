@@ -87,7 +87,7 @@ function ValidateCustomModeParameters
         [string] $LogonMethod,
 
         [bool] $UseCachedCredentials,
-        $BypassLocal
+        [bool] $BypassLocal
     )
 
     write-verbose "validating parameters..."
@@ -146,7 +146,7 @@ function Set-TargetResource
         [string] $LogonMethod,
 
         [bool] $UseCachedCredentials,
-        $BypassLocal
+        [bool] $BypassLocal
     )
 
     write-verbose "Starting RD Gateway configuration for the RD deployment at broker '$ConnectionBroker'..."
