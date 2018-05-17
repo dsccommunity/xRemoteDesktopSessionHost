@@ -42,6 +42,10 @@ try
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan15'
         
         Import-Module RemoteDesktop -Force
+
+        Mock -CommandName Set-RDSessionCollectionConfiguration -MockWith {
+            $null
+        }
         
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
