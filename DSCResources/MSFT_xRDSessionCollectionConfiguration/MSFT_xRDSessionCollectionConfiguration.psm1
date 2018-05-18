@@ -57,7 +57,7 @@ function Get-TargetResource
         [Parameter()]
         [bool] $EnableUserProfileDisk,
         [Parameter()]
-        [int] $MaxUserProfileDiskSizeGB,
+        [uint32] $MaxUserProfileDiskSizeGB,
         [Parameter()]
         [string[]] $IncludeFolderPath,
         [Parameter()]
@@ -171,7 +171,7 @@ function Set-TargetResource
         [Parameter()]
         [bool] $EnableUserProfileDisk,
         [Parameter()]
-        [int] $MaxUserProfileDiskSizeGB,
+        [uint32] $MaxUserProfileDiskSizeGB,
         [Parameter()]
         [string[]] $IncludeFolderPath,
         [Parameter()]
@@ -314,7 +314,7 @@ function Test-TargetResource
         [Parameter()]
         [bool] $EnableUserProfileDisk,
         [Parameter()]
-        [int] $MaxUserProfileDiskSizeGB,
+        [uint32] $MaxUserProfileDiskSizeGB,
         [Parameter()]
         [string[]] $IncludeFolderPath,
         [Parameter()]
