@@ -1,7 +1,6 @@
 Import-Module -Name "$PSScriptRoot\..\..\xRemoteDesktopSessionHostCommon.psm1"
 if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
 Import-Module RemoteDesktop
-$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
 
 #######################################################################
@@ -57,7 +56,7 @@ function Get-TargetResource
         [Parameter()]
         [bool] $EnableUserProfileDisk,
         [Parameter()]
-        [int] $MaxUserProfileDiskSizeGB,
+        [uint32] $MaxUserProfileDiskSizeGB,
         [Parameter()]
         [string[]] $IncludeFolderPath,
         [Parameter()]
@@ -67,11 +66,7 @@ function Get-TargetResource
         [Parameter()]
         [string[]] $ExcludeFilePath
     )
-        Write-Verbose "Getting currently configured RDSH Collection properties"
-        $collectionName = Get-RDSessionCollection | 
-            ForEach-Object {Get-RDSessionHost $_.CollectionName} | 
-            Where-Object {$_.SessionHost -ieq $localhost} | 
-            ForEach-Object {$_.CollectionName}
+        Write-Verbose "Getting currently configured RDSH Collection properties for collection $CollectionName"
 
         $collectionGeneral = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName
         $collectionClient = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Client
@@ -171,7 +166,7 @@ function Set-TargetResource
         [Parameter()]
         [bool] $EnableUserProfileDisk,
         [Parameter()]
-        [int] $MaxUserProfileDiskSizeGB,
+        [uint32] $MaxUserProfileDiskSizeGB,
         [Parameter()]
         [string[]] $IncludeFolderPath,
         [Parameter()]
@@ -183,37 +178,43 @@ function Set-TargetResource
     )
     Write-Verbose "Setting DSC collection properties"
 
-    $discoveredCollectionName = Get-RDSessionCollection | 
-        ForEach-Object {Get-RDSessionHost $_.CollectionName} | 
-        Where-Object {$_.SessionHost -ieq $localhost} | 
-        ForEach-Object {$_.CollectionName}
-
-    if ($collectionName -ne $discoveredCollectionName) {
-        $PSBoundParameters.collectionName = $discoveredCollectionName
+    try {
+        $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
+    }
+    catch {
+        throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
-    if(([version](Get-CimInstance -ClassName win32_operatingsystem -Property Version).Version).Major -ge 10) {
-        Write-Verbose 'Running on W2016 or higher, testing UserProfileDisk'
+    # By default we do not configure the UserProfileDisk (this is in a different parameter set and we could be running on W2012 R2)
+    $null = $PSBoundParameters.Remove('DiskPath')  
+    $null = $PSBoundParameters.Remove('EnableUserProfileDisk')
+    $null = $PSBoundParameters.Remove('ExcludeFilePath')       
+    $null = $PSBoundParameters.Remove('ExcludeFolderPath')
+    $null = $PSBoundParameters.Remove('IncludeFilePath')     
+    $null = $PSBoundParameters.Remove('IncludeFolderPath')   
+    $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
 
-        $null = $PSBoundParameters.Remove('DiskPath')  
-        $null = $PSBoundParameters.Remove('EnableUserProfileDisk')
-        $null = $PSBoundParameters.Remove('ExcludeFilePath')       
-        $null = $PSBoundParameters.Remove('ExcludeFolderPath')
-        $null = $PSBoundParameters.Remove('IncludeFilePath')     
-        $null = $PSBoundParameters.Remove('IncludeFolderPath')   
-        $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
+
+    if(([version](Get-CimInstance -ClassName win32_operatingsystem -Property Version).Version).Major -ge 10) {
+        Write-Verbose 'Running on W2016 or higher, prepare to set UserProfileDisk configuration'
 
         # First set the initial configuration before trying to modify the UserProfileDisk Configuration
         Set-RDSessionCollectionConfiguration @PSBoundParameters
 
         if($EnableUserProfileDisk) {
             Write-Verbose 'EnableUserProfileDisk is True - a DiskPath and MaxUserProfileDiskSizeGB are now mandatory'
-            $validateDiskPath = Test-Path -Path $DiskPath -ErrorAction SilentlyContinue
-            if(-not($validateDiskPath)) {
-                Throw "To enable UserProfileDisk we need a valid DiskPath. Path $DiskPath not found"
+
+            if($DiskPath) {
+                $validateDiskPath = Test-Path -Path $DiskPath -ErrorAction SilentlyContinue
+                if(-not($validateDiskPath)) {
+                    Throw "To enable UserProfileDisk we need a valid DiskPath. Path $DiskPath not found"
+                }
+                else {
+                    Write-Verbose "EnableUserProfileDisk: Validated diskPath: $DiskPath"
+                }
             }
             else {
-                Write-Verbose "EnableUserProfileDisk: Validated diskPath: $DiskPath"
+                Throw "No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True" 
             }
 
             if(-not($MaxUserProfileDiskSizeGB -gt 0)) {
@@ -314,7 +315,7 @@ function Test-TargetResource
         [Parameter()]
         [bool] $EnableUserProfileDisk,
         [Parameter()]
-        [int] $MaxUserProfileDiskSizeGB,
+        [uint32] $MaxUserProfileDiskSizeGB,
         [Parameter()]
         [string[]] $IncludeFolderPath,
         [Parameter()]
@@ -326,10 +327,6 @@ function Test-TargetResource
     )
     
     Write-Verbose "Testing DSC collection properties"
-    $collectionName = Get-RDSessionCollection | 
-        ForEach-Object {Get-RDSessionHost $_.CollectionName} | 
-        Where-Object {$_.SessionHost -ieq $localhost} | 
-        ForEach-Object {$_.CollectionName}
 
     $null = $PSBoundParameters.Remove('Verbose')
     $null = $PSBoundParameters.Remove('Debug')

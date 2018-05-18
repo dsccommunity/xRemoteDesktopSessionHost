@@ -151,6 +151,11 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
+            
+            Mock -CommandName Set-RDSessionCollectionConfiguration -MockWith {
+                $null
+            }
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 15" {
@@ -159,6 +164,92 @@ try
                 }
             }
 
+            Context "Running on set on Windows Server 2012 (R2)" {
+                Mock -CommandName Get-RDSessionCollection -MockWith {$true}
+
+                Mock -CommandName Get-CimInstance -MockWith {
+                    [pscustomobject]@{
+                        Version = '6.3.9600'
+                    }
+                }
+
+                It "Running on Windows Server 2012 (R2) with EnableUserProfile disk set to True should not call Set-RDSessionCollectionConfiguration with parameter EnableUserProfileDisk" {
+                    Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true 
+                    Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter {$EnableUserProfileDisk -eq $true} -Times 0 -Exactly
+                }
+            }
+
+            Context "Running on set on Windows Server 2016 (or higher)" {
+                Mock -CommandName Get-CimInstance -MockWith {
+                    [pscustomobject]@{
+                        Version = '10.0.14393'
+                    }
+                }
+
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    Throw "No session collection DoesNotExist was found." 
+                }
+
+                It "Trying to configure a non existing collection should throw" {
+                    $errorMessages = try {
+                        Set-TargetResource -CollectionName 'DoesNotExist' -ActiveSessionLimitMin 1
+                    }
+                    catch {
+                        $_ 2>&1
+                    }
+
+                    $errorMessages.Exception.Message | Should Be 'Failed to lookup RD Session Collection DoesNotExist. Error: No session collection DoesNotExist was found.'
+                }
+
+                Mock -CommandName Get-RDSessionCollection -MockWith {$true}
+                It "Running Set on W2016 with only EnableUserProfileDisk specified should throw on missing DiskPath parameter" {
+                    $errorMessages = try {
+                        Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true
+                    }
+                    catch {
+                        $_ 2>&1
+                    }
+
+                    $errorMessages.Exception.Message | Should Be 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
+                }
+
+                It "Running Set on W2016 with EnableUserProfileDisk and Diskpath specified should throw on invalid MaxUserProfileDiskSizeGB parameter" {
+                    $errorMessages = try {
+                        Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true -DiskPath TestDrive:\
+                    }
+                    catch {
+                        $_ 2>&1
+                    }
+
+                    $errorMessages.Exception.Message | Should Be 'To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value 0 is not valid'
+                }
+
+                It "Running Set with EnableUserProfileDisk, DiskPath and MaxUserProfileDiskSizeGB, but with an invalid DiskPath, should throw" {
+                    $errorMessages = try {
+                        Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true -DiskPath TestDrive:\NonExistingPath -MaxUserProfileDiskSizeGB 5
+                    }
+                    catch {
+                        $_ 2>&1
+                    }
+
+                    $errorMessages.Exception.Message | Should Be "To enable UserProfileDisk we need a valid DiskPath. Path TestDrive:\NonExistingPath not found"
+                }
+
+                It "Running Set with all valid parameters should call Set-RDSessionCollectionConfiguration with EnableUserProfileDisk" {
+                    Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true -DiskPath TestDrive:\ -MaxUserProfileDiskSizeGB 5
+                    Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter {$EnableUserProfileDisk -eq $true} -Times 1 -Exactly -Scope It
+                }
+
+                It "Running Set without EnableUserProfileDisk should not call Set-RDSessionCollectionConfiguration with EnableUserProfileDisk" {
+                    Set-TargetResource -CollectionName $collectionName -ActiveSessionLimitMin 1
+                    Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter {$EnableUserProfileDisk -eq $true} -Times 0 -Exactly -Scope It
+                }
+
+                It "Running Set with EnableUserProfileDisk disabled should call Set-RDSessionCollectionConfiguration with DisableUserProfileDisk" {
+                    Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $false
+                    Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter {$DisableUserProfileDisk -eq $true} -Times 1 -Exactly -Scope It
+                }
+            }
         }
         #endregion
 
@@ -174,18 +265,12 @@ try
                 }
             }
 
-            Mock -CommandName Get-RDSessionHost -MockWith {
-                [pscustomobject]@{
-                    SessionHost = [System.Net.Dns]::GetHostByName((hostname)).HostName
-                    CollectionName = 'TestCollection'
-                }
-            }
-
             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
                 [pscustomobject]@{
                     CollectionName = 'TestCollection'
                 }
             }
+
             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
                 [pscustomobject]@{
                     CollectionName           = 'TestCollection'
