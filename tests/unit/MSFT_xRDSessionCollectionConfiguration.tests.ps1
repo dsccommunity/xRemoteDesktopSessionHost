@@ -88,10 +88,8 @@ try
             }
 
             Context "Get properties on Windows Server 2012 (R2)" {
-                Mock -CommandName Get-CimInstance -MockWith {
-                    [pscustomobject]@{
-                        Version = '6.3.9600'
-                    }
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
                 }
 
                 It "Should not call Get-RDSessionCollectionConfiguration with parameter UserProfileDisk" {
@@ -104,10 +102,8 @@ try
             }
 
             Context "Get properties on Windows Server 2016+" {
-                Mock -CommandName Get-CimInstance -MockWith {
-                    [pscustomobject]@{
-                        Version = '10.0.14393'
-                    }
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
                 }
 
                 $getTargetResourceResult = Get-TargetResource -CollectionName $collectionName
@@ -167,10 +163,8 @@ try
             Context "Running on set on Windows Server 2012 (R2)" {
                 Mock -CommandName Get-RDSessionCollection -MockWith {$true}
 
-                Mock -CommandName Get-CimInstance -MockWith {
-                    [pscustomobject]@{
-                        Version = '6.3.9600'
-                    }
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
                 }
 
                 It "Running on Windows Server 2012 (R2) with EnableUserProfile disk set to True should not call Set-RDSessionCollectionConfiguration with parameter EnableUserProfileDisk" {
@@ -180,10 +174,8 @@ try
             }
 
             Context "Running on set on Windows Server 2016 (or higher)" {
-                Mock -CommandName Get-CimInstance -MockWith {
-                    [pscustomobject]@{
-                        Version = '10.0.14393'
-                    }
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
                 }
 
                 Mock -CommandName Get-RDSessionCollection -MockWith {
@@ -293,10 +285,8 @@ try
             }
 
             Context "Running on test on Windows Server 2012 (R2)" {
-                Mock -CommandName Get-CimInstance -MockWith {
-                    [pscustomobject]@{
-                        Version = '6.3.9600'
-                    }
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
                 }
 
                 It "Running on Windows Server 2012 (R2) with EnableUserProfile disk set to True should ignore the EnableUserProfile property (Test returns True - In Desired State)" {
@@ -305,10 +295,8 @@ try
             }
 
             Context "Running on test on Windows Server 2016 (or higher)" {
-                Mock -CommandName Get-CimInstance -MockWith {
-                    [pscustomobject]@{
-                        Version = '10.0.14393'
-                    }
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
                 }
 
                 It "Running on Windows Server 2016+ with EnableUserProfile disk set to True and current setting set to false should return Test result False - Not In Desired State" {

@@ -96,7 +96,8 @@ function Get-TargetResource
         }
 
         # This part of the configuration only applies to Win 2016+
-        if(([version](Get-CimInstance -ClassName win32_operatingsystem -Property Version).Version).Major -ge 10) {
+        if((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10) 
+        {
             Write-Verbose 'Running on W2016+, get UserProfileDisk configuration'
             $collectionUserProfileDisk = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserProfileDisk
 
@@ -178,10 +179,12 @@ function Set-TargetResource
     )
     Write-Verbose "Setting DSC collection properties"
 
-    try {
+    try 
+    {
         $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
     }
-    catch {
+    catch 
+    {
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
@@ -194,34 +197,41 @@ function Set-TargetResource
     $null = $PSBoundParameters.Remove('IncludeFolderPath')   
     $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
 
-
-    if(([version](Get-CimInstance -ClassName win32_operatingsystem -Property Version).Version).Major -ge 10) {
+    if((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10) 
+    {
         Write-Verbose 'Running on W2016 or higher, prepare to set UserProfileDisk configuration'
 
         # First set the initial configuration before trying to modify the UserProfileDisk Configuration
         Set-RDSessionCollectionConfiguration @PSBoundParameters
 
-        if($EnableUserProfileDisk) {
+        if($EnableUserProfileDisk) 
+        {
             Write-Verbose 'EnableUserProfileDisk is True - a DiskPath and MaxUserProfileDiskSizeGB are now mandatory'
 
-            if($DiskPath) {
+            if($DiskPath) 
+            {
                 $validateDiskPath = Test-Path -Path $DiskPath -ErrorAction SilentlyContinue
-                if(-not($validateDiskPath)) {
+                if(-not($validateDiskPath)) 
+                {
                     Throw "To enable UserProfileDisk we need a valid DiskPath. Path $DiskPath not found"
                 }
-                else {
+                else 
+                {
                     Write-Verbose "EnableUserProfileDisk: Validated diskPath: $DiskPath"
                 }
             }
-            else {
+            else 
+            {
                 Throw "No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True" 
             }
 
-            if(-not($MaxUserProfileDiskSizeGB -gt 0)) {
-                Throw "To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value $MaxUserProfileDiskSizeGB is not valid"
+            if(-not($MaxUserProfileDiskSizeGB -le 0)) 
+            {
+                Write-Verbose "EnableUserProfileDisk: Validated MaxUserProfileDiskSizeGB size: $MaxUserProfileDiskSizeGB"   
             }
-            else {
-                Write-Verbose "EnableUserProfileDisk: Validated MaxUserProfileDiskSizeGB size: $MaxUserProfileDiskSizeGB"
+            else 
+            {
+                Throw "To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value $MaxUserProfileDiskSizeGB is not valid"
             }
 
             $enableUserProfileDiskSplat = @{
@@ -237,26 +247,33 @@ function Set-TargetResource
 
             $errorMsg = Set-RDSessionCollectionConfiguration @enableUserProfileDiskSplat 2>&1
 
-            # This is a workaround for the buggy RemoteDesktop module spamming errors because the functions are imported without prefix.
+            # This is a workaround for the buggy Set-RDSessionCollectionConfiguration. This command starts the functions in the Microsoft.windows.servermanagerworkflows configuration.
+            # In this configuration, the remote desktop module is not imported by default, so we get errors about commands that cannot be found.
+            
             $expectedErrorMessages = @(
                 "The term 'Get-RDSessionCollection' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again."
                 "The term 'Get-RDVirtualDesktopCollection' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again."
             )
 
-            foreach($msg in $errorMsg) {
-                if($msg -in $expectedErrorMessages) {
+            foreach($msg in $errorMsg) 
+            {
+                if($msg -in $expectedErrorMessages) 
+                {
                     Write-Verbose $msg
                 }
-                else {
+                else 
+                {
                     Write-Error $msg
                 }
             }
         }
-        else {
+        else 
+        {
             Set-RDSessionCollectionConfiguration -CollectionName $CollectionName -DisableUserProfileDisk
         }
     }
-    else {
+    else 
+    {
         Set-RDSessionCollectionConfiguration @PSBoundParameters
     }
 }
@@ -333,7 +350,8 @@ function Test-TargetResource
     $null = $PSBoundParameters.Remove('ConnectionBroker')
     $isInDesiredState = $true
 
-    if(([version](Get-CimInstance -ClassName win32_operatingsystem -Property Version).Version).Major -lt 10) {
+    if((Get-xRemoteDesktopSessionHostOsVersion).Major -lt 10) 
+    {
         Write-Verbose 'Running on W2012R2 or lower, removing properties that are not compatible'
 
         $null = $PSBoundParameters.Remove('CollectionName') 
@@ -346,7 +364,8 @@ function Test-TargetResource
         $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
     }
 
-    if(-not($EnableUserProfileDisk)) {
+    if(-not($EnableUserProfileDisk)) 
+    {
         Write-Verbose 'Running on W2016+ and UserProfileDisk is disabled. Removing properties from compare'
 
         $null = $PSBoundParameters.Remove('DiskPath')  
@@ -359,12 +378,15 @@ function Test-TargetResource
 
     $get = Get-TargetResource -CollectionName $CollectionName
 
-    foreach($name in $PSBoundParameters.Keys) {
-        if ($PSBoundParameters[$name] -ne $get[$name]) {
+    foreach($name in $PSBoundParameters.Keys) 
+    {
+        if ($PSBoundParameters[$name] -ne $get[$name]) 
+        {
             Write-Verbose ('Property: {0} with value {1} does not match value {2}' -f $name, $PSBoundParameters[$name], $get[$name])
             $isInDesiredState = $false
         }
-        else {
+        else 
+        {
             Write-Verbose "Property: $name - InDesiredState: True"
         }
     }
