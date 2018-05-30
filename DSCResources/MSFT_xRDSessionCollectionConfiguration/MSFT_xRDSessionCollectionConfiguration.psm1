@@ -225,7 +225,7 @@ function Set-TargetResource
                 Throw "No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True" 
             }
 
-            if(-not($MaxUserProfileDiskSizeGB -le 0)) 
+            if($MaxUserProfileDiskSizeGB -gt 0)
             {
                 Write-Verbose "EnableUserProfileDisk: Validated MaxUserProfileDiskSizeGB size: $MaxUserProfileDiskSizeGB"   
             }
@@ -245,25 +245,22 @@ function Set-TargetResource
                 MaxUserProfileDiskSizeGB = $MaxUserProfileDiskSizeGB
             }
 
-            $errorMsg = Set-RDSessionCollectionConfiguration @enableUserProfileDiskSplat 2>&1
+            $null = Set-RDSessionCollectionConfiguration @enableUserProfileDiskSplat -ErrorAction SilentlyContinue -ErrorVariable setRDSessionCollectionErrors 2>&1
 
             # This is a workaround for the buggy Set-RDSessionCollectionConfiguration. This command starts the functions in the Microsoft.windows.servermanagerworkflows configuration.
-            # In this configuration, the remote desktop module is not imported by default, so we get errors about commands that cannot be found.
+            # In this configuration, the C:\Windows\system32\WindowsPowerShell\v1.0\Modules\RemoteDesktop\Utility.psm1 module cannot call the RemoteDesktop module functions as they seem to load without the -RD prefix.
+            # Here, we work around the errors thrown by Test-UserVhdPathInUse (the function in the Utility.psm1 module which calls the RemoteDesktop module functions)
             
-            $expectedErrorMessages = @(
-                "The term 'Get-RDSessionCollection' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again."
-                "The term 'Get-RDVirtualDesktopCollection' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again."
-            )
-
-            foreach($msg in $errorMsg) 
+            foreach($setRDSessionCollectionError in $setRDSessionCollectionErrors) 
             {
-                if($msg -in $expectedErrorMessages) 
+                if($SetRDSessionCollectionError.FullyQualifiedErrorId -eq 'CommandNotFoundException')
                 {
-                    Write-Verbose $msg
+                    Write-Verbose "Set-RDSessionCollectionConfiguration: trapped erroneous CommandNotFoundException errors, that's ok, continuing..."
+                    # ignore & continue
                 }
-                else 
+                else
                 {
-                    Write-Error $msg
+                    Write-Error "Set-RDSessionCollectionConfiguration error: $setRDSessionCollectionError"
                 }
             }
         }
