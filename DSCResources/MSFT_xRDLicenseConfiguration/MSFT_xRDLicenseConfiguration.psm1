@@ -35,7 +35,11 @@ function Get-TargetResource
     {
     Write-Verbose "configuration retrieved successfully:"
     }
-
+    else 
+    {
+        Write-Verbose "Failed to retrieve RD License configuration from broker '$ConnectionBroker'."
+        throw ("Failed to retrieve RD License configuration from broker '$ConnectionBroker'.")
+    }
     $result = 
     @{
         "ConnectionBroker" = $ConnectionBroker
@@ -45,11 +49,6 @@ function Get-TargetResource
 
     Write-Verbose ">> RD License mode:     $($result.LicenseMode)"
     Write-Verbose ">> RD License servers:  $($result.LicenseServers -join '; ')"
-
-    else 
-    {
-        Write-Verbose "Failed to retrieve RD License configuration from broker '$ConnectionBroker'."
-    }
 
     $result
 }
@@ -71,7 +70,7 @@ function Set-TargetResource
         [string[]] 
         $LicenseServers,
         
-        [Parameter()]
+        [Parameter(Mandatory = $true)] # required parameter in Set-RDLicenseConfiguration
         [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
         [string] 
         $LicenseMode
@@ -114,7 +113,7 @@ function Test-TargetResource
         [string[]] 
         $LicenseServers,
         
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
         [string] $LicenseMode
     )
@@ -123,9 +122,28 @@ function Test-TargetResource
     
     if ($config) 
     {
-        Write-Verbose "verifying RD Licensing mode..."
+        Write-Verbose "Verifying RD Licensing mode: $($config.LicenseMode -eq $LicenseMode)"
 
-        $result = ($config.LicenseMode -eq $LicenseMode)
+        Write-Verbose "Verifying RD license servers..."
+        $noChange = $true
+        if ($LicenseServers)
+        {
+            ForEach ($server in $config.LicenseServers)
+            {
+                if ($LicenseServers -notcontains $server)
+                {
+                    $noChange = $false
+                    Write-Verbose "License Server '$server' in the current configuration will be removed."
+                }
+            }
+            if ($LicenseServers.Count -ne $config.LicenseServers.Count)
+            {
+                $noChange = $false
+            }
+        }
+
+
+        $result = ($config.LicenseMode -eq $LicenseMode) -and $noChange
     }
     else 
     {
