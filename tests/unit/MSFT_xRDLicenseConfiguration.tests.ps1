@@ -47,7 +47,7 @@ try
             Context "Parameter Values,Validations and Errors" {
                 Mock Get-RDLicenseConfiguration -MockWith {return $null}
                 It "Should error if unable to get RD License config." {
-                    {Get-TargetResource -ConnectionBroker "connectionbroker.lan" } `
+                    {Get-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "NotConfigured"} `
                         | should throw
                 }
             }

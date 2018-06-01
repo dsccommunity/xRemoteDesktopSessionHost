@@ -19,7 +19,7 @@ function Get-TargetResource
         [string[]] 
         $LicenseServers,
         
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
         [string] 
         $LicenseMode
