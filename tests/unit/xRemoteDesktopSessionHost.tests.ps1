@@ -44,25 +44,25 @@ try
         #region Function Test-xRemoteDesktopSessionHostOsRequirement
         Describe "Test-xRemoteDesktopSessionHostOsRequirement" {
             Context 'Windows 10' {
-                Mock Get-OsVersion -MockWith {return (new-object 'Version' 10,1,1,1)}
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 10,1,1,1)}
                 it 'Should return true' {
                     Test-xRemoteDesktopSessionHostOsRequirement | should be $true
                 }
             }
             Context 'Windows 8.1' {
-                Mock Get-OsVersion -MockWith {return (new-object 'Version' 6,3,1,1)}
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 6,3,1,1)}
                 it 'Should return true' {
                     Test-xRemoteDesktopSessionHostOsRequirement | should be $true
                 }
             }
             Context 'Windows 8' {
-                Mock Get-OsVersion -MockWith {return (new-object 'Version' 6,2,9200,0)}
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 6,2,9200,0)}
                 it 'Should return true' {
                     Test-xRemoteDesktopSessionHostOsRequirement | should be $true
                 }
             }
             Context 'Windows 7' {
-                Mock Get-OsVersion -MockWith {return (new-object 'Version' 6,1,1,0)}
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 6,1,1,0)}
                 it 'Should return false' {
                     Test-xRemoteDesktopSessionHostOsRequirement | should be $false
                 }
@@ -77,7 +77,7 @@ try
     Describe "Test-xRemoteDesktopSessionHostOsRequirement use in modules" {
             Import-module "$moduleRoot\xRemoteDesktopSessionHost.psd1" -force
             Context 'Loading resource modules on Windows 10' {
-                Mock Get-OsVersion -MockWith {return (new-object 'Version' 10,1,1,1)} -ModuleName xRemoteDesktopSessionHost
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 10,1,1,1)} -ModuleName xRemoteDesktopSessionHost
                 foreach($resourceModule in $global:resourceModules)
                 {
                     # The resource does not check if the remote desktop module exists before it loads it 
