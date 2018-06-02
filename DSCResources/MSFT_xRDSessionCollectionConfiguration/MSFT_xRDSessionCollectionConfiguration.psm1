@@ -245,6 +245,7 @@ function Set-TargetResource
                 MaxUserProfileDiskSizeGB = $MaxUserProfileDiskSizeGB
             }
 
+            # 2>&1 redirects the error stream to output stream. This for us to be able to ignore certain errors that popup in Set-RDSessionCollectionConfiguration.
             $null = Set-RDSessionCollectionConfiguration @enableUserProfileDiskSplat -ErrorAction SilentlyContinue -ErrorVariable setRDSessionCollectionErrors 2>&1
 
             # This is a workaround for the buggy Set-RDSessionCollectionConfiguration. This command starts the functions in the Microsoft.windows.servermanagerworkflows configuration.
