@@ -72,6 +72,13 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **SecurityLayer**: Specifies which security protocol to use.
 * **TemporaryFoldersDeletedOnExit**: Whether to delete temporary folders from the RD Session Host server for a disconnected session.
 * **UserGroup**: Specifies a domain group authorized to connect to the RD Session Host servers in a session collection.
+* **DiskPath**: Specifies the target path to store the User Profile Disks
+* **EnableUserProfileDisk**: Specifies if this collection uses UserProfileDisks
+* **ExcludeFilePath**: Specifies a list of strings for files to exclude from the user profile disk
+* **ExcludeFolderPath**: Specifies a list of strings for folders to exclude from the user profile disk
+* **IncludeFilePath**: Specifies a list of strings for files to include in the user profile disk
+* **IncludeFolderPath**: Specifies a list of strings for folders to include in the user profile disk
+* **MaxUserProfileDiskSizeGB**: Specifies the maximum size in GB for a User Profile Disk
 
 ### xRDRemoteApp
 
