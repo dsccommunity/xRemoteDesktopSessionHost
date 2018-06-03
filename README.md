@@ -115,6 +115,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* xRDSessionCollectionConfiguration: Add support to configure UserProfileDisks on Windows Server 2016
 * Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
 
 ### 1.5.0.0
