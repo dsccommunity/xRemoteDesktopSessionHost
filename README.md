@@ -96,6 +96,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+### 1.6.0.0
+
 * xRDSessionCollectionConfiguration: Add support to configure UserProfileDisks on Windows Server 2016
 
 ### 1.5.0.0
