@@ -308,7 +308,18 @@ function Test-TargetResource
     if ($config)
     {
         write-verbose "verifying RD Gateway usage name..."
-        $result =  ($config.GatewayMode -ieq $GatewayMode)
+
+        if($config.GatewayMode -eq 'Custom' -and $config.GatewayMode -ieq $GatewayMode) 
+        {
+            $result = $config.BypassLocal -eq $BypassLocal -and
+                $config.UseCachedCredentials -eq $UseCachedCredentials -and
+                $config.LogonMethod -eq $LogonMethod -and 
+                $config.GatewayExternalFqdn -eq $ExternalFqdn
+        }
+        else
+        {
+            $result =  ($config.GatewayMode -ieq $GatewayMode)
+        }
     }
     else
     {
