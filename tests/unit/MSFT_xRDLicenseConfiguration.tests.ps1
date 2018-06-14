@@ -47,8 +47,7 @@ try
             Context "Parameter Values,Validations and Errors" {
                 Mock Get-RDLicenseConfiguration -MockWith {return $null}
                 It "Should error if unable to get RD License config." {
-                    {Get-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "NotConfigured"} `
-                        | should throw
+                    {Get-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "NotConfigured"} | should throw
                 }
             }
         }
@@ -57,21 +56,59 @@ try
         #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
-                Mock -CommandName Get-TargetResource -MockWith {return @{"ConnectionBroker"="connectionbroker.lan";"LicenseServers"=@("One","Two");"LicenseMode"="PerUser"}} -ModuleName MSFT_xRDLicenseConfiguration
+            
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        "ConnectionBroker"="connectionbroker.lan"
+                        "LicenseServers"=@("One","Two")
+                        "LicenseMode"="PerUser"
+                    }
+                } -ModuleName MSFT_xRDLicenseConfiguration
+                
                 It "Should return false if there's a change in license servers." {
-                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerUser" -LicenseServers "One" `
-                        | should -Be $false
+                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerUser" -LicenseServer "One" | should Be $false
                 }
 
-                Mock Get-TargetResource -MockWith {return @{"ConnectionBroker"="connectionbroker.lan";"LicenseServers"=@("One","Two");"LicenseMode"="PerUser"}}
+                Mock Get-TargetResource -MockWith {
+                    return @{
+                        "ConnectionBroker"="connectionbroker.lan"
+                        "LicenseServers"=@("One","Two")
+                        "LicenseMode"="PerUser"
+                    }
+                }
+                
                 It "Should return false if there's a change in license mode." {
-                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerDevice" -LicenseServers @("One","Two") `
-                        | should -Be $false
+                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerDevice" -LicenseServer @("One","Two") | should Be $false
+                }
+                
+                It "Should return true if there are no changes in license mode." {
+                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerUser" -LicenseServer @("One","Two") | should Be $true
                 }
             }
         }
         #endregion
 
+        Describe "$($script:DSCResourceName)\Set-TargetResource" {
+        
+            Context "Configuration changes performed by Set" {
+                
+                Mock -CommandName Set-RDLicenseConfiguration
+                
+                It 'Given license servers, Set-RDLicenseConfiguration is called with LicenseServer parameter' {
+                    Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode PerDevice -LicenseServer 'LicenseServer1'
+                    Assert-MockCalled -CommandName Set-RDLicenseConfiguration -Times 1 -ParameterFilter {
+                        $LicenseServer -eq 'LicenseServer1'
+                    }
+                }
+                
+                It 'Given no license servers, Set-RDLicenseConfiguration is called without LicenseServer parameter' {
+                    Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode PerDevice
+                    Assert-MockCalled -CommandName Set-RDLicenseConfiguration -Times 1 -ParameterFilter {
+                        $LicenseServer -eq $null
+                    } -Scope It
+                }
+            }
+        }
     }
 }
 finally

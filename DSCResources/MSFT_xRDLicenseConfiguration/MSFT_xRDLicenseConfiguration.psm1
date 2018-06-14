@@ -68,7 +68,7 @@ function Set-TargetResource
         
         [Parameter()]
         [string[]] 
-        $LicenseServers,
+        $LicenseServer,
         
         [Parameter(Mandatory = $true)] # required parameter in Set-RDLicenseConfiguration
         [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
@@ -79,12 +79,12 @@ function Set-TargetResource
     Write-Verbose "Starting RD License server configuration..."
     Write-Verbose ">> RD Connection Broker:  $($ConnectionBroker.ToLower())"
 
-    if ($LicenseServers) 
+    if ($LicenseServer) 
     {
-        Write-Verbose ">> RD License servers:    $($LicenseServers -join '; ')"
+        Write-Verbose ">> RD License servers:    $($LicenseServer -join '; ')"
 
         Write-Verbose "calling Set-RDLicenseConfiguration cmdlet..."
-        Set-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -LicenseServer $LicenseServers -Mode $LicenseMode -Force
+        Set-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -LicenseServer $LicenseServer -Mode $LicenseMode -Force
     }
     else 
     {
