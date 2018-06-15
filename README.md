@@ -124,6 +124,10 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 * Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
 
+### 1.6.0.0
+
+* xRDSessionCollectionConfiguration: Add support to configure UserProfileDisks on Windows Server 2016
+
 ### 1.5.0.0
 
 * Fix issue where DSC configuration gets into a reboot loop because sessionhost does not match (casing) and RDMS service is not started in time
