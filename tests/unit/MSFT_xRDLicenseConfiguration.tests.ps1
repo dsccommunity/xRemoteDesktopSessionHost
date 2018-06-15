@@ -60,7 +60,7 @@ try
                 Mock -CommandName Get-TargetResource -MockWith {
                     return @{
                         "ConnectionBroker"="connectionbroker.lan"
-                        "LicenseServers"=@("One","Two")
+                        "LicenseServer"=@("One","Two")
                         "LicenseMode"="PerUser"
                     }
                 } -ModuleName MSFT_xRDLicenseConfiguration
@@ -72,7 +72,7 @@ try
                 Mock Get-TargetResource -MockWith {
                     return @{
                         "ConnectionBroker"="connectionbroker.lan"
-                        "LicenseServers"=@("One","Two")
+                        "LicenseServer"=@("One","Two")
                         "LicenseMode"="PerUser"
                     }
                 }

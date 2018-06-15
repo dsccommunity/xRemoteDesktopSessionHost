@@ -17,7 +17,7 @@ function Get-TargetResource
         
         [Parameter()]
         [string[]] 
-        $LicenseServers,
+        $LicenseServer,
         
         [Parameter(Mandatory = $true)]
         [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
@@ -43,12 +43,12 @@ function Get-TargetResource
     $result = 
     @{
         "ConnectionBroker" = $ConnectionBroker
-        "LicenseServers"   = $config.LicenseServer          
+        "LicenseServer"   = $config.LicenseServer          
         "LicenseMode"      = $config.Mode.ToString()  # Microsoft.RemoteDesktopServices.Management.LicensingMode  .ToString()
     }
 
     Write-Verbose ">> RD License mode:     $($result.LicenseMode)"
-    Write-Verbose ">> RD License servers:  $($result.LicenseServers -join '; ')"
+    Write-Verbose ">> RD License servers:  $($result.LicenseServer -join '; ')"
 
     $result
 }
@@ -111,7 +111,7 @@ function Test-TargetResource
         
         [Parameter()]
         [string[]] 
-        $LicenseServers,
+        $LicenseServer,
         
         [Parameter(Mandatory = $true)]
         [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
@@ -126,17 +126,17 @@ function Test-TargetResource
 
         Write-Verbose "Verifying RD license servers..."
         $noChange = $true
-        if ($LicenseServers)
+        if ($LicenseServer)
         {
-            ForEach ($server in $config.LicenseServers)
+            ForEach ($server in $config.LicenseServer)
             {
-                if ($LicenseServers -notcontains $server)
+                if ($LicenseServer -notcontains $server)
                 {
                     $noChange = $false
                     Write-Verbose "License Server '$server' in the current configuration will be removed."
                 }
             }
-            if ($LicenseServers.Count -ne $config.LicenseServers.Count)
+            if ($LicenseServer.Count -ne $config.LicenseServer.Count)
             {
                 $noChange = $false
             }
