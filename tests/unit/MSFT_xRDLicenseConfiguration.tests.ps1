@@ -88,6 +88,7 @@ try
         }
         #endregion
 
+        #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
         
             Context "Configuration changes performed by Set" {
@@ -109,6 +110,7 @@ try
                 }
             }
         }
+        #endregion
     }
 }
 finally

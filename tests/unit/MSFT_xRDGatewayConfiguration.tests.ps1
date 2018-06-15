@@ -42,6 +42,7 @@ try
         
         Import-Module RemoteDesktop -Force
 
+        #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
             
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
@@ -155,6 +156,7 @@ try
                 Test-TargetResource @testSplat | Should be $true
             }
         }
+        #endregion
 
 
         #region Function Set-TargetResource

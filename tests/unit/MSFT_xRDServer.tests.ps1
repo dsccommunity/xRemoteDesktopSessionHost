@@ -42,6 +42,7 @@ try
         
         Import-Module RemoteDesktop -Force
 
+        #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
@@ -96,7 +97,9 @@ try
                 $getResult.GatewayExternalFqdn | Should Be 'testgateway.external.fqdn'
             }
         }
+        #endregion
         
+        #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
             Mock -CommandName Get-RDServer -MockWith {
             
@@ -128,6 +131,7 @@ try
                 Test-TargetResource -Server connectionbroker.lan -ConnectionBroker connectionbroker.lan -Role RDS-Connection-Broker | Should be $true
             }
         }
+        #endregion
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
