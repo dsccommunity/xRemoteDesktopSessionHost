@@ -121,6 +121,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ## Versions
 
 =======
+
 ### Unreleased
 
 * Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
