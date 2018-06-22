@@ -120,9 +120,15 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ## Versions
 
+=======
+
 ### Unreleased
 
 * Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
+* xRDSessionCollection:
+  * Fixed call to Add-RDSessionHost in Set-TargetResource by properly removing CollectionDescription from PSBoundParameters (issue #28)
+  * Fixed bug on Get-TargetResource that did return any collection instead of the one collection the user asked for (issue #27)
+  * Added unit tests to test Get, Test and Set results in this resource
 
 ### 1.6.0.0
 
