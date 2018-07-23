@@ -42,43 +42,44 @@ function Get-TargetResource
         [Parameter()]
         [boolean] $ShowInWebAccess
     )
-        Write-Verbose "Getting published RemoteApp program $DisplayName, if one exists."
-        try 
-        {
-            $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
-        }
-        catch 
-        {
-            throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
-        }
 
-        $remoteApp = Get-RDRemoteApp -CollectionName $CollectionName -Alias $Alias -ErrorAction SilentlyContinue
+    try
+    {
+        $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
+    }
+    catch
+    {
+        throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
+    }
 
-        $return = @{
-            CollectionName = $remoteApp.CollectionName
-            DisplayName = $remoteApp.DisplayName
-            FilePath = $remoteApp.FilePath
-            Alias = $remoteApp.Alias
-            FileVirtualPath = $remoteApp.FileVirtualPath
-            FolderName = $remoteApp.FolderName
-            CommandLineSetting = $remoteApp.CommandLineSetting
-            RequiredCommandLine = $remoteApp.RequiredCommandLine
-            IconIndex = $remoteApp.IconIndex
-            IconPath = $remoteApp.IconPath
-            UserGroups = $remoteApp.UserGroups
-            ShowInWebAccess = $remoteApp.ShowInWebAccess
-        }
+    Write-Verbose "Getting published RemoteApp program $DisplayName, if one exists."
+    $remoteApp = Get-RDRemoteApp -CollectionName $CollectionName -Alias $Alias -ErrorAction SilentlyContinue
 
-        if($remoteApp) 
-        {
-            $return['Ensure'] = 'Present'
-        }
-        else
-        {
-            $return['Ensure'] = 'Absent'
-        }
+    $return = @{
+        CollectionName = $remoteApp.CollectionName
+        DisplayName = $remoteApp.DisplayName
+        FilePath = $remoteApp.FilePath
+        Alias = $remoteApp.Alias
+        FileVirtualPath = $remoteApp.FileVirtualPath
+        FolderName = $remoteApp.FolderName
+        CommandLineSetting = $remoteApp.CommandLineSetting
+        RequiredCommandLine = $remoteApp.RequiredCommandLine
+        IconIndex = $remoteApp.IconIndex
+        IconPath = $remoteApp.IconPath
+        UserGroups = $remoteApp.UserGroups
+        ShowInWebAccess = $remoteApp.ShowInWebAccess
+    }
 
-        $return
+    if($remoteApp)
+    {
+        $return['Ensure'] = 'Present'
+    }
+    else
+    {
+        $return['Ensure'] = 'Absent'
+    }
+
+    $return
 }
 
 
@@ -121,9 +122,8 @@ function Set-TargetResource
         [Parameter()]
         [boolean] $ShowInWebAccess
     )
-    Write-Verbose "Making updates to RemoteApp."
-    
-    try 
+
+    try
     {
         $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
         $null = $PSBoundParameters.Remove('Ensure')
@@ -133,8 +133,9 @@ function Set-TargetResource
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
+    Write-Verbose "Making updates to RemoteApp."
     $remoteApp = Get-RDRemoteApp -CollectionName $CollectionName -Alias $Alias
-    if (!$remoteApp -and $Ensure -eq 'Present') 
+    if (!$remoteApp -and $Ensure -eq 'Present')
     {
         New-RDRemoteApp @PSBoundParameters
     }
@@ -142,7 +143,7 @@ function Set-TargetResource
     {
         Remove-RDRemoteApp -CollectionName $CollectionName -Alias $Alias -Force
     }
-    else 
+    else
     {
         Set-RDRemoteApp @PSBoundParameters
     }
@@ -200,21 +201,18 @@ function Test-TargetResource
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
-    $null = $PSBoundParameters.Remove("Verbose")
-    $null = $PSBoundParameters.Remove("Debug")
-    $null = $PSBoundParameters.Remove("ConnectionBroker")
-    $check = $true
+    $testTargetResourceResult = $true
     
-    $get = Get-TargetResource @PSBoundParameters
-    $PSBoundParameters.keys | ForEach-Object {
-        if ($PSBoundParameters[$_] -ne $get[$_]) 
+    $getTargetResourceResult = Get-TargetResource @PSBoundParameters
+    $PSBoundParameters.Keys | ForEach-Object -Process {
+        if ($PSBoundParameters[$_] -ne $getTargetResourceResult[$_]) 
         {
-            Write-Verbose "Property [ $_ ] with value $($PSBoundParameters[$_]) does not match $($get[$_])"
-            $check = $false
+            Write-Verbose "Property [ $_ ] with value $($PSBoundParameters[$_]) does not match $($getTargetResourceResult[$_])"
+            $testTargetResourceResult = $false
         }
     }
 
-    $check
+    $testTargetResourceResult
 }
 
 Export-ModuleMember -Function *-TargetResource

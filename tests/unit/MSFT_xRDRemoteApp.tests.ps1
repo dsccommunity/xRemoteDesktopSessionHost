@@ -76,19 +76,19 @@ try
                 }
 
                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
-                It 'Does only accept valid values for CommandLineSetting' {
+                It 'Should only accept valid values for CommandLineSetting' {
                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
                 }
 
                 $xRDRemoteAppSplat.CommandLineSetting = 'DoNotAllow'
             }
 
-            Context "Get output validation" {
+            Context "When Get-TargetResource is called" {
                 
                 Mock -CommandName Get-RDRemoteApp
                 Mock -CommandName Get-RDSessionCollection
 
-                It 'Given the RemoteApp is not created yet, get returns Absent' {
+                It 'Should return Ensure Absent, given the RemoteApp is not created yet' {
                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Absent'
                 }
 
@@ -109,7 +109,7 @@ try
                     }
                 }
 
-                It 'Given the RemoteApp is created, get returns Present' {
+                It 'Should return Ensure Present, given the RemoteApp is created' {
                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Present'
                 }
 
@@ -127,28 +127,28 @@ try
                     'PipelineVariable'
                 )
 
-                $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object{$_ -notin $excludeParameters} | ForEach-Object {
+                $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $excludeParameters } | ForEach-Object -Process {
                     @{
                         Property = $_
                         Value = $xRDRemoteAppSplat[$_]
                     }
                 }
 
-                $get = Get-TargetResource @xRDRemoteAppSplat
-                It 'Get returns property <Property> with value <Value>' {
+                $getTargetResourceResult = Get-TargetResource @xRDRemoteAppSplat
+                It 'Should return property <Property> with value <Value> in Get-TargetResource' {
                     Param(
                         $Property,
                         $Value
                     )
 
-                    $get.$Property | Should Be $Value
+                    $getTargetResourceResult.$Property | Should Be $Value
                 } -TestCases $allParameters
 
                 Mock -CommandName Get-RDSessionCollection -MockWith {
                     Write-Error 'Collection not found!'
                 }
 
-                It 'Given that the CollectionName is not found in the SessionDeployment, an error is generated' {
+                It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
                     try
                     {
                         Get-TargetResource @xRDRemoteAppSplat -ErrorVariable collectionError
@@ -171,14 +171,14 @@ try
                 }
 
                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
-                It 'Does only accept valid values for CommandLineSetting' {
+                It 'Should only accept valid values for CommandLineSetting' {
                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
                 }
 
                 $xRDRemoteAppSplat.CommandLineSetting = 'DoNotAllow'
             }
 
-            Context 'Validate Set Actions' {
+            Context 'When Set-TargetResource actions are performed' {
 
                 Mock -CommandName Get-RDSessionCollection
                 Mock -CommandName Get-RDRemoteApp
@@ -186,20 +186,20 @@ try
                 Mock -CommandName Remove-RDRemoteApp
                 Mock -CommandName Set-RDRemoteApp
 
-                It 'Given that the RemoteApp does not exist yet and Ensure is set to Present, New-RDRemoteApp is called' {
+                It 'Should call New-RDRemoteApp, given that the RemoteApp does not exist yet and Ensure is set to Present' {
                     Set-TargetResource @xRDRemoteAppSplat
                     Assert-MockCalled -CommandName New-RDRemoteApp -Times 1 -Scope It
                 }
 
                 Mock -CommandName Get-RDRemoteApp -MockWith { $true }
 
-                It 'Given that the RemoteApp does exist and Ensure is set to Present, Set-RDRemoteApp is called' {
+                It 'Should call Set-RDRemoteApp, given that the RemoteApp does exist and Ensure is set to Present' {
                     Set-TargetResource @xRDRemoteAppSplat
                     Assert-MockCalled -CommandName Set-RDRemoteApp -Times 1 -Scope It
                 }
 
                 $xRDRemoteAppSplat.Ensure = 'Absent'
-                It 'Given that the RemoteApp exists and Ensure is set to Absent, Remove-RDRemoteApp is called' {
+                It 'Should call Remove-RDRemoteApp, given that the RemoteApp exists and Ensure is set to Absent' {
                     Set-TargetResource @xRDRemoteAppSplat
                     Assert-MockCalled -CommandName Remove-RDRemoteApp -Times 1 -Scope It
                 }
@@ -209,7 +209,7 @@ try
                     Write-Error 'Collection not found!'
                 }
 
-                It 'Given that the CollectionName is not found in the SessionDeployment, an error is generated' {
+                It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
                     try
                     {
                         Set-TargetResource @xRDRemoteAppSplat -ErrorVariable collectionError
@@ -232,7 +232,7 @@ try
                 }
                 
                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
-                It 'Does only accept valid values for CommandLineSetting' {
+                It 'Should only accept valid values for CommandLineSetting' {
                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
                 }
 
@@ -243,11 +243,11 @@ try
                 Mock -CommandName Get-RDSessionCollection
                 Mock -CommandName Get-RDRemoteApp
 
-                It 'Given that the RemoteApp does not exist yet and Ensure is set to Present, test returns false' {
+                It 'Should return false, given that the RemoteApp does not exist yet and Ensure is set to Present' {
                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
                 }
 
-                Mock -CommandName Get-RDRemoteApp -MockWith { 
+                Mock -CommandName Get-RDRemoteApp -MockWith {
                     @{
                         CollectionName = 'TestCollection'
                         DisplayName = 'MyCalc (1.0.0)'
@@ -264,17 +264,17 @@ try
                     }
                 }
 
-                It 'Given that the RemoteApp does exist and Ensure is set to Present, test returns true' {
+                It 'Should return true, given that the RemoteApp does exist and Ensure is set to Present' {
                     Test-TargetResource @xRDRemoteAppSplat | Should Be $true
                 }
 
                 $xRDRemoteAppSplat.Ensure = 'Absent'
-                It 'Given that the RemoteApp exists and Ensure is set to Absent, test returns false' {
+                It 'Should return false, given that the RemoteApp exists and Ensure is set to Absent' {
                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
                 }
                 $xRDRemoteAppSplat.Ensure = 'Present'
 
-                Mock -CommandName Get-RDRemoteApp -MockWith { 
+                Mock -CommandName Get-RDRemoteApp -MockWith {
                     @{
                         CollectionName = 'TestCollection'
                         DisplayName = 'MyCalc (1.0.0)'
@@ -291,7 +291,7 @@ try
                     }
                 }
 
-                It 'Given that the RemoteApp exists and Ensure is set to Present and a single setting is misconfigured, test returns false' {
+                It 'Should return false, given that the RemoteApp exists and Ensure is set to Present and a single setting is misconfigured' {
                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
                 }
 
@@ -299,7 +299,7 @@ try
                     Write-Error 'Collection not found!'
                 }
 
-                It 'Given that the CollectionName is not found in the SessionDeployment, an error is generated' {
+                It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
                     try
                     {
                         Test-TargetResource @xRDRemoteAppSplat -ErrorVariable collectionError

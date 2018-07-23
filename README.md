@@ -84,11 +84,12 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 * **Alias**: Specifies an alias for the RemoteApp program.
 * **CollectionName**: Specifies the name of the personal virtual desktop collection or session collection.  The cmdlet publishes the RemoteApp program to this collection.
+* **Ensure**: Specifies if the RemoteApp needs to be Present (default) or Absent.
 * **DisplayName**: Specifies a name to display to users for the RemoteApp program.
 * **FilePath**: Specifies a path for the executable file for the application.  Note: Do not include any environment variables.
 * **FileVirtualPath**: Specifies a path for the application executable file.  This path resolves to the same location as the value of the FilePath parameter, but it can include environment variables.
 * **FolderName**: Specifies the name of the folder that the RemoteApp program appears in on the Remote Desktop Web Access (RD Web Access) webpage and in the Start menu for subscribed RemoteApp and Desktop Connections.
-* **CommandLineSetting**: Specifies whether the RemoteApp program accepts command-line arguments from the client at connection time.
+* **CommandLineSetting**: Specifies whether the RemoteApp program accepts command-line arguments from the client at connection time. Parameters accepts Allow, DoNotAllow or Require as values.
 * **RequiredCommandLine**: Specifies a string that contains command-line arguments that the client can use at connection time with the RemoteApp program.
 * **IconIndex**: Specifies the index within the icon file (specified by the IconPath parameter) where the RemoteApp program's icon can be found.
 * **IconPath**: Specifies the path to a file containing the icon to display for the RemoteApp program identified by the Alias parameter.
