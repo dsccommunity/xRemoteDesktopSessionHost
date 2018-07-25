@@ -41,17 +41,35 @@ try
         $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan15'
+        $testcollectionName = 'TestCollection'
+        
         $testSessionHost = 'localhost'
+        $testConnectionBroker = 'localhost.fqdn'
+        
+        $validTargetResourceCall = @{
+            CollectionName = $testCollectionName
+            SessionHost = $testSessionHost
+            ConnectionBroker = $testConnectionBroker
+        }
         
         Import-Module RemoteDesktop -Force
         
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
+            Mock -CommandName Get-RDSessionCollection
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 15" {
-                    {Get-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} `
-                        | should throw
+                    {Get-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                }
+
+                It 'Calls Get-RDSessionCollection with CollectionName and ConnectionBroker parameters' {
+                    Get-TargetResource @validTargetResourceCall
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope It -ParameterFilter {
+                        $CollectionName -eq $testCollectionName -and
+                        $ConnectionBroker -eq $testConnectionBroker
+                    }
                 }
             }
         }
@@ -62,8 +80,27 @@ try
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 15" {
-                    {Set-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} `
-                        | should throw
+                    {Set-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                }
+            }
+            
+            Context 'Validate Set-TargetResource actions' {
+                Mock -CommandName New-RDSessionCollection
+                Mock -CommandName Add-RDSessionHost
+                
+                It 'Given the configuration is executed on the Connection Broker, New-RDSessionCollection is called' {
+                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker ([System.Net.Dns]::GetHostByName((hostname)).HostName) -SessionHost $testSessionHost
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It 
+                }
+                
+                It 'Given the configuration is not executed on the Connection Broker, Add-RDSessionHost is called' {
+                    Set-TargetResource @validTargetResourceCall
+                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It 
+                }
+                
+                It 'Given the configuration is not executed on the Connection Broker, and a description is passed, Add-RDSessionHost is called without the collection description' {
+                    Set-TargetResource @validTargetResourceCall -CollectionDescription 'Pester Test Collection Output'
+                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It 
                 }
             }
         }
@@ -74,8 +111,32 @@ try
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 15" {
-                    {Test-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} `
-                        | should throw
+                    {Test-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                }
+            }
+            
+            Context 'Validating Test-TargetResource output' {
+                Mock -CommandName Get-RDSessionCollection
+                
+                It 'Given Get-RDSessionCollection not returning a collection, test returns false' {
+                    Test-TargetResource @validTargetResourceCall | Should Be $false
+                }
+                
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    [pscustomobject]@{
+                        AutoAssignPersonalDesktop = $false
+                        CollectionAlias = $testcollectionName
+                        CollectionDescription = 'Pester Test Collection Output'
+                        CollectionName = $testcollectionName
+                        CollectionType = 'PooledUnmanaged'
+                        GrantAdministrativePrivilege = $false
+                        ResourceType = 'Remote Desktop'
+                        Size = 1
+                    }
+                }
+                
+                It 'Given Get-RDSessionCollection returning a collection, test returns true' {
+                    Test-TargetResource @validTargetResourceCall | Should Be $true
                 }
             }
         }
