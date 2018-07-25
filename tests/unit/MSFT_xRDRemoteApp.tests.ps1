@@ -127,12 +127,14 @@ try
                     'PipelineVariable'
                 )
 
-                $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $excludeParameters } | ForEach-Object -Process {
-                    @{
-                        Property = $_
-                        Value = $xRDRemoteAppSplat[$_]
+                $allParameters = (Get-Command Get-TargetResource).Parameters.Keys |
+                    Where-Object -FilterScript { $_ -notin $excludeParameters } |
+                    ForEach-Object -Process {
+                        @{
+                            Property = $_
+                            Value = $xRDRemoteAppSplat[$_]
+                        }
                     }
-                }
 
                 $getTargetResourceResult = Get-TargetResource @xRDRemoteAppSplat
                 It 'Should return property <Property> with value <Value> in Get-TargetResource' {
