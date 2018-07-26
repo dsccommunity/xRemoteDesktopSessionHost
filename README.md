@@ -125,20 +125,21 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* Changes to xRDSessionDeployment
+  * Fixed issue where an initial deployment failed due to a convert to lowercase (issue #39).
+  * Added unit tests to test Get, Test and Set results in this resource.
+* Change to xRDRemoteApp
+  * Fixed issue where this resource ignored the CollectionName provided in the parameters (issue #41).
+  * Changed key values in schema.mof to only Alias and CollectionName, DisplayName and FilePath are not key values.
+  * Added Ensure property (Absent or Present) to enable removal of RemoteApps.
+  * Added unit tests to test Get, Test and Set results in this resource.
+
 ### 1.7.0.0
 
 * Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
 * xRDSessionCollection:
   * Fixed call to Add-RDSessionHost in Set-TargetResource by properly removing CollectionDescription from PSBoundParameters (issue #28)
   * Fixed bug on Get-TargetResource that did return any collection instead of the one collection the user asked for (issue #27)
-  * Added unit tests to test Get, Test and Set results in this resource
-* xRDSessionDeployment:
-  * Fixed issue where an initial deployment failed due to a convert to lowercase (issue #39)
-  * Added unit tests to test Get, Test and Set results in this resource
-* xRDRemoteApp:
-  * Fixed issue where this resource ignored the CollectionName provided in the parameters (issue #41)
-  * Changed key values in schema.mof to only Alias and CollectionName, DisplayName and FilePath are not key values
-  * Added Ensure property (Absent or Present) to enable removal of RemoteApps
   * Added unit tests to test Get, Test and Set results in this resource
 
 ### 1.6.0.0
