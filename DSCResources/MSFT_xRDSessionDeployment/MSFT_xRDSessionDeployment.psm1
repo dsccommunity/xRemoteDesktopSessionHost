@@ -23,7 +23,7 @@ function Get-TargetResource
 
     # Start service RDMS is needed because otherwise a reboot loop could happen due to
     # the RDMS Service being on Delay-Start by default, and DSC kicks in too quickly after a reboot.
-    if((Get-Service -Name RDMS | Select-Object -ExpandProperty Status) -ne 'Running') 
+    if((Get-Service -Name RDMS -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status) -ne 'Running') 
     {
         try
         {
