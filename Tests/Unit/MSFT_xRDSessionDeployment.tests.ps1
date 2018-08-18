@@ -48,62 +48,9 @@ try
             ConnectionBroker = 'connectionbroker.lan'
             WebAccessServer  = 'webaccess.lan'
         }
-        
+
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-
-            Mock -CommandName Get-RDServer -MockWith {
-                [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.SessionHost
-                    Roles = @(
-                        'RDS-RD-SERVER'
-                    )
-                }
-                [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.ConnectionBroker
-                    Roles = @(
-                        'RDS-CONNECTION-BROKER'
-                    )
-                }
-                [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.WebAccessServer
-                    Roles = @(
-                        'RDS-WEB-ACCESS'
-                    )
-                }
-            }
-
-            Mock -CommandName Start-Service
-            Mock -CommandName Get-Service -MockWith {
-                [pscustomobject]@{
-                    Status = 'Stopped'
-                }
-            }
-
-            It 'Should attempt to start the RDMS service, given the RDMS service is stopped' {
-                Get-TargetResource @sessionDeploymentSplat
-                Assert-MockCalled -CommandName Start-Service -Times 1 -Scope It
-            }
-            
-            Mock -CommandName Start-Service -MockWith {
-                Throw "Throwing from Start-Service mock"
-            }
-
-            It 'Should generate a warning, given RDMS service is stopped and start fails' {
-                Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-                $serviceWarning | Should Be 'Failed to start RDMS service. Error: Throwing from Start-Service mock'
-            }
-
-            Mock -CommandName Get-Service -MockWith {
-                [pscustomobject]@{
-                    Status = 'Running'
-                }
-            }
-
-            It 'Should not attempt to start the RDMS service, given the RDMS service is running' {
-                Get-TargetResource @sessionDeploymentSplat
-                Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
-            }
 
             $excludeParameters = @(
                 'Verbose'
@@ -126,15 +73,84 @@ try
                 }
             }
 
-            $get = Get-TargetResource @sessionDeploymentSplat
-            It 'Should return property <property> with value <Value> in Get-TargetResource ' {
-                Param(
-                    $Property,
-                    $Value
-                )
+            Context "RDSessionDeployment is not present" {
+                #No mocking of any kind; all commands should fail!
 
-                $get.$Property | Should Be $Value
-            } -TestCases $allParameters
+                $get = Get-TargetResource @sessionDeploymentSplat
+                It 'Should return $null on property <property> in Get-TargetResource ' {
+                    Param(
+                        $Property,
+                        $Value
+                    )
+
+                    $get.$Property | Should Be $null
+                } -TestCases $allParameters
+            }
+
+            Context "RDSessionDeployment is present" {
+                Mock -CommandName Get-RDServer -MockWith {
+                    [pscustomobject]@{
+                        Server = $sessionDeploymentSplat.SessionHost
+                        Roles = @(
+                            'RDS-RD-SERVER'
+                        )
+                    }
+                    [pscustomobject]@{
+                        Server = $sessionDeploymentSplat.ConnectionBroker
+                        Roles = @(
+                            'RDS-CONNECTION-BROKER'
+                        )
+                    }
+                    [pscustomobject]@{
+                        Server = $sessionDeploymentSplat.WebAccessServer
+                        Roles = @(
+                            'RDS-WEB-ACCESS'
+                        )
+                    }
+                }
+
+                Mock -CommandName Start-Service
+                Mock -CommandName Get-Service -MockWith {
+                    [pscustomobject]@{
+                        Status = 'Stopped'
+                    }
+                }
+
+                It 'Should attempt to start the RDMS service, given the RDMS service is stopped' {
+                    Get-TargetResource @sessionDeploymentSplat
+                    Assert-MockCalled -CommandName Start-Service -Times 1 -Scope It
+                }
+                
+                Mock -CommandName Start-Service -MockWith {
+                    Throw "Throwing from Start-Service mock"
+                }
+
+                It 'Should generate a warning, given RDMS service is stopped and start fails' {
+                    Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
+                    $serviceWarning | Should Be 'Failed to start RDMS service. Error: Throwing from Start-Service mock'
+                }
+
+                Mock -CommandName Get-Service -MockWith {
+                    [pscustomobject]@{
+                        Status = 'Running'
+                    }
+                }
+
+                It 'Should not attempt to start the RDMS service, given the RDMS service is running' {
+                    Get-TargetResource @sessionDeploymentSplat
+                    Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
+                }
+
+                $get = Get-TargetResource @sessionDeploymentSplat
+                It 'Should return property <property> with value <Value> in Get-TargetResource ' {
+                    Param(
+                        $Property,
+                        $Value
+                    )
+
+                    $get.$Property | Should Be $Value
+                } -TestCases $allParameters
+            }
         }
         #endregion
 
