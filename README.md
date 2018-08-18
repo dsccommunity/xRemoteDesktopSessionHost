@@ -124,6 +124,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ### Unreleased
 
 * Changes to xRDSessionDeployment
+  * When RDMS service does not exist the Get-TargetResource will no longer throw an error (issue #47).
   * Fixed issue where an initial deployment failed due to a convert to lowercase (issue #39).
   * Added unit tests to test Get, Test and Set results in this resource.
 * Change to xRDRemoteApp
