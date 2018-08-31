@@ -122,6 +122,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ## Versions
 
 ### Unreleased
+
 * Changes to xRDServer
   * Fixed parameter typo GateewayExternalFqdn and bug in ValidateCustomModeParameters (issue #50)
 * Changes to xRDSessionDeployment
