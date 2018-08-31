@@ -112,9 +112,9 @@ function ValidateCustomModeParameters
     {
         # ensure GatewayExternalFqdn was passed in, otherwise Add-RDServer will fail
         $nulls = $null
-        $nulls = $customParams.getenumerator() | Where-Object { $null -eq $_.value }
+        $nulls = $customParams.getenumerator() | Where-Object { $_.value -eq [string]::Empty }
 
-        if ($null -ne $nulls) 
+        if ($nulls) 
         {
             $nulls | ForEach-Object { write-verbose ">> '$($_.Key)' parameter is empty" }
 
