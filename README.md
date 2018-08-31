@@ -123,7 +123,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 * Changes to xRDServer
-  * Fixed parameter typo GateewayExternalFqdn (issue #50)
+  * Fixed parameter typo GateewayExternalFqdn and bug in ValidateCustomModeParameters (issue #50)
 * Changes to xRDSessionDeployment
   * When RDMS service does not exist the Get-TargetResource will no longer throw an error (issue #47).
   * Fixed issue where an initial deployment failed due to a convert to lowercase (issue #39).
