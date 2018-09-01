@@ -73,8 +73,20 @@ try
                 }
             }
 
-            Context "RDSessionDeployment is not present" {
-                #No mocking of any kind; all commands should fail!
+            Context "RDSessionDeployment is not present" {      
+                Mock -CommandName Get-Service -ParameterFilter {$Name -eq 'RDMS' } -MockWith {
+                    Write-Error "MOCK Get-Service with parameter RDMS"
+                }
+
+                Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
+
+                It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {  
+                    Assert-MockCalled -CommandName Get-Service -Times 1
+                }
+
+                It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {  
+                    $serviceWarning | Should BeLike "Failed to start RDMS service. Error: Cannot find any service with service name 'RDMS'*"
+                }
 
                 $get = Get-TargetResource @sessionDeploymentSplat
                 It 'Should return $null on property <property> in Get-TargetResource ' {
