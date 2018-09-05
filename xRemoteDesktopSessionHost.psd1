@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '1.7.0.0'
+moduleVersion = '1.8.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'b42ff085-bd2b-4232-90ba-02b4c780e2d9'
@@ -49,11 +49,14 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
-* xRDSessionCollection:
-  * Fixed call to Add-RDSessionHost in Set-TargetResource by properly removing CollectionDescription from PSBoundParameters (issue 28)
-  * Fixed bug on Get-TargetResource that did return any collection instead of the one collection the user asked for (issue 27)
-  * Added unit tests to test Get, Test and Set results in this resource
+        ReleaseNotes = '* Changes to xRDSessionDeployment
+  * Fixed issue where an initial deployment failed due to a convert to lowercase (issue 39).
+  * Added unit tests to test Get, Test and Set results in this resource.
+* Change to xRDRemoteApp
+  * Fixed issue where this resource ignored the CollectionName provided in the parameters (issue 41).
+  * Changed key values in schema.mof to only Alias and CollectionName, DisplayName and FilePath are not key values.
+  * Added Ensure property (Absent or Present) to enable removal of RemoteApps.
+  * Added unit tests to test Get, Test and Set results in this resource.
 
 '
 
@@ -61,6 +64,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
