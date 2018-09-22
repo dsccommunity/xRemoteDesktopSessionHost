@@ -124,6 +124,9 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ### Unreleased
 
 * Rename Tests/Unit folder to use upper case on first letter.
+* Update appveyor.yml to use the default template.
+* Added default template files .codecov.yml, .gitattributes, and .gitignore, and
+  .vscode folder.
 
 ### 1.8.0.0
 
