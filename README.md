@@ -123,6 +123,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* Rename Tests/Unit folder to use upper case on first letter.
+
 ### 1.8.0.0
 
 * Changes to xRDSessionDeployment
