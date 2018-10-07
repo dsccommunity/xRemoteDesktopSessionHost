@@ -113,22 +113,11 @@ try
                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Present'
                 }
 
-                $excludeParameters = @(
-                    'Verbose'
-                    'Debug'
-                    'ErrorAction'
-                    'WarningAction'
-                    'InformationAction'
-                    'ErrorVariable'
-                    'WarningVariable'
-                    'InformationVariable'
-                    'OutVariable'
-                    'OutBuffer'
-                    'PipelineVariable'
-                )
+                [array]$commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+                $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
 
                 $allParameters = (Get-Command Get-TargetResource).Parameters.Keys |
-                    Where-Object -FilterScript { $_ -notin $excludeParameters } |
+                    Where-Object -FilterScript { $_ -notin $commonParameters} |
                     ForEach-Object -Process {
                         @{
                             Property = $_
