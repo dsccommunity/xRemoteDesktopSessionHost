@@ -67,23 +67,22 @@ try
                     Write-Error "MOCK Get-Service with parameter RDMS"
                 }
 
-                Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-
-                It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {  
+                It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {
+                    Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
                     Assert-MockCalled -CommandName Get-Service -Times 1
                 }
 
-                It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {  
+                It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {
+                    Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
                     $serviceWarning | Should BeLike "Failed to start RDMS service. Error: Cannot find any service with service name 'RDMS'*"
                 }
-
-                $get = Get-TargetResource @sessionDeploymentSplat
+                
                 It 'Should return $null on property <property> in Get-TargetResource ' {
                     Param(
                         $Property,
                         $Value
                     )
-
+                    $get = Get-TargetResource @sessionDeploymentSplat
                     $get.$Property | Should Be $null
                 } -TestCases $allParameters
             }
@@ -142,13 +141,13 @@ try
                     Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
                 }
 
-                $get = Get-TargetResource @sessionDeploymentSplat
+                
                 It 'Should return property <property> with value <Value> in Get-TargetResource ' {
                     Param(
                         $Property,
                         $Value
                     )
-
+                    $get = Get-TargetResource @sessionDeploymentSplat
                     $get.$Property | Should Be $Value
                 } -TestCases $allParameters
             }
