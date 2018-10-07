@@ -112,9 +112,9 @@ function ValidateCustomModeParameters
     {
         # ensure GatewayExternalFqdn was passed in, otherwise Add-RDServer will fail
         $nulls = $null
-        $nulls = $customParams.getenumerator() | Where-Object { $null -eq $_.value }
+        $nulls = $customParams.getenumerator() | Where-Object { $_.value -eq [string]::Empty }
 
-        if ($null -ne $nulls) 
+        if ($nulls) 
         {
             $nulls | ForEach-Object { write-verbose ">> '$($_.Key)' parameter is empty" }
 
@@ -170,7 +170,7 @@ function Set-TargetResource
     write-verbose "Adding server '$($Server.ToLower())' as $Role to the deployment on '$($ConnectionBroker.ToLower())'..."
 
     # validate parameters
-    ValidateCustomModeParameters -Role $Role -GateewayExternalFqdn $GatewayExternalFqdn
+    ValidateCustomModeParameters -Role $Role -GatewayExternalFqdn $GatewayExternalFqdn
 
     if ($Role -eq 'RDS-Gateway') 
     {

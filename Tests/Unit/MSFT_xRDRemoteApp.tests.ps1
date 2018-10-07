@@ -66,7 +66,7 @@ try
         }
 
         Import-Module RemoteDesktop -Force
-        
+
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
@@ -84,7 +84,7 @@ try
             }
 
             Context "When Get-TargetResource is called" {
-                
+
                 Mock -CommandName Get-RDRemoteApp
                 Mock -CommandName Get-RDSessionCollection
 
@@ -113,22 +113,11 @@ try
                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Present'
                 }
 
-                $excludeParameters = @(
-                    'Verbose'
-                    'Debug'
-                    'ErrorAction'
-                    'WarningAction'
-                    'InformationAction'
-                    'ErrorVariable'
-                    'WarningVariable'
-                    'InformationVariable'
-                    'OutVariable'
-                    'OutBuffer'
-                    'PipelineVariable'
-                )
+                [array]$commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+                $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
 
                 $allParameters = (Get-Command Get-TargetResource).Parameters.Keys |
-                    Where-Object -FilterScript { $_ -notin $excludeParameters } |
+                    Where-Object -FilterScript { $_ -notin $commonParameters} |
                     ForEach-Object -Process {
                         @{
                             Property = $_
@@ -157,7 +146,7 @@ try
                     }
                     catch
                     {
-                        $collectionError[-1].Exception.Message | Should Be 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!' 
+                        $collectionError[-1].Exception.Message | Should Be 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
                     }
                 }
             }
@@ -218,7 +207,7 @@ try
                     }
                     catch
                     {
-                        $collectionError[-1].Exception.Message | Should Be 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!' 
+                        $collectionError[-1].Exception.Message | Should Be 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
                     }
                 }
             }
@@ -232,7 +221,7 @@ try
                 It "Should error when CollectionName length is greater than 15" {
                     { Test-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
-                
+
                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
                 It 'Should only accept valid values for CommandLineSetting' {
                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
@@ -308,7 +297,7 @@ try
                     }
                     catch
                     {
-                        $collectionError[-1].Exception.Message | Should Be 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!' 
+                        $collectionError[-1].Exception.Message | Should Be 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
                     }
                 }
             }
