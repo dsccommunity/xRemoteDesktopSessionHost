@@ -52,21 +52,10 @@ try
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
 
-            $excludeParameters = @(
-                'Verbose'
-                'Debug'
-                'ErrorAction'
-                'WarningAction'
-                'InformationAction'
-                'ErrorVariable'
-                'WarningVariable'
-                'InformationVariable'
-                'OutVariable'
-                'OutBuffer'
-                'PipelineVariable'
-            )
+            [array]$commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+            $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
 
-            $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $excludeParameters } | ForEach-Object -Process {
+            $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $commonParameters } | ForEach-Object -Process {
                 @{
                     Property = $_
                     Value = $sessionDeploymentSplat[$_]
