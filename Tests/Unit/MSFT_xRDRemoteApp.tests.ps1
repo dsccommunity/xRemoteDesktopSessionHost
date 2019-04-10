@@ -22,20 +22,19 @@ $TestEnvironment = Initialize-TestEnvironment `
 
 #endregion HEADER
 
-function Invoke-TestSetup {
-
+function Invoke-TestSetup
+{
 }
 
-function Invoke-TestCleanup {
+function Invoke-TestCleanup
+{
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
-
 }
 
 # Begin Testing
 
 try
 {
-
     Invoke-TestSetup
 
     InModuleScope $script:DSCResourceName {
