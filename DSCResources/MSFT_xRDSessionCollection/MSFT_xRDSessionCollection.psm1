@@ -13,7 +13,7 @@ function Get-TargetResource
     param
     (    
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,15)]
+        [ValidateLength(1,80)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string] $SessionHost,
@@ -43,7 +43,7 @@ function Set-TargetResource
     param
     (    
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,15)]
+        [ValidateLength(1,80)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string] $SessionHost,
@@ -75,7 +75,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,15)]
+        [ValidateLength(1,80)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string] $SessionHost,

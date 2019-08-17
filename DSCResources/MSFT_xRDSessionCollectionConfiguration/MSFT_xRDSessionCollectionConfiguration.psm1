@@ -13,7 +13,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,15)]
+        [ValidateLength(1,80)]
         [string] $CollectionName,
         [Parameter()]
         [uint32] $ActiveSessionLimitMin,
@@ -124,7 +124,7 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,15)]
+        [ValidateLength(1,80)]
         [string] $CollectionName,
         [Parameter()]
         [uint32] $ActiveSessionLimitMin,
@@ -287,7 +287,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,15)]
+        [ValidateLength(1,80)]
         [string] $CollectionName,
         [Parameter()]
         [uint32] $ActiveSessionLimitMin,

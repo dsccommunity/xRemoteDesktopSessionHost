@@ -127,6 +127,10 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * Update appveyor.yml to use the default template.
 * Added default template files .codecov.yml, .gitattributes, and .gitignore, and
   .vscode folder.
+* xRDSessionCollectionConfiguration:
+  * Changed CollectionName variable validation max length to 80
+* xRDSessionCollection
+  * Changed CollectionName variable validation max length to 80
 
 ### 1.8.0.0
 
