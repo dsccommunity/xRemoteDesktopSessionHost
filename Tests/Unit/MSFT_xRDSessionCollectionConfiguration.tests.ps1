@@ -39,7 +39,7 @@ try
     InModuleScope $script:DSCResourceName {
         $script:DSCResourceName    = 'MSFT_xRDSessionCollectionConfiguration'
 
-        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan15'
+        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan80'
         $collectionName = 'TestCollection'
         
         Import-Module RemoteDesktop -Force
@@ -81,7 +81,7 @@ try
 
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when CollectionName length is greater than 15" {
+                It "Should error when CollectionName length is greater than 80" {
                     {Get-TargetResource -CollectionName $testInvalidCollectionName} `
                         | should throw
                 }
@@ -154,7 +154,7 @@ try
 
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when CollectionName length is greater than 15" {
+                It "Should error when CollectionName length is greater than 80" {
                     {Set-TargetResource -CollectionName $testInvalidCollectionName} `
                         | should throw
                 }
@@ -278,7 +278,7 @@ try
 
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when CollectionName length is greater than 15" {
+                It "Should error when CollectionName length is greater than 80" {
                     {Test-TargetResource -CollectionName $testInvalidCollectionName} `
                         | should throw
                 }
