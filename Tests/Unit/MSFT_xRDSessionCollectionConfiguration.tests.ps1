@@ -39,7 +39,7 @@ try
     InModuleScope $script:DSCResourceName {
         $script:DSCResourceName    = 'MSFT_xRDSessionCollectionConfiguration'
 
-        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan80'
+        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan80-12345678910111213141516171819202122232425262728'
         $collectionName = 'TestCollection'
         
         Import-Module RemoteDesktop -Force

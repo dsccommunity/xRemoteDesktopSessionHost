@@ -40,7 +40,7 @@ try
     InModuleScope $script:DSCResourceName {
         $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
 
-        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan80'
+        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan80-12345678910111213141516171819202122232425262728'
         $testcollectionName = 'TestCollection'
         
         $testSessionHost = 'localhost'
