@@ -131,6 +131,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
   * Changed CollectionName variable validation max length to 80
 * xRDSessionCollection
   * Changed CollectionName variable validation max length to 80
+* xRDRemoteApp
+  * Changed CollectionName variable validation max length to 80
 
 ### 1.8.0.0
 
