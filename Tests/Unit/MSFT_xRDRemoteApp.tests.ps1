@@ -41,7 +41,7 @@ try
     InModuleScope $script:DSCResourceName {
         $script:DSCResourceName    = 'MSFT_xRDRemoteApp'
 
-        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan15'
+        $testInvalidCollectionName = 'InvalidCollectionNameLongerThan80-12345678910111213141516171819202122232425262728'
         $testInvalidCollectionSplat = @{
             CollectionName = $testInvalidCollectionName
             DisplayName = 'name'
@@ -71,7 +71,7 @@ try
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when CollectionName length is greater than 15" {
+                It "Should error when CollectionName length is greater than 80" {
                     { Get-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
 
@@ -168,7 +168,7 @@ try
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when CollectionName length is greater than 15" {
+                It "Should error when CollectionName length is greater than 80" {
                     { Set-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
 
@@ -229,7 +229,7 @@ try
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when CollectionName length is greater than 15" {
+                It "Should error when CollectionName length is greater than 80" {
                     { Test-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
                 
