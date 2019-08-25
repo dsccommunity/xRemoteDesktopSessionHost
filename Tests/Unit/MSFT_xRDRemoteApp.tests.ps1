@@ -112,7 +112,7 @@ try
                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Present'
                 }
 
-                [array]$commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+                [System.Array] $commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
                 $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
 
                 $allParameters = (Get-Command Get-TargetResource).Parameters.Keys |

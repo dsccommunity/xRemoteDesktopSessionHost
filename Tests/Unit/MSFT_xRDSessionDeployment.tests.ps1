@@ -62,7 +62,7 @@ try
                 }
             }
 
-            Context "RDSessionDeployment is not present" {      
+            Context "RDSessionDeployment is not present" {
                 Mock -CommandName Get-Service -ParameterFilter {$Name -eq 'RDMS' } -MockWith {
                     Write-Error "MOCK Get-Service with parameter RDMS"
                 }
@@ -76,9 +76,10 @@ try
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
                     $serviceWarning | Should BeLike "Failed to start RDMS service. Error: Cannot find any service with service name 'RDMS'*"
                 }
-                
+
                 It 'Should return $null on property <property> in Get-TargetResource ' {
-                    Param(
+                    param
+                    (
                         $Property,
                         $Value
                     )
@@ -120,7 +121,7 @@ try
                     Get-TargetResource @sessionDeploymentSplat
                     Assert-MockCalled -CommandName Start-Service -Times 1 -Scope It
                 }
-                
+
                 Mock -CommandName Start-Service -MockWith {
                     Throw "Throwing from Start-Service mock"
                 }
@@ -141,7 +142,7 @@ try
                     Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
                 }
 
-                
+
                 It 'Should return property <property> with value <Value> in Get-TargetResource ' {
                     Param(
                         $Property,
@@ -156,7 +157,7 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            
+
             Mock -CommandName New-RDSessionDeployment
 
             Set-TargetResource @sessionDeploymentSplat
@@ -172,7 +173,7 @@ try
 
         #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-            
+
             Mock -CommandName Get-Service -MockWith {
                 [pscustomobject]@{
                     Status = 'Running'
