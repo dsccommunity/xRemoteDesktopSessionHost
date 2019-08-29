@@ -48,99 +48,116 @@ try
             ConnectionBroker = 'connectionbroker.lan'
             WebAccessServer  = 'webaccess.lan'
         }
-        
+
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
 
-            Mock -CommandName Get-RDServer -MockWith {
-                [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.SessionHost
-                    Roles = @(
-                        'RDS-RD-SERVER'
-                    )
-                }
-                [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.ConnectionBroker
-                    Roles = @(
-                        'RDS-CONNECTION-BROKER'
-                    )
-                }
-                [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.WebAccessServer
-                    Roles = @(
-                        'RDS-WEB-ACCESS'
-                    )
-                }
-            }
+            [array]$commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+            $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
 
-            Mock -CommandName Start-Service
-            Mock -CommandName Get-Service -MockWith {
-                [pscustomobject]@{
-                    Status = 'Stopped'
-                }
-            }
-
-            It 'Should attempt to start the RDMS service, given the RDMS service is stopped' {
-                Get-TargetResource @sessionDeploymentSplat
-                Assert-MockCalled -CommandName Start-Service -Times 1 -Scope It
-            }
-            
-            Mock -CommandName Start-Service -MockWith {
-                Throw "Throwing from Start-Service mock"
-            }
-
-            It 'Should generate a warning, given RDMS service is stopped and start fails' {
-                Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-                $serviceWarning | Should Be 'Failed to start RDMS service. Error: Throwing from Start-Service mock'
-            }
-
-            Mock -CommandName Get-Service -MockWith {
-                [pscustomobject]@{
-                    Status = 'Running'
-                }
-            }
-
-            It 'Should not attempt to start the RDMS service, given the RDMS service is running' {
-                Get-TargetResource @sessionDeploymentSplat
-                Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
-            }
-
-            $excludeParameters = @(
-                'Verbose'
-                'Debug'
-                'ErrorAction'
-                'WarningAction'
-                'InformationAction'
-                'ErrorVariable'
-                'WarningVariable'
-                'InformationVariable'
-                'OutVariable'
-                'OutBuffer'
-                'PipelineVariable'
-            )
-
-            $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $excludeParameters } | ForEach-Object -Process {
+            $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $commonParameters } | ForEach-Object -Process {
                 @{
                     Property = $_
                     Value = $sessionDeploymentSplat[$_]
                 }
             }
 
-            $get = Get-TargetResource @sessionDeploymentSplat
-            It 'Should return property <property> with value <Value> in Get-TargetResource ' {
-                Param(
-                    $Property,
-                    $Value
-                )
+            Context "RDSessionDeployment is not present" {
+                Mock -CommandName Get-Service -ParameterFilter {$Name -eq 'RDMS' } -MockWith {
+                    Write-Error "MOCK Get-Service with parameter RDMS"
+                }
 
-                $get.$Property | Should Be $Value
-            } -TestCases $allParameters
+                It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {
+                    Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
+                    Assert-MockCalled -CommandName Get-Service -Times 1
+                }
+
+                It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {
+                    Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
+                    $serviceWarning | Should BeLike "Failed to start RDMS service. Error: Cannot find any service with service name 'RDMS'*"
+                }
+
+                It 'Should return $null on property <property> in Get-TargetResource ' {
+                    param
+                    (
+                        $Property,
+                        $Value
+                    )
+                    $get = Get-TargetResource @sessionDeploymentSplat
+                    $get.$Property | Should Be $null
+                } -TestCases $allParameters
+            }
+
+            Context "RDSessionDeployment is present" {
+                Mock -CommandName Get-RDServer -MockWith {
+                    [pscustomobject]@{
+                        Server = $sessionDeploymentSplat.SessionHost
+                        Roles = @(
+                            'RDS-RD-SERVER'
+                        )
+                    }
+                    [pscustomobject]@{
+                        Server = $sessionDeploymentSplat.ConnectionBroker
+                        Roles = @(
+                            'RDS-CONNECTION-BROKER'
+                        )
+                    }
+                    [pscustomobject]@{
+                        Server = $sessionDeploymentSplat.WebAccessServer
+                        Roles = @(
+                            'RDS-WEB-ACCESS'
+                        )
+                    }
+                }
+
+                Mock -CommandName Start-Service
+                Mock -CommandName Get-Service -MockWith {
+                    [pscustomobject]@{
+                        Status = 'Stopped'
+                    }
+                }
+
+                It 'Should attempt to start the RDMS service, given the RDMS service is stopped' {
+                    Get-TargetResource @sessionDeploymentSplat
+                    Assert-MockCalled -CommandName Start-Service -Times 1 -Scope It
+                }
+
+                Mock -CommandName Start-Service -MockWith {
+                    Throw "Throwing from Start-Service mock"
+                }
+
+                It 'Should generate a warning, given RDMS service is stopped and start fails' {
+                    Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
+                    $serviceWarning | Should Be 'Failed to start RDMS service. Error: Throwing from Start-Service mock'
+                }
+
+                Mock -CommandName Get-Service -MockWith {
+                    [pscustomobject]@{
+                        Status = 'Running'
+                    }
+                }
+
+                It 'Should not attempt to start the RDMS service, given the RDMS service is running' {
+                    Get-TargetResource @sessionDeploymentSplat
+                    Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
+                }
+
+
+                It 'Should return property <property> with value <Value> in Get-TargetResource ' {
+                    Param(
+                        $Property,
+                        $Value
+                    )
+                    $get = Get-TargetResource @sessionDeploymentSplat
+                    $get.$Property | Should Be $Value
+                } -TestCases $allParameters
+            }
         }
         #endregion
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            
+
             Mock -CommandName New-RDSessionDeployment
 
             Set-TargetResource @sessionDeploymentSplat
@@ -156,7 +173,7 @@ try
 
         #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-            
+
             Mock -CommandName Get-Service -MockWith {
                 [pscustomobject]@{
                     Status = 'Running'
