@@ -4,8 +4,8 @@ class MSFT_xRDServer : OMI_BaseResource
     [write] string ConnectionBroker;
     [key]   string Server;
 
-    [required, 
-    ValueMap{"RDS-Connection-Broker","RDS-Virtualization","RDS-RD-Server","RDS-Web-Access","RDS-Gateway","RDS-Licensing"}, 
+    [key, required,
+    ValueMap{"RDS-Connection-Broker","RDS-Virtualization","RDS-RD-Server","RDS-Web-Access","RDS-Gateway","RDS-Licensing"},
     Values{  "RDS-Connection-Broker","RDS-Virtualization","RDS-RD-Server","RDS-Web-Access","RDS-Gateway","RDS-Licensing"}] string Role;
 
     [write] string GatewayExternalFqdn;
