@@ -123,6 +123,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+### 1.9.0.0
+
 * Changes to xRDRemoteApp
   * Fixing typo in parameter name when calling the function ValidateCustomModeParameters (issue #50).
 * Changes to xRDSessionDeployment

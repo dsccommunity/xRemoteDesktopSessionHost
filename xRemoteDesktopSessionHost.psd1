@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '1.8.0.0'
+moduleVersion = '1.9.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'b42ff085-bd2b-4232-90ba-02b4c780e2d9'
@@ -49,14 +49,20 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Changes to xRDSessionDeployment
-  * Fixed issue where an initial deployment failed due to a convert to lowercase (issue 39).
-  * Added unit tests to test Get, Test and Set results in this resource.
-* Change to xRDRemoteApp
-  * Fixed issue where this resource ignored the CollectionName provided in the parameters (issue 41).
-  * Changed key values in schema.mof to only Alias and CollectionName, DisplayName and FilePath are not key values.
-  * Added Ensure property (Absent or Present) to enable removal of RemoteApps.
-  * Added unit tests to test Get, Test and Set results in this resource.
+        ReleaseNotes = '* Changes to xRDRemoteApp
+  * Fixing typo in parameter name when calling the function ValidateCustomModeParameters (issue 50).
+* Changes to xRDSessionDeployment
+  * When RDMS service does not exist the Get-TargetResource will no longer throw an error (issue 47).
+* Rename Tests/Unit folder to use upper case on first letter.
+* Update appveyor.yml to use the default template.
+* Added default template files .codecov.yml, .gitattributes, and .gitignore, and
+  .vscode folder.
+* xRDSessionCollectionConfiguration:
+  * Changed CollectionName variable validation max length to 256
+* xRDSessionCollection
+  * Changed CollectionName variable validation max length to 256
+* xRDRemoteApp
+  * Changed CollectionName variable validation max length to 256
 
 '
 
@@ -64,6 +70,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
