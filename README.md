@@ -46,14 +46,14 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### xRDSessionCollection
 
-* **CollectionName**: Specifies a name for the session collection
+* **CollectionName**: Specifies a name for the session collection (Max length is 256 characters)
 * **SessionHost**: Specifies a RD Session Host server to include in the session collection.
 * **CollectionDescription**: A description for the collection.
 * **ConnectionBroker**: The Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
 
 ### xRDSessionCollectionConfiguration
 
-* **CollectionName**: Specifies the name for the session collection.
+* **CollectionName**: Specifies the name for the session collection. (Max length is 256 characters)
 * **ActiveSessionLimitMin**: Specifies the maximum time, in minutes, an active session runs.  After this period, the RD Session Host server ends the session.
 * **AuthenticateUsingNLA**: Indicates whether to use Network Level Authentication (NLA).  If this value is $True, Remote Desktop uses NLA to authenticate a user before the user sees a logon screen.
 * **AutomaticReconnectionEnabled**: Indicates whether the Remote Desktop client attempts to reconnect after a connection interruption.
@@ -83,7 +83,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ### xRDRemoteApp
 
 * **Alias**: Specifies an alias for the RemoteApp program.
-* **CollectionName**: Specifies the name of the personal virtual desktop collection or session collection.  The cmdlet publishes the RemoteApp program to this collection.
+* **CollectionName**: Specifies the name of the personal virtual desktop collection or session collection.  The cmdlet publishes the RemoteApp program to this collection. (Max length is 256 characters)
 * **Ensure**: Specifies if the RemoteApp needs to be Present (default) or Absent.
 * **DisplayName**: Specifies a name to display to users for the RemoteApp program.
 * **FilePath**: Specifies a path for the executable file for the application.  Note: Do not include any environment variables.
@@ -122,6 +122,23 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 ## Versions
 
 ### Unreleased
+
+### 1.9.0.0
+
+* Changes to xRDRemoteApp
+  * Fixing typo in parameter name when calling the function ValidateCustomModeParameters (issue #50).
+* Changes to xRDSessionDeployment
+  * When RDMS service does not exist the Get-TargetResource will no longer throw an error (issue #47).
+* Rename Tests/Unit folder to use upper case on first letter.
+* Update appveyor.yml to use the default template.
+* Added default template files .codecov.yml, .gitattributes, and .gitignore, and
+  .vscode folder.
+* xRDSessionCollectionConfiguration:
+  * Changed CollectionName variable validation max length to 256
+* xRDSessionCollection
+  * Changed CollectionName variable validation max length to 256
+* xRDRemoteApp
+  * Changed CollectionName variable validation max length to 256
 
 ### 1.8.0.0
 
