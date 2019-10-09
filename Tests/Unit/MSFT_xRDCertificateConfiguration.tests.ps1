@@ -73,17 +73,23 @@ try
                     )
                 }
 
-                It 'Given the certificate is not configured, no thumbprint is returned' {
+                It 'Get-TargetResource returns no thumbprint' {
                     (Get-TargetResource @resourceNotConfiguredSplat).Thumbprint | Should -BeNullOrEmpty
                 }
 
-                It 'Given the certificate is not configured, Test-TargetResource returns false' {
+                It 'Test-TargetResource returns false' {
                     Test-TargetResource @resourceNotConfiguredSplat | Should -BeFalse
                 }
 
-                It 'Given the certificate is not configured, Set-TargetResource runs Set-RDCertificate' {
+                It 'Set-TargetResource runs Set-RDCertificate' {
                     Set-TargetResource @resourceNotConfiguredSplat
-                    Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly
+                    Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly -ParameterFilter {
+                        $Role -eq $resourceNotConfiguredSplat.Role -and
+                        $ConnectionBroker -eq $resourceNotConfiguredSplat.ConnectionBroker -and
+                        $ImportPath -eq $resourceNotConfiguredSplat.ImportPath -and
+                        $Password -eq $resourceNotConfiguredSplat.Credential.Password -and
+                        $Force -eq $true
+                    }
                 }
             }
 
@@ -114,11 +120,11 @@ try
                     )
                 }
 
-                It 'Given the certificate is configured properly, the correct thumbprint is returned' {
+                It 'Get-TargetResource returns the correct thumbprint' {
                     (Get-TargetResource @resourceConfiguredSplat).Thumbprint | Should -Be '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
                 }
 
-                It 'Given the certificate is configured properly, Test-TargetResource returns true' {
+                It 'Test-TargetResource returns true' {
                     Test-TargetResource @resourceConfiguredSplat | Should -BeTrue
                 }
             }
@@ -150,17 +156,82 @@ try
                     )
                 }
 
-                It 'Given the wrong certificate is configured, the thumbprint of the currently configured certificate is returned' {
+                It 'Get-TargetResource returns the thumbprint of the currently configured certificate' {
                     (Get-TargetResource @resourceWrongConfiguredSplat).Thumbprint | Should -Be '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
                 }
 
-                It 'Given the wrong certificate is configured, Test-TargetResource returns false' {
+                It 'Test-TargetResource returns false' {
                     Test-TargetResource @resourceWrongConfiguredSplat | Should -BeFalse
                 }
 
-                It 'Given the wrong certificate is configured, Set-TargetResource runs Set-RDCertificate' {
+                It 'Set-TargetResource runs Set-RDCertificate' {
                     Set-TargetResource @resourceWrongConfiguredSplat
-                    Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly
+                    Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly -ParameterFilter {
+                        $Role -eq $resourceWrongConfiguredSplat.Role -and
+                        $ConnectionBroker -eq $resourceWrongConfiguredSplat.ConnectionBroker -and
+                        $ImportPath -eq $resourceWrongConfiguredSplat.ImportPath -and
+                        $Password -eq $resourceWrongConfiguredSplat.Credential.Password -and
+                        $Force -eq $true
+                    }
+                }
+            }
+
+            Context 'When a wrong certificate is configured and the PFX file is protected based on group membership (ProtectTo)' {
+                Mock -CommandName Get-RDCertificate -MockWith {
+                    [pscustomobject]@{
+                        Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
+                        Role = 'RDGateway'
+                    }
+                } -ParameterFilter {$Role -eq 'RDGateway'}
+
+                Mock -CommandName Get-PfxData -MockWith {
+                    [pscustomobject]@{
+                        EndEntityCertificates = [pscustomobject]@{
+                            Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
+                        }
+                    }
+                } -ParameterFilter {$ImportPath -eq 'testdrive:\RDGateway.pfx'}
+
+                $resourceWrongConfiguredSplat = @{
+                    Role = 'RDGateway'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath = 'testdrive:\RDGateway.pfx'
+                }
+
+                It 'Get-TargetResource returns the thumbprint of the currently configured certificate' {
+                    (Get-TargetResource @resourceWrongConfiguredSplat).Thumbprint | Should -Be '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
+                }
+
+                It 'Test-TargetResource returns false' {
+                    Test-TargetResource @resourceWrongConfiguredSplat | Should -BeFalse
+                }
+
+                It 'Set-TargetResource runs Set-RDCertificate without password' {
+                    Set-TargetResource @resourceWrongConfiguredSplat
+                    Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly -ParameterFilter {
+                        $Role -eq $resourceWrongConfiguredSplat.Role -and
+                        $ConnectionBroker -eq $resourceWrongConfiguredSplat.ConnectionBroker -and
+                        $ImportPath -eq $resourceWrongConfiguredSplat.ImportPath -and
+                        $Force -eq $true
+                    }
+                }
+            }
+
+            Context 'When a certificate fails to set' {
+
+                Mock Set-RDCertificate -MockWith {
+                    throw 'Failed to apply certificate'
+                }
+
+                $resourceWrongConfiguredSplat = @{
+                    Role = 'RDGateway'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath = 'testdrive:\RDGateway.pfx'
+                }
+
+                It 'Set-TargetResource returns an error when the certificate could not be applied' {
+                    $errorMessage = Set-TargetResource @resourceWrongConfiguredSplat 2>&1
+                    $errorMessage | Should -Not -BeNullOrEmpty
                 }
             }
         }

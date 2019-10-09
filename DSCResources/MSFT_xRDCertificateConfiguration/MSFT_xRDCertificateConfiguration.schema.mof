@@ -11,7 +11,7 @@ class MSFT_xRDCertificateConfiguration : OMI_BaseResource
         Description ("The connection broker that this certificate configuration is applied to.")
     ] string ConnectionBroker;
 
-    [write,
+    [write, required,
         Description ("The certificate that should be used, should point to a PFX file on the filesystem.")
     ] string ImportPath;
 
