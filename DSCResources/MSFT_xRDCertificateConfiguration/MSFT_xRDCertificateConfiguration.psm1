@@ -34,6 +34,7 @@ function Get-TargetResource
     Write-Verbose -Message (
         $script:localizedData.GetCertificate -f $Role, $ConnectionBroker
     )
+
     Get-RDCertificate -Role $Role -ConnectionBroker $ConnectionBroker
 }
 
@@ -71,6 +72,7 @@ function Set-TargetResource
         ConnectionBroker = $ConnectionBroker
         ImportPath = $ImportPath
         Force = $true
+        ErrorAction = 'Stop'
     }
 
     if ($Credential -ne [pscredential]::Empty)
@@ -83,6 +85,7 @@ function Set-TargetResource
         Write-Verbose -Message (
             $script:localizedData.SetCertificate -f $Role, $ImportPath
         )
+
         Set-RDCertificate @rdCertificateSplat
     }
     catch
