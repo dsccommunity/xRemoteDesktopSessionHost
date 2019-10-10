@@ -113,3 +113,10 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 * **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
 * **LicenseServers**: An array of servers to use for RD licensing
 * **LicenseMode**: The RD licensing mode to use. PerUser, PerDevice, or NotConfigured.
+
+### xRDCertificateConfiguration
+
+* **Role**: Specifies the role that nees to be configured ('RDRedirector', 'RDPublishing', 'RDWebAccess', 'RDGateway').
+* **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **ImportPath**: The certificate that should be used, should point to a PFX file on the filesystem.
+* **Credential**: The password (if applicable) for the PFX file. The username is ignored.
