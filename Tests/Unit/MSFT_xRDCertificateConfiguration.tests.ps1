@@ -217,6 +217,28 @@ try
                 }
             }
 
+            Context 'When a certificate fails to test' {
+                Mock Get-RDCertificate
+                Mock Get-PfxData -MockWith {
+                    throw "Cannot import PFX file"
+                }
+
+                $resourceWrongConfiguredSplat = @{
+                    Role = 'RDGateway'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath = 'testdrive:\RDGateway.pfx'
+                }
+
+                It 'Test-TargetResource displays a warning when a certificate fails to test' {
+                    $message = Test-TargetResource @resourceWrongConfiguredSplat 3>&1
+                    $message | Should -Not -BeNullOrEmpty
+                }
+
+                It 'Test-TargetResource returns false' {
+                    Test-TargetResource @resourceWrongConfiguredSplat | Should -BeFalse
+                }
+            }
+
             Context 'When a certificate fails to set' {
 
                 Mock Set-RDCertificate -MockWith {

@@ -1,5 +1,5 @@
 Import-Module -Name "$PSScriptRoot\..\..\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { throw "The minimum OS requirement was not met."}
 Import-Module RemoteDesktop
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xRDCertificateConfiguration'
 
@@ -31,6 +31,9 @@ function Get-TargetResource
         $Credential
     )
 
+    Write-Verbose -Message (
+        $script:localizedData.GetCertificate -f $Role, $ConnectionBroker
+    )
     Get-RDCertificate -Role $Role -ConnectionBroker $ConnectionBroker
 }
 
@@ -77,6 +80,9 @@ function Set-TargetResource
 
     try
     {
+        Write-Verbose -Message (
+            $script:localizedData.SetCertificate -f $Role, $ImportPath
+        )
         Set-RDCertificate @rdCertificateSplat
     }
     catch
@@ -118,6 +124,7 @@ function Test-TargetResource
 
     $getPfxDataSplat = @{
         FilePath = $ImportPath
+        ErrorAction = 'Stop'
     }
 
     if ($Credential -ne [pscredential]::Empty)
@@ -125,10 +132,28 @@ function Test-TargetResource
         $getPfxDataSplat.Add('Password', $Credential.Password)
     }
 
-    $pfxCertificate = (Get-PfxData @getPfxDataSplat).EndEntityCertificates
     $currentCertificate = Get-TargetResource @PSBoundParameters
+    Write-Verbose -Message (
+        $script:localizedData.VerboseCurrentCertificate -f $Role, $currentCertificate.Thumbprint
+    )
 
-    $currentCertificate.Thumbprint -eq $pfxCertificate.Thumbprint
+    try
+    {
+        $pfxCertificate = (Get-PfxData @getPfxDataSplat).EndEntityCertificates
+        Write-Verbose -Message (
+            $script:localizedData.VerbosePfxCertificate -f $Role, $pfxCertificate.Thumbprint
+        )
+
+        return ($currentCertificate.Thumbprint -eq $pfxCertificate.Thumbprint)
+    }
+    catch
+    {
+        Write-Warning -Message (
+            $script:localizedData.WarningPfxDataImportFailed -f $ImportPath, $_
+        )
+
+        return $false
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource
