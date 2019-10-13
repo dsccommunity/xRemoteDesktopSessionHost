@@ -1,5 +1,5 @@
 Import-Module -Name "$PSScriptRoot\..\..\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { throw "The minimum OS requirement was not met."}
 Import-Module RemoteDesktop
 
 #######################################################################
@@ -23,7 +23,7 @@ function Get-TargetResource
 
     # Start service RDMS is needed because otherwise a reboot loop could happen due to
     # the RDMS Service being on Delay-Start by default, and DSC kicks in too quickly after a reboot.
-    if((Get-Service -Name RDMS -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status) -ne 'Running') 
+    if ((Get-Service -Name RDMS -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status) -ne 'Running')
     {
         try
         {
@@ -35,12 +35,12 @@ function Get-TargetResource
         }
     }
 
-    $Deployed = Get-RDServer -ErrorAction SilentlyContinue
+    $deployed = Get-RDServer -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
 
     @{
-        SessionHost = $Deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server
-        ConnectionBroker = $Deployed | Where-Object Roles -contains "RDS-CONNECTION-BROKER" | ForEach-Object Server
-        WebAccessServer = $Deployed | Where-Object Roles -contains "RDS-WEB-ACCESS" | ForEach-Object Server
+        SessionHost = $deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server
+        ConnectionBroker = $deployed | Where-Object Roles -contains "RDS-CONNECTION-BROKER" | ForEach-Object Server
+        WebAccessServer = $deployed | Where-Object Roles -contains "RDS-WEB-ACCESS" | ForEach-Object Server
     }
 }
 
@@ -87,11 +87,9 @@ function Test-TargetResource
     )
 
     Write-Verbose "Checking RDSH role is deployed on this node."
-    
+
     $get = Get-TargetResource @PSBoundParameters
     $get.ConnectionBroker -eq $ConnectionBroker
 }
 
-
 Export-ModuleMember -Function *-TargetResource
-

@@ -35,7 +35,6 @@ function Invoke-TestCleanup {
 
 try
 {
-
     Invoke-TestSetup
 
     InModuleScope $script:DSCResourceName {
@@ -123,7 +122,7 @@ try
                 }
 
                 Mock -CommandName Start-Service -MockWith {
-                    Throw "Throwing from Start-Service mock"
+                    throw "Throwing from Start-Service mock"
                 }
 
                 It 'Should generate a warning, given RDMS service is stopped and start fails' {
@@ -144,7 +143,8 @@ try
 
 
                 It 'Should return property <property> with value <Value> in Get-TargetResource ' {
-                    Param(
+                    param
+                    (
                         $Property,
                         $Value
                     )

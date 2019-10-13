@@ -123,6 +123,9 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* Changes to xRDSessionDeployment
+  * Fixing Get-TargetResource to target the connection broker, instead of assuming localhost
+
 ### 1.9.0.0
 
 * Changes to xRDRemoteApp
