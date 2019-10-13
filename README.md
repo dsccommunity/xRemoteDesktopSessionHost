@@ -113,3 +113,232 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 * **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
 * **LicenseServers**: An array of servers to use for RD licensing
 * **LicenseMode**: The RD licensing mode to use. PerUser, PerDevice, or NotConfigured.
+
+## Versions
+
+### Unreleased
+
+* Changes to xRDSessionDeployment
+  * Fixing Get-TargetResource to target the connection broker, instead of assuming localhost
+
+### 1.9.0.0
+
+* Changes to xRDRemoteApp
+  * Fixing typo in parameter name when calling the function ValidateCustomModeParameters (issue #50).
+* Changes to xRDSessionDeployment
+  * When RDMS service does not exist the Get-TargetResource will no longer throw an error (issue #47).
+* Rename Tests/Unit folder to use upper case on first letter.
+* Update appveyor.yml to use the default template.
+* Added default template files .codecov.yml, .gitattributes, and .gitignore, and
+  .vscode folder.
+* xRDSessionCollectionConfiguration:
+  * Changed CollectionName variable validation max length to 256
+* xRDSessionCollection
+  * Changed CollectionName variable validation max length to 256
+* xRDRemoteApp
+  * Changed CollectionName variable validation max length to 256
+
+### 1.8.0.0
+
+* Changes to xRDSessionDeployment
+  * Fixed issue where an initial deployment failed due to a convert to lowercase (issue #39).
+  * Added unit tests to test Get, Test and Set results in this resource.
+* Change to xRDRemoteApp
+  * Fixed issue where this resource ignored the CollectionName provided in the parameters (issue #41).
+  * Changed key values in schema.mof to only Alias and CollectionName, DisplayName and FilePath are not key values.
+  * Added Ensure property (Absent or Present) to enable removal of RemoteApps.
+  * Added unit tests to test Get, Test and Set results in this resource.
+
+### 1.7.0.0
+
+* Added additional resources, copied from the [Azure RDS quickstart templates](https://github.com/Azure/RDS-Templates).
+* xRDSessionCollection:
+  * Fixed call to Add-RDSessionHost in Set-TargetResource by properly removing CollectionDescription from PSBoundParameters (issue #28)
+  * Fixed bug on Get-TargetResource that did return any collection instead of the one collection the user asked for (issue #27)
+  * Added unit tests to test Get, Test and Set results in this resource
+
+### 1.6.0.0
+
+* xRDSessionCollectionConfiguration: Add support to configure UserProfileDisks on Windows Server 2016
+
+### 1.5.0.0
+
+* Fix issue where DSC configuration gets into a reboot loop because sessionhost does not match (casing) and RDMS service is not started in time
+
+### 1.4.0.0
+
+* Updated CollectionName parameter to validate length between 1 and 15 characters, and added tests to verify.
+
+### 1.3.0.0
+
+* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
+
+### 1.2.0.0
+
+* Fixed an issue with version checks where OS version greater than 9 would fail (Windows 10/Server 2016)
+
+### 1.1.0.0
+
+* Fixed encoding
+
+### 1.0.1
+
+### 1.0.0.0
+
+* Initial release with the following resources
+  * **xRDSessionDeployment**
+  * **xRDSessionCollection**
+  * **xRDSessionCollectionConfiguration**
+  * **xRDRemoteApp**
+
+## Examples
+
+### End to End
+
+```powershell
+param (
+[string]$brokerFQDN,
+[string]$webFQDN,
+[string]$collectionName,
+[string]$collectionDescription
+)
+
+$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
+
+if (!$collectionName) {$collectionName = "Tenant Jump Box"}
+if (!$collectionDescription) {$collectionDescription = "Remote Desktop instance for accessing an isolated network environment."}
+
+Configuration RemoteDesktopSessionHost
+{
+    param
+    (
+
+        # Connection Broker Name
+        [Parameter(Mandatory)]
+        [String]$collectionName,
+
+        # Connection Broker Description
+        [Parameter(Mandatory)]
+        [String]$collectionDescription,
+
+        # Connection Broker Node Name
+        [String]$connectionBroker,
+
+        # Web Access Node Name
+        [String]$webAccessServer
+    )
+    Import-DscResource -Module xRemoteDesktopSessionHost
+    if (!$connectionBroker) {$connectionBroker = $localhost}
+    if (!$connectionWebAccessServer) {$webAccessServer = $localhost}
+
+    Node "localhost"
+    {
+
+        LocalConfigurationManager
+        {
+            RebootNodeIfNeeded = $true
+        }
+
+        WindowsFeature Remote-Desktop-Services
+        {
+            Ensure = "Present"
+            Name = "Remote-Desktop-Services"
+        }
+
+        WindowsFeature RDS-RD-Server
+        {
+            Ensure = "Present"
+            Name = "RDS-RD-Server"
+        }
+
+        WindowsFeature Desktop-Experience
+        {
+            Ensure = "Present"
+            Name = "Desktop-Experience"
+        }
+
+        WindowsFeature RSAT-RDS-Tools
+        {
+            Ensure = "Present"
+            Name = "RSAT-RDS-Tools"
+            IncludeAllSubFeature = $true
+        }
+
+        if ($localhost -eq $connectionBroker) {
+            WindowsFeature RDS-Connection-Broker
+            {
+                Ensure = "Present"
+                Name = "RDS-Connection-Broker"
+            }
+        }
+
+        if ($localhost -eq $webAccessServer) {
+            WindowsFeature RDS-Web-Access
+            {
+                Ensure = "Present"
+                Name = "RDS-Web-Access"
+            }
+        }
+
+        WindowsFeature RDS-Licensing
+        {
+            Ensure = "Present"
+            Name = "RDS-Licensing"
+        }
+
+        xRDSessionDeployment Deployment
+        {
+            SessionHost = $localhost
+            ConnectionBroker = if ($ConnectionBroker) {$ConnectionBroker} else {$localhost}
+            WebAccessServer = if ($WebAccessServer) {$WebAccessServer} else {$localhost}
+            DependsOn = "[WindowsFeature]Remote-Desktop-Services", "[WindowsFeature]RDS-RD-Server"
+        }
+
+        xRDSessionCollection Collection
+        {
+            CollectionName = $collectionName
+            CollectionDescription = $collectionDescription
+            SessionHost = $localhost
+            ConnectionBroker = if ($ConnectionBroker) {$ConnectionBroker} else {$localhost}
+            DependsOn = "[xRDSessionDeployment]Deployment"
+        }
+        xRDSessionCollectionConfiguration CollectionConfiguration
+        {
+        CollectionName = $collectionName
+        CollectionDescription = $collectionDescription
+        ConnectionBroker = if ($ConnectionBroker) {$ConnectionBroker} else {$localhost}
+        TemporaryFoldersDeletedOnExit = $false
+        SecurityLayer = "SSL"
+        DependsOn = "[xRDSessionCollection]Collection"
+        }
+        xRDRemoteApp Calc
+        {
+        CollectionName = $collectionName
+        DisplayName = "Calculator"
+        FilePath = "C:\Windows\System32\calc.exe"
+        Alias = "calc"
+        DependsOn = "[xRDSessionCollection]Collection"
+        }
+        xRDRemoteApp Mstsc
+        {
+        CollectionName = $collectionName
+        DisplayName = "Remote Desktop"
+        FilePath = "C:\Windows\System32\mstsc.exe"
+        Alias = "mstsc"
+        DependsOn = "[xRDSessionCollection]Collection"
+        }
+    }
+}
+
+write-verbose "Creating configuration with parameter values:"
+write-verbose "Collection Name: $collectionName"
+write-verbose "Collection Description: $collectionDescription"
+write-verbose "Connection Broker: $brokerFQDN"
+write-verbose "Web Access Server: $webFQDN"
+
+RemoteDesktopSessionHost -collectionName $collectionName -collectionDescription $collectionDescription -connectionBroker $brokerFQDN -webAccessServer $webFQDN -OutputPath .\RDSDSC\
+
+Set-DscLocalConfigurationManager -verbose -path .\RDSDSC\
+
+Start-DscConfiguration -wait -force -verbose -path .\RDSDSC\
+```
