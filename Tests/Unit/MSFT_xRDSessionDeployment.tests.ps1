@@ -141,7 +141,6 @@ try
                     Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
                 }
 
-
                 It 'Should return property <property> with value <Value> in Get-TargetResource ' {
                     param
                     (
@@ -151,6 +150,12 @@ try
                     $get = Get-TargetResource @sessionDeploymentSplat
                     $get.$Property | Should Be $Value
                 } -TestCases $allParameters
+
+                It 'Should connect to the right connection broker' {
+                    Assert-MockCalled -CommandName Get-RDServer -Scope Context -ParameterFilter {
+                        $ConnectionBroker -eq $sessionDeploymentSplat['ConnectionBroker']
+                    }
+                }
             }
         }
         #endregion
