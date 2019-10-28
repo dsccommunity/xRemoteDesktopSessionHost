@@ -123,6 +123,10 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* Changes to xRDServer
+  * Changed resouce key from Server alone to Role + Server.
+  This allows the resource to be used multiple times for different roles on the same server. (Issue #62)
+
 ### 1.9.0.0
 
 * Changes to xRDRemoteApp
