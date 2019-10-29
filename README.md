@@ -123,9 +123,11 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### Unreleased
 
+* Changes to xRDSessionDeployment
+  * Fixing Get-TargetResource to target the connection broker, instead of assuming localhost
 * Changes to xRDServer
   * Changed resouce key from Server alone to Role + Server.
-  This allows the resource to be used multiple times for different roles on the same server. (Issue #62)
+    This allows the resource to be used multiple times for different roles on the same server. (Issue #62)
 
 ### 1.9.0.0
 
