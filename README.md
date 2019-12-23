@@ -120,6 +120,11 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 
 * Changes to xRDSessionDeployment
   * Fixing Get-TargetResource to target the connection broker, instead of assuming localhost
+* Changes to xRDServer
+  * Changed resouce key from Server alone to Role + Server.
+    This allows the resource to be used multiple times for different roles on the same server. (Issue #62)
+* Changes to xRDRemoteApp
+  * Fix xRDRemoteApp Test-TargetResource to not test PowerShell common parameters
 
 ### 1.9.0.0
 
