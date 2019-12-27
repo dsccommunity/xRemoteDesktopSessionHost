@@ -1,18 +1,18 @@
 @{
-# Version number of this module.
-moduleVersion = '1.9.0.0'
+# Version number of this module. This is controlled by gitversion.
+moduleVersion = '0.0.1'
 
 # ID used to uniquely identify this module
 GUID = 'b42ff085-bd2b-4232-90ba-02b4c780e2d9'
 
 # Author of this module
-Author = 'Microsoft Corporation'
+Author = 'DSC Community'
 
 # Company or vendor of this module
-CompanyName = 'Microsoft Corporation'
+CompanyName = 'DSC Community'
 
 # Copyright statement for this module
-Copyright = '(c) 2014 Microsoft Corporation. All rights reserved.'
+Copyright = 'Copyright the DSC Community contributors. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Module with DSC Resources for Remote Desktop Session Host'
@@ -24,10 +24,10 @@ PowerShellVersion = '4.0'
 CLRVersion = '4.0'
 
 # Functions to export from this module
-FunctionsToExport = '*'
+FunctionsToExport = @()
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+CmdletsToExport = @()
 
 RootModule = 'xRemoteDesktopSessionHostCommon.psm1'
 
@@ -39,32 +39,22 @@ PrivateData = @{
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
+        IconUri = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
+
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/PowerShell/xRemoteDesktopSessionHost/blob/master/LICENSE'
+        LicenseUri = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/master/LICENSE'
+
+        # Set to a prerelease string value if the release should be a prerelease.
+        Prerelease = ''
 
         # A URL to the main website for this project.
-        ProjectUri = 'https://github.com/PowerShell/xRemoteDesktopSessionHost'
+        ProjectUri = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Changes to xRDRemoteApp
-  * Fixing typo in parameter name when calling the function ValidateCustomModeParameters (issue 50).
-* Changes to xRDSessionDeployment
-  * When RDMS service does not exist the Get-TargetResource will no longer throw an error (issue 47).
-* Rename Tests/Unit folder to use upper case on first letter.
-* Update appveyor.yml to use the default template.
-* Added default template files .codecov.yml, .gitattributes, and .gitignore, and
-  .vscode folder.
-* xRDSessionCollectionConfiguration:
-  * Changed CollectionName variable validation max length to 256
-* xRDSessionCollection
-  * Changed CollectionName variable validation max length to 256
-* xRDRemoteApp
-  * Changed CollectionName variable validation max length to 256
-
-'
+        ReleaseNotes = ''
 
     } # End of PSData hashtable
 
