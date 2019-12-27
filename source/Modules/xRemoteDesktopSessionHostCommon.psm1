@@ -5,10 +5,5 @@ function Test-xRemoteDesktopSessionHostOsRequirement
 
 function Get-xRemoteDesktopSessionHostOsVersion
 {
-    return [Environment]::OSVersion.Version 
+    return [Environment]::OSVersion.Version
 }
-
-Export-ModuleMember -Function @(
-        'Get-xRemoteDesktopSessionHostOsVersion'
-        'Test-xRemoteDesktopSessionHostOsRequirement'
-)
