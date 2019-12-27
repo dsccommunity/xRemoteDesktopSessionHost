@@ -1,0 +1,26 @@
+TOPIC
+    about_xRemoteDesktopSessionHost
+
+SHORT DESCRIPTION
+    DSC resources to manage Remote Desktop Services Hosts
+
+LONG DESCRIPTION
+    This module is meant to enable DSC configured RDSH (Remote Desktop Session Hosts).
+    It allows for setting up a connection broker, configuring licensing and deployment
+    of remote applications.
+
+EXAMPLES
+    See the examples in the Examples folder.
+
+NOTE:
+    Thank you to all those who contributed to this module, by writing code, sharing opinions, and provided feedback.
+
+TROUBLESHOOTING NOTE:
+    Look out on the Github repository for issues and new releases.
+
+SEE ALSO
+  - https://github.com/dsccommunity/xRemoteDesktopSessionHost
+
+KEYWORDS
+    DSC, RDS, RDSH, RemoteDesktop
+
