@@ -14,7 +14,7 @@ stages:
     jobs:
       - job: BuildModuleJob
         pool:
-          vmImage: 'ubuntu 16.04'
+          vmImage: 'vs2017-win2016'
         steps:
           - task: GitVersion@5
             name: gitversion
@@ -26,7 +26,7 @@ stages:
             name: Build
             inputs:
               filePath: './build.ps1'
-              arguments: '-ResolveDependency -tasks pack'
+              arguments: '-ResolveDependency -tasks build'
               pwsh: true
             env:
               ModuleVersion: $(GitVersion.Informationalversion)
@@ -94,7 +94,7 @@ stages:
     jobs:
       - job: Deploy_Artefact
         pool:
-          vmImage: 'ubuntu 16.04'
+          vmImage: 'vs2017-win2016'
         steps:
           - task: DownloadBuildArtifacts@0
             inputs:
