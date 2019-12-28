@@ -141,7 +141,7 @@ process
             Set-BuildHeader ([scriptblock]::Create($BuildInfo.TaskHeader))
         }
 
-        # Import Tasks from modules via their exported aliases when defined in BUild Manifest
+        # Import Tasks from modules via their exported aliases when defined in Build Manifest
         # https://github.com/nightroman/Invoke-Build/tree/master/Tasks/Import#example-2-import-from-a-module-with-tasks
         if ($BuildInfo.containsKey('ModuleBuildTasks'))
         {
