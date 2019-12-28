@@ -1,50 +1,42 @@
-$script:DSCModuleName      = '.\xRemoteDesktopSessionHost'
+$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
 $script:DSCResourceName    = 'MSFT_xRDSessionCollectionConfiguration'
 
-#region HEADER
-
-# Unit Test Template Version: 1.2.1
-$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-Write-Output @('clone','https://github.com/PowerShell/DscResource.Tests.git',"'"+(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests')+"'")
-
-if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+function Invoke-TestSetup
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'),'--verbose')
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 }
 
-Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
-
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
-    -TestType Unit
-
-#endregion HEADER
-
-function Invoke-TestSetup {
-
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-function Invoke-TestCleanup {
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-
-}
-
-# Begin Testing
+Invoke-TestSetup
 
 try
 {
-    Invoke-TestSetup
-    InModuleScope $script:DSCResourceName {
+    InModuleScope $script:dscResourceName {
         $script:DSCResourceName    = 'MSFT_xRDSessionCollectionConfiguration'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
         $collectionName = 'TestCollection'
-        
+
         Import-Module RemoteDesktop -Force
 
-        
+
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
 
@@ -64,7 +56,7 @@ try
                     CollectionName = 'TestCollection'
                 }
             }
-            
+
             Mock -CommandName Get-RDSessionCollectionConfiguration
             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
                 [pscustomobject]@{
@@ -147,7 +139,7 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            
+
             Mock -CommandName Set-RDSessionCollectionConfiguration -MockWith {
                 $null
             }
@@ -168,7 +160,7 @@ try
                 }
 
                 It "Running on Windows Server 2012 (R2) with EnableUserProfile disk set to True should not call Set-RDSessionCollectionConfiguration with parameter EnableUserProfileDisk" {
-                    Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true 
+                    Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true
                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter {$EnableUserProfileDisk -eq $true} -Times 0 -Exactly
                 }
             }
@@ -179,7 +171,7 @@ try
                 }
 
                 Mock -CommandName Get-RDSessionCollection -MockWith {
-                    Throw "No session collection DoesNotExist was found." 
+                    Throw "No session collection DoesNotExist was found."
                 }
 
                 It "Trying to configure a non existing collection should throw" {
@@ -313,7 +305,5 @@ try
 }
 finally
 {
-    #region FOOTER
     Invoke-TestCleanup
-    #endregion
 }
