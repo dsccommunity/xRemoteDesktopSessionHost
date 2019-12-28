@@ -7,6 +7,7 @@
 # Output Directory where ModuleBuilder will build the Module, relative to module manifest
 # OutputDirectory: ../output/Sampler
 CopyDirectories:
+  - DSCResources
   - en-US
   - Modules
 # SemVer: '1.2.3'
@@ -71,7 +72,7 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
   Script:
   # - tests/QA/module.tests.ps1
   # - tests/QA
-  # - tests/Unit
+  - tests/Unit
   # - tests/Integration
   ExcludeTag:
   Tag:

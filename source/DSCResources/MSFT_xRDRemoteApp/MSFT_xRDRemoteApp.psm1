@@ -1,4 +1,4 @@
-Import-Module -Name "$PSScriptRoot\..\..\xRemoteDesktopSessionHostCommon.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
 if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
 Import-Module RemoteDesktop
 
@@ -83,7 +83,7 @@ function Get-TargetResource
 }
 
 
-######################################################################## 
+########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
@@ -128,7 +128,7 @@ function Set-TargetResource
         $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
         $null = $PSBoundParameters.Remove('Ensure')
     }
-    catch 
+    catch
     {
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
@@ -192,7 +192,7 @@ function Test-TargetResource
 
     Write-Verbose "Testing if RemoteApp is published."
 
-    try 
+    try
     {
         $null = Get-RDSessionCollection -CollectionName $CollectionName -ErrorAction Stop
     }
@@ -202,10 +202,10 @@ function Test-TargetResource
     }
 
     $testTargetResourceResult = $true
-    
+
     $getTargetResourceResult = Get-TargetResource @PSBoundParameters
     $PSBoundParameters.Keys | ForEach-Object -Process {
-        if ($PSBoundParameters[$_] -ne $getTargetResourceResult[$_]) 
+        if ($PSBoundParameters[$_] -ne $getTargetResourceResult[$_])
         {
             Write-Verbose "Property [ $_ ] with value $($PSBoundParameters[$_]) does not match $($getTargetResourceResult[$_])"
             $testTargetResourceResult = $false

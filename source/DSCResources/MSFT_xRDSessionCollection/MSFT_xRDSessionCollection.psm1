@@ -1,4 +1,4 @@
-Import-Module -Name "$PSScriptRoot\..\..\xRemoteDesktopSessionHostCommon.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
 if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
 Import-Module RemoteDesktop
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
@@ -11,7 +11,7 @@ function Get-TargetResource
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
-    (    
+    (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1,256)]
         [string] $CollectionName,
@@ -25,7 +25,7 @@ function Get-TargetResource
     Write-Verbose "Getting information about RDSH collection."
     $Collection = Get-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
     @{
-        "CollectionName" = $Collection.CollectionName 
+        "CollectionName" = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
         "SessionHost" = $localhost
         "ConnectionBroker" = $ConnectionBroker
@@ -33,7 +33,7 @@ function Get-TargetResource
 }
 
 
-######################################################################## 
+########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
@@ -41,7 +41,7 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-    (    
+    (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1,256)]
         [string] $CollectionName,
@@ -53,11 +53,11 @@ function Set-TargetResource
         [string] $ConnectionBroker
     )
     Write-Verbose "Creating a new RDSH collection."
-    if ($localhost -eq $ConnectionBroker) 
+    if ($localhost -eq $ConnectionBroker)
     {
         New-RDSessionCollection @PSBoundParameters
     }
-    else 
+    else
     {
         $PSBoundParameters.Remove('CollectionDescription')
         Add-RDSessionHost @PSBoundParameters
