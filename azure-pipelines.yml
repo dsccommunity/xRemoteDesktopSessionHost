@@ -63,7 +63,7 @@ stages:
             inputs:
               filePath: './build.ps1'
               arguments: '-tasks test'
-              pwsh: true
+              pwsh: false
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
