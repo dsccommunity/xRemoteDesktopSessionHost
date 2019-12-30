@@ -14,7 +14,7 @@ stages:
     jobs:
       - job: BuildModuleJob
         pool:
-          vmImage: 'vs2017-win2016'
+          vmImage: 'ubuntu 16.04'
         steps:
           - task: GitVersion@5
             name: gitversion
