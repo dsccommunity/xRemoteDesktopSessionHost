@@ -1,5 +1,8 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+{
+    throw "The minimum OS requirement was not met."
+}
 Import-Module RemoteDesktop
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
@@ -34,52 +37,52 @@ function Get-TargetResource
 
     $result = $null
 
-    if (-not $ConnectionBroker) { $ConnectionBroker = $localhost }
+    if (-not $ConnectionBroker)
+    {
+        $ConnectionBroker = $localhost
+    }
 
-    write-verbose "Getting list of servers of type '$Role' from '$ConnectionBroker'..."
-    #{
+    Write-Verbose "Getting list of servers of type '$Role' from '$ConnectionBroker'..."
     $servers = Get-RDServer -ConnectionBroker $ConnectionBroker -Role $Role -ea SilentlyContinue
-    #}
 
     if ($servers)
     {
-        write-verbose "Found $($servers.Count) '$Role' servers in the deployment, now looking for server named '$Server'..."
+        Write-Verbose "Found $($servers.Count) '$Role' servers in the deployment, now looking for server named '$Server'..."
 
         if ($Server -in $servers.Server)
         {
-            write-verbose "The server '$Server' is in the RD deployment."
+            Write-Verbose "The server '$Server' is in the RD deployment."
 
-            $result =
-            @{
-                "ConnectionBroker"    = $ConnectionBroker
-                "Server"              = $Server
-                "Role"                = $Role
-                "GatewayExternalFqdn" = $null
+            $result = @{
+                ConnectionBroker    = $ConnectionBroker
+                Server              = $Server
+                Role                = $Role
+                GatewayExternalFqdn = $null
             }
 
             if ($Role -eq 'RDS-Gateway')
             {
-                write-verbose "the role is '$Role', querying RDS Gateway configuration..."
+                Write-Verbose "the role is '$Role', querying RDS Gateway configuration..."
 
                 $config = Get-RDDeploymentGatewayConfiguration -ConnectionBroker $ConnectionBroker
 
                 if ($config)
                 {
-                    write-verbose "RDS Gateway configuration retrieved successfully..."
+                    Write-Verbose "RDS Gateway configuration retrieved successfully..."
                     $result.GatewayExternalFqdn = $config.GatewayExternalFqdn
-                    Write-verbose ">> GatewayExternalFqdn: '$($result.GatewayExternalFqdn)'"
+                    Write-Verbose ">> GatewayExternalFqdn: '$($result.GatewayExternalFqdn)'"
                 }
             }
         }
         else
         {
-            write-verbose "The server '$Server' is not in the deployment as '$Role' yet."
+            Write-Verbose "The server '$Server' is not in the deployment as '$Role' yet."
         }
 
     }
     else
     {
-        write-verbose "No '$Role' servers found in the deployment on '$ConnectionBroker'."
+        Write-Verbose "No '$Role' servers found in the deployment on '$ConnectionBroker'."
         # or, possibly, Remote Desktop Deployment doesn't exist/Remote Desktop Management Service not running
     }
 
@@ -104,9 +107,11 @@ function ValidateCustomModeParameters
         $GatewayExternalFqdn
     )
 
-    write-verbose "validating parameters..."
+    Write-Verbose "validating parameters..."
 
-    $customParams = @{ "GatewayExternalFqdn" = $GatewayExternalFqdn }
+    $customParams = @{
+        GatewayExternalFqdn = $GatewayExternalFqdn
+    }
 
     if ($Role -eq 'RDS-Gateway')
     {
@@ -165,16 +170,19 @@ function Set-TargetResource
         $GatewayExternalFqdn   # only for RDS-Gateway
     )
 
-    if (-not $ConnectionBroker) { $ConnectionBroker = $localhost }
+    if (-not $ConnectionBroker)
+    {
+        $ConnectionBroker = $localhost
+    }
 
-    write-verbose "Adding server '$($Server.ToLower())' as $Role to the deployment on '$($ConnectionBroker.ToLower())'..."
+    Write-Verbose "Adding server '$($Server.ToLower())' as $Role to the deployment on '$($ConnectionBroker.ToLower())'..."
 
     # validate parameters
     ValidateCustomModeParameters -Role $Role -GatewayExternalFqdn $GatewayExternalFqdn
 
     if ($Role -eq 'RDS-Gateway')
     {
-        write-verbose ">> GatewayExternalFqdn:  '$GatewayExternalFqdn'"
+        Write-Verbose ">> GatewayExternalFqdn:  '$GatewayExternalFqdn'"
     }
     else
     {
@@ -182,7 +190,7 @@ function Set-TargetResource
     }
 
 
-    write-verbose "calling Add-RDServer cmdlet..."
+    Write-Verbose "calling Add-RDServer cmdlet..."
     #{
     if ($Role -eq 'RDS-Licensing' -or $Role -eq 'RDS-Gateway')
     {
@@ -192,12 +200,12 @@ function Set-TargetResource
 
         if ($e.count -eq 0)
         {
-            write-verbose "Add-RDServer completed without errors..."
+            Write-Verbose "Add-RDServer completed without errors..."
             # continue
         }
         elseif ($e.count -eq 2 -and $e[0].FullyQualifiedErrorId -eq 'CommandNotFoundException')
         {
-            write-verbose "Add-RDServer: trapped 2 errors, that's ok, continuing..."
+            Write-Verbose "Add-RDServer: trapped 2 errors, that's ok, continuing..."
             # ignore & continue
         }
         else
@@ -210,7 +218,7 @@ function Set-TargetResource
         Add-RDServer @PSBoundParameters
     }
     #}
-    write-verbose "Add-RDServer done."
+    Write-Verbose "Add-RDServer done."
 
 }
 
@@ -249,7 +257,7 @@ function Test-TargetResource
 
     $result = $null -ne $target
 
-    write-verbose "Test-TargetResource returning:  $result"
+    Write-Verbose "Test-TargetResource returning:  $result"
     return $result
 }
 
