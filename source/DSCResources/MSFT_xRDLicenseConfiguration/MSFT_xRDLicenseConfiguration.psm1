@@ -1,5 +1,8 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+{
+    throw "The minimum OS requirement was not met."
+}
 Import-Module RemoteDesktop
 
 #######################################################################
@@ -33,7 +36,7 @@ function Get-TargetResource
 
     if ($config)   # Microsoft.RemoteDesktopServices.Management.LicensingSetting
     {
-    Write-Verbose "configuration retrieved successfully:"
+        Write-Verbose "configuration retrieved successfully:"
     }
     else
     {
@@ -128,7 +131,7 @@ function Test-TargetResource
         $noChange = $true
         if ($LicenseServer)
         {
-            ForEach ($server in $config.LicenseServer)
+            foreach ($server in $config.LicenseServer)
             {
                 if ($LicenseServer -notcontains $server)
                 {

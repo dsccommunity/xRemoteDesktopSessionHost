@@ -37,48 +37,70 @@ stages:
               ArtifactName: 'output'
               publishLocation: 'Container'
 
-  - stage: test_module
+  - stage: Test
     dependsOn: Build
     jobs:
-      - job: test_windows_gui
-        timeoutInMinutes: 0
-        pool:
-          vmImage: 'vs2017-win2016'
-        steps:
-          - task: DownloadBuildArtifacts@0
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'output'
-              downloadPath: '$(Build.SourcesDirectory)'
+    - job: Test_HQRM
+      pool:
+        vmImage: 'vs2017-win2016'
+      timeoutInMinutes: 0
+      steps:
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'output'
+            downloadPath: '$(Build.SourcesDirectory)'
+        - task: PowerShell@2
+          name: Test
+          inputs:
+            filePath: './build.ps1'
+            arguments: '-Tasks hqrmtest'
+            pwsh: false
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFormat: 'NUnit'
+            testResultsFiles: 'output/testResults/NUnit*.xml'
 
-          - powershell: |
-              $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
-              echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
-              echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
-            name: DscBuildVariable
+    - job: Test_Unit
+      timeoutInMinutes: 0
+      pool:
+        vmImage: 'vs2017-win2016'
+      steps:
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            artifactName: 'output'
+            downloadPath: '$(Build.SourcesDirectory)'
 
-          - task: PowerShell@2
-            name: Test
-            inputs:
-              filePath: './build.ps1'
-              arguments: '-tasks test'
-              pwsh: false
+        - powershell: |
+            $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
+            echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
+            echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
+          name: DscBuildVariable
 
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFormat: 'NUnit'
-              testResultsFiles: 'output/testResults/NUnit*.xml'
+        - task: PowerShell@2
+          name: Test
+          inputs:
+            filePath: './build.ps1'
+            arguments: "-Tasks test -PesterScript 'tests/Unit'"
+            pwsh: false
 
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFormat: 'NUnit'
+            testResultsFiles: 'output/testResults/NUnit*.xml'
 
-          # Publish code coverage results
-          - task: PublishCodeCoverageResults@1
-            condition: succeededOrFailed()
-            inputs:
-              codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: 'output/testResults/CodeCov*.xml'
-              pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
+        # Publish code coverage results
+        - task: PublishCodeCoverageResults@1
+          condition: succeededOrFailed()
+          inputs:
+            codeCoverageTool: 'JaCoCo'
+            summaryFileLocation: 'output/testResults/CodeCov*.xml'
+            pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
 
   - stage: Deploy
     dependsOn: test_module

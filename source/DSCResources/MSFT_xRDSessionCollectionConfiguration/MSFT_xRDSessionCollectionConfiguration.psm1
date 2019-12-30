@@ -1,5 +1,8 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+{
+    throw "The minimum OS requirement was not met."
+}
 Import-Module RemoteDesktop
 
 
@@ -96,7 +99,7 @@ function Get-TargetResource
         }
 
         # This part of the configuration only applies to Win 2016+
-        if((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
+        if ((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
         {
             Write-Verbose 'Running on W2016+, get UserProfileDisk configuration'
             $collectionUserProfileDisk = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserProfileDisk
@@ -197,23 +200,23 @@ function Set-TargetResource
     $null = $PSBoundParameters.Remove('IncludeFolderPath')
     $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
 
-    if((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
+    if ((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
     {
         Write-Verbose 'Running on W2016 or higher, prepare to set UserProfileDisk configuration'
 
         # First set the initial configuration before trying to modify the UserProfileDisk Configuration
         Set-RDSessionCollectionConfiguration @PSBoundParameters
 
-        if($EnableUserProfileDisk)
+        if ($EnableUserProfileDisk)
         {
             Write-Verbose 'EnableUserProfileDisk is True - a DiskPath and MaxUserProfileDiskSizeGB are now mandatory'
 
-            if($DiskPath)
+            if ($DiskPath)
             {
                 $validateDiskPath = Test-Path -Path $DiskPath -ErrorAction SilentlyContinue
-                if(-not($validateDiskPath))
+                if (-not($validateDiskPath))
                 {
-                    Throw "To enable UserProfileDisk we need a valid DiskPath. Path $DiskPath not found"
+                    throw "To enable UserProfileDisk we need a valid DiskPath. Path $DiskPath not found"
                 }
                 else
                 {
@@ -222,16 +225,16 @@ function Set-TargetResource
             }
             else
             {
-                Throw "No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True"
+                throw "No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True"
             }
 
-            if($MaxUserProfileDiskSizeGB -gt 0)
+            if ($MaxUserProfileDiskSizeGB -gt 0)
             {
                 Write-Verbose "EnableUserProfileDisk: Validated MaxUserProfileDiskSizeGB size: $MaxUserProfileDiskSizeGB"
             }
             else
             {
-                Throw "To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value $MaxUserProfileDiskSizeGB is not valid"
+                throw "To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value $MaxUserProfileDiskSizeGB is not valid"
             }
 
             $enableUserProfileDiskSplat = @{
@@ -252,9 +255,9 @@ function Set-TargetResource
             # In this configuration, the C:\Windows\system32\WindowsPowerShell\v1.0\Modules\RemoteDesktop\Utility.psm1 module cannot call the RemoteDesktop module functions as they seem to load without the -RD prefix.
             # Here, we work around the errors thrown by Test-UserVhdPathInUse (the function in the Utility.psm1 module which calls the RemoteDesktop module functions)
 
-            foreach($setRDSessionCollectionError in $setRDSessionCollectionErrors)
+            foreach ($setRDSessionCollectionError in $setRDSessionCollectionErrors)
             {
-                if($SetRDSessionCollectionError.FullyQualifiedErrorId -eq 'CommandNotFoundException')
+                if ($SetRDSessionCollectionError.FullyQualifiedErrorId -eq 'CommandNotFoundException')
                 {
                     Write-Verbose "Set-RDSessionCollectionConfiguration: trapped erroneous CommandNotFoundException errors, that's ok, continuing..."
                     # ignore & continue
@@ -348,7 +351,7 @@ function Test-TargetResource
     $null = $PSBoundParameters.Remove('ConnectionBroker')
     $isInDesiredState = $true
 
-    if((Get-xRemoteDesktopSessionHostOsVersion).Major -lt 10)
+    if ((Get-xRemoteDesktopSessionHostOsVersion).Major -lt 10)
     {
         Write-Verbose 'Running on W2012R2 or lower, removing properties that are not compatible'
 
@@ -362,7 +365,7 @@ function Test-TargetResource
         $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
     }
 
-    if(-not($EnableUserProfileDisk))
+    if (-not($EnableUserProfileDisk))
     {
         Write-Verbose 'Running on W2016+ and UserProfileDisk is disabled. Removing properties from compare'
 
@@ -376,7 +379,7 @@ function Test-TargetResource
 
     $get = Get-TargetResource -CollectionName $CollectionName
 
-    foreach($name in $PSBoundParameters.Keys)
+    foreach ($name in $PSBoundParameters.Keys)
     {
         if ($PSBoundParameters[$name] -ne $get[$name])
         {

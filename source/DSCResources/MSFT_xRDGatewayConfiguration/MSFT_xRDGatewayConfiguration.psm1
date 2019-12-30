@@ -1,5 +1,8 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement)) { Throw "The minimum OS requirement was not met."}
+if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+{
+    throw "The minimum OS requirement was not met."
+}
 Import-Module RemoteDesktop
 
 #######################################################################
@@ -118,7 +121,12 @@ function ValidateCustomModeParameters
 
     write-verbose "validating parameters..."
 
-    $customModeParams = @{ "ExternalFqdn" = $ExternalFqdn; "LogonMethod" = $LogonMethod; "UseCachedCredentials" = $UseCachedCredentials; "BypassLocal" = $BypassLocal }
+    $customModeParams = @{
+        ExternalFqdn = $ExternalFqdn
+        LogonMethod = $LogonMethod
+        UseCachedCredentials = $UseCachedCredentials
+        BypassLocal = $BypassLocal
+    }
 
     if ($mode -eq 'Custom')
     {
@@ -309,7 +317,7 @@ function Test-TargetResource
     {
         write-verbose "verifying RD Gateway usage name..."
 
-        if($config.GatewayMode -eq 'Custom' -and $config.GatewayMode -ieq $GatewayMode)
+        if ($config.GatewayMode -eq 'Custom' -and $config.GatewayMode -ieq $GatewayMode)
         {
             $result = $config.BypassLocal -eq $BypassLocal -and
                 $config.UseCachedCredentials -eq $UseCachedCredentials -and
