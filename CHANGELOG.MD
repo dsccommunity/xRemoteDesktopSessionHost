@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xRemoteDesktopSessionHost
   - Added automatic release with a new CI pipeline.
+  - Added DSC HQRM Tests
 
 ### Changed
 
