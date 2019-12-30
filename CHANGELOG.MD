@@ -20,22 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     This allows the resource to be used multiple times for different roles on
     the same server. (Issue #62)
 
-### Deprecated
-
-- None
-
-### Removed
-
-- None
-
-### Fixed
-
-- None
-
-### Security
-
-- None
-
 ## 1.9.0.0
 
 - Changes to xRDRemoteApp
