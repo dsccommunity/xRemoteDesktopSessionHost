@@ -86,6 +86,7 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
 DscTest:
   ExcludeTag:
     - "Common Tests - Validate Localization"
+    - "Common Tests - New Error-Level Script Analyzer Rules"
   Tag:
   ExcludeSourceFile:
     - output
