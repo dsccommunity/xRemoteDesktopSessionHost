@@ -103,7 +103,7 @@ stages:
             pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
 
   - stage: Deploy
-    dependsOn: test_module
+    dependsOn: Test
     # Only execute deploy stage if we're on master and previous stage succeeded
     condition: |
       and(
