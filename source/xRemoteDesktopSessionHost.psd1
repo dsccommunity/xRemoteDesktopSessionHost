@@ -48,6 +48,7 @@
             # Tags applied to this module. These help with module discovery in online galleries.
             Tags = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
+            # A URL to an icon representing this module.
             IconUri = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
 
             # A URL to the license for this module.
@@ -58,9 +59,6 @@
 
             # A URL to the main website for this project.
             ProjectUri = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost'
-
-            # A URL to an icon representing this module.
-            # IconUri = ''
 
             # ReleaseNotes of this module
             ReleaseNotes = ''

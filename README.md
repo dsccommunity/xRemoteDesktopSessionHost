@@ -1,8 +1,8 @@
 # xRemoteDesktopSessionHost
 
-[![Build Status](https://dev.azure.com/dsccommunity/xRemoteDesktopSessionHost/_apis/build/status/dsccommunity.xRemoteDesktopSessionHost?branchName=master)](https://dev.azure.com/dsccommunity/xRemoteDesktopSessionHost/_build/latest?definitionId={definitionId}&branchName=master)
-![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/xRemoteDesktopSessionHost/{definitionId}/master)
-[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xRemoteDesktopSessionHost/{definitionId}/master)](https://dsccommunity.visualstudio.com/xRemoteDesktopSessionHost/_test/analytics?definitionId={definitionId}&contextType=build)
+[![Build Status](https://dev.azure.com/dsccommunity/xRemoteDesktopSessionHost/_apis/build/status/dsccommunity.xRemoteDesktopSessionHost?branchName=master)](https://dev.azure.com/dsccommunity/xRemoteDesktopSessionHost/_build/latest?definitionId=10&branchName=master)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/xRemoteDesktopSessionHost/10/master)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xRemoteDesktopSessionHost/10/master)](https://dsccommunity.visualstudio.com/xRemoteDesktopSessionHost/_test/analytics?definitionId=10&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xRemoteDesktopSessionHost?label=xRemoteDesktopSessionHost%20Preview)](https://www.powershellgallery.com/packages/xRemoteDesktopSessionHost/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xRemoteDesktopSessionHost?label=xRemoteDesktopSessionHost)](https://www.powershellgallery.com/packages/xRemoteDesktopSessionHost/)
 

@@ -9,7 +9,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-# RootModule = ''
+RootModule = 'xRemoteDesktopSessionHostCommon.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.0.0'
@@ -24,7 +24,7 @@ GUID = '4e0e43d9-17b0-4f89-bd67-12d5302ce8ed'
 Author = 'DSC Community'
 
 # Company or vendor of this module
-CompanyName = 'Dsc Community'
+CompanyName = 'DSC Community'
 
 # Copyright statement for this module
 Copyright = 'Copyright the DSC Community contributors. All rights reserved.'
@@ -78,7 +78,7 @@ FunctionsToExport = @(
 CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = '*'
+VariablesToExport = @()
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
 AliasesToExport = @()
