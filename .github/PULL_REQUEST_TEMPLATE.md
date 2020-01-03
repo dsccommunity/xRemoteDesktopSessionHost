@@ -34,7 +34,7 @@
     Change to [x] for each task in the task list that applies to your PR.
     For those task that don't apply to you PR, leave those as is.
 -->
-- [ ] Added an entry under the Unreleased section of the change log in the README.md.
+- [ ] Added an entry under the Unreleased section of file CHANGELOG.md.
       Entry should say what was changed, and how that affects users (if applicable).
 - [ ] Resource documentation added/updated in README.md.
 - [ ] Resource parameter descriptions added/updated in README.md, schema.mof
@@ -42,6 +42,6 @@
 - [ ] Comment-based help added/updated.
 - [ ] Localization strings added/updated in all localization files as appropriate.
 - [ ] Examples appropriately added/updated.
-- [ ] Unit tests added/updated. See [DSC Resource Testing Guidelines](https://github.com/PowerShell/DscResources/blob/master/TestsGuidelines.md).
-- [ ] Integration tests added/updated (where possible). See [DSC Resource Testing Guidelines](https://github.com/PowerShell/DscResources/blob/master/TestsGuidelines.md).
-- [ ] New/changed code adheres to [DSC Resource Style Guidelines](https://github.com/PowerShell/DscResources/blob/master/StyleGuidelines.md) and [Best Practices](https://github.com/PowerShell/DscResources/blob/master/BestPractices.md).
+- [ ] Unit tests added/updated. See [DSC Community Testing Guidelines](https://dsccommunity.org/guidelines/testing-guidelines).
+- [ ] Integration tests added/updated (where possible). See [DSC Community Testing Guidelines](https://dsccommunity.org/guidelines/testing-guidelines).
+- [ ] New/changed code adheres to [DSC Community Style Guidelines](https://dsccommunity.org/styleguidelines).
