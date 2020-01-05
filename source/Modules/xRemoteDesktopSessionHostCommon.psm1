@@ -45,7 +45,7 @@ function Get-LocalizedData
 
     if (-not $ScriptRoot)
     {
-        $dscResourcesFolder = Join-Path -Path $PSScriptRoot -ChildPath 'DSCResources'
+        $dscResourcesFolder = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'DSCResources'
         $resourceDirectory = Join-Path -Path $dscResourcesFolder -ChildPath $ResourceName
     }
     else
