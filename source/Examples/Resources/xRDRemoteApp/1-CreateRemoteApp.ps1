@@ -21,7 +21,7 @@ Configuration Example
             RequiredCommandLine = '-noprofile'
             ShowInWebAccess = $True
             UserGroups = ''
-            VirtualFilePath = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+            FileVirtualPath = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
         }
     }
 }
