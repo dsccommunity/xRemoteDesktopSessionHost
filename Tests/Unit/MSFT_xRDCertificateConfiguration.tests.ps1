@@ -246,8 +246,8 @@ try
                 }
 
                 It 'Set-TargetResource returns an error when the certificate could not be applied' {
-                    $errorMessage = Set-TargetResource @resourceWrongConfiguredSplat 2>&1
-                    $errorMessage | Should -Not -BeNullOrEmpty
+                    { Set-TargetResource @resourceWrongConfiguredSplat -ErrorAction Stop } |
+                        Should -Throw 'Failed to apply certificate'
                 }
             }
         }
