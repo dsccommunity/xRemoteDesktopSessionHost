@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changed resouce key from Server alone to Role + Server.
     This allows the resource to be used multiple times for different roles on
     the same server. (Issue #62)
+- Changes to xRemoteApp
+  - Fix xRDRemoteApp Test-TargetResource to not test PowerShell common parameters
 
 ## 1.9.0.0
 
