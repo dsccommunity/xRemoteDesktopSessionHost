@@ -207,6 +207,10 @@ function Test-TargetResource
     $testTargetResourceResult = $true
 
     $getTargetResourceResult = Get-TargetResource @PSBoundParameters
+    [System.Management.Automation.PSCmdlet]::CommonParameters | Foreach-Object -Process {
+        $null = $PSBoundParameters.Remove($_)
+    }
+
     $PSBoundParameters.Keys | ForEach-Object -Process {
         if ($PSBoundParameters[$_] -ne $getTargetResourceResult[$_])
         {
