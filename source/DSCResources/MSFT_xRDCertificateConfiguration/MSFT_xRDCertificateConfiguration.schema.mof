@@ -1,0 +1,22 @@
+[ClassVersion("1.0.0.0"), FriendlyName("xRDCertificateConfiguration")]
+class MSFT_xRDCertificateConfiguration : OMI_BaseResource
+{
+    [key,
+        Description ("The role to apply this certificate configuration to."),
+        ValueMap {"RDRedirector", "RDPublishing", "RDWebAccess", "RDGateway"},
+        Values {"RDRedirector", "RDPublishing", "RDWebAccess", "RDGateway"}
+    ] string Role;
+
+    [key,
+        Description ("The connection broker that this certificate configuration is applied to.")
+    ] string ConnectionBroker;
+
+    [write, required,
+        Description ("The certificate that should be used, should point to a PFX file on the filesystem.")
+    ] string ImportPath;
+
+    [write,
+        Description("Specifies the password used to decrypt the PFX file. The username is ignored."),
+        EmbeddedInstance("MSFT_Credential")
+    ] string Credential;
+};
