@@ -12,7 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added DSC HQRM Tests
 - xRDCertificateConfiguration
   - New resource to configure the used certificate on a deployment
-
+- xRDSessionCollection
+  - Added parameter "Ensure" to add/remove a sessionhost to/from session collection
+  - Added parameter "NewConnectionAllowed" to enable/disable new connections
+  
 ### Changed
 
 - Changes to xRDSessionDeployment

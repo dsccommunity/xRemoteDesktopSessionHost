@@ -26,7 +26,7 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 ## Resources
 
 * **xRDSessionDeployment** creates and configures a deployment in RDSH.
-* **xRDSessionCollection** creates an RDSH collection.
+* **xRDSessionCollection** creates an RDSH collection and add/remove RDSessionHosts.
 * **xRDSessionCollectionConfiguration** configures an RDSH collection.
 * **xRDRemoteApp** publishes applications for your RDSH collection.
 * **xRDServer** adds RD Server features to your RDSH deployment.
@@ -41,10 +41,12 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 
 ### xRDSessionCollection
 
-* **CollectionName**: Specifies a name for the session collection (Max length is 256 characters)
-* **SessionHost**: Specifies a RD Session Host server to include in the session collection.
-* **CollectionDescription**: A description for the collection.
+* **Ensure**: Specifies if RD Session Host should be present or absent in session collection.
+* **CollectionName**: Specifies a name for the session collection. (Max length is 256 characters)
+* **SessionHost**: Specifies a RD Session Host server.
 * **ConnectionBroker**: The Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **CollectionDescription**: A description for the collection. Only set when new session collection is created.
+* **NewConnectionAllowed**: Specifies if new connections are allowed. (Valid values are Yes, NotUntilReboot, No).
 
 ### xRDSessionCollectionConfiguration
 

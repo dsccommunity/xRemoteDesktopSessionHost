@@ -33,7 +33,7 @@ function Get-TargetResource
 
         [Parameter()]
         [ValidateSet('Yes', 'NotUntilReboot', 'No')]
-        [string] $NewConnectionAllowed
+        [string] $NewConnectionAllowed = 'Yes'
     )
 
     $returnvalues = @{
@@ -48,7 +48,8 @@ function Get-TargetResource
     Write-Verbose "Getting information about RDSH collection."
     $TargetCollection = Get-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
     
-    if ($TargetCollection) {
+    if ($TargetCollection) 
+    {
         $returnvalues["Ensure"] = "Present"
         $returnvalues["CollectionName"] = $CollectionName
         $returnvalues["CollectionDescription"] = $CollectionDescription
@@ -56,7 +57,8 @@ function Get-TargetResource
 
         $TargetSessionhost = Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker | Where-Object -property Sessionhost -eq $SessionHost
 
-        if ($TargetSessionhost) {
+        if ($TargetSessionhost) 
+        {
             $returnvalues["SessionHost"] = $SessionHost
             $returnvalues["NewConnectionAllowed"] = $TargetSessionhost.NewConnectionAllowed
         }
@@ -93,33 +95,40 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateSet('Yes', 'NotUntilReboot', 'No')]
-        [string] $NewConnectionAllowed
+        [string] $NewConnectionAllowed = 'Yes'
     )
 
     $Targetresource = Get-TargetResource @PSBoundParameters
 
-    if ($Targetresource['Ensure'] -eq 'Present') {
-
-        if ($Ensure -eq 'Present') {            
-            if ($Null -eq $Targetresource['Sessionhost']) {
+    if ($Targetresource['Ensure'] -eq 'Present') 
+    {
+        if ($Ensure -eq 'Present') 
+        {
+            if ($Null -eq $Targetresource['Sessionhost']) 
+            {
                 Write-Verbose "Sessionhost was not found in Collection. Adding it."
                 Add-RDSessionHost -Connectionbroker $ConnectionBroker -Sessionhost $SessionHost -CollectionName $CollectionName -ErrorAction 'Stop'
             }
-            if (($Null -ne $Targetresource['NewConnectionAllowed']) -and ($Targetresource['NewConnectionAllowed'] -ne $NewConnectionAllowed)) {
+            if (($Null -ne $Targetresource['NewConnectionAllowed']) -and ($Targetresource['NewConnectionAllowed'] -ne $NewConnectionAllowed)) 
+            {
                 Write-Verbose "Setting right Value for NewConnectionAllowed."                
                 Set-RDSessionHost -Connectionbroker $ConnectionBroker -Sessionhost $SessionHost -NewConnectionAllowed $NewConnectionAllowed -ErrorAction 'Stop'
             }      
-
-        } elseif ($Ensure -eq 'Absent') {
-            if ($Targetresource['SessionHost'] -eq $SessionHost) {
+        }
+        elseif ($Ensure -eq 'Absent')
+        {
+            if ($Targetresource['SessionHost'] -eq $SessionHost) 
+            {
                 Write-Verbose "Removing Sessionhost from Collection. "
                 Remove-RDSessionHost -Connectionbroker $ConnectionBroker -Sessionhost $SessionHost -ErrorAction 'Stop'
             }
         }
-
-    } else {
+    }
+    else
+    {
         
-        if ($Ensure -eq 'Present') {
+        if ($Ensure -eq 'Present') 
+        {
             Write-Verbose "Creating a new RDSH collection."
 
             $NewRDSessionCollection = @{} + $PSBoundParameters
@@ -162,7 +171,7 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateSet('Yes', 'NotUntilReboot', 'No')]
-        [string] $NewConnectionAllowed
+        [string] $NewConnectionAllowed = 'Yes'
     )
 
     $Targetresource = Get-TargetResource @PSBoundParameters
