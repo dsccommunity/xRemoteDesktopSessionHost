@@ -2,10 +2,12 @@
 [ClassVersion("1.0.0.0"), FriendlyName("xRDSessionCollection")]
 class MSFT_xRDSessionCollection : OMI_BaseResource
 {
-    [key, Description("Specifies a name for the session collection. ")] string CollectionName;
-    [key, Description("Specifies an RD Session Host server to include in the session collection. ")] string SessionHost;
-    [write, Description("Specifies a description for the collection.")] string CollectionDescription;
+    [key, Description("Specifies a name for the session collection.")] string CollectionName;
+    [key, Description("Specifies an RD Session Host server to include in the session collection.")] string SessionHost;
+    [write, Description("Specifies if Sessionhost is added to or removed from session collection. Default value is 'Present'."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] string Ensure;
+    [write, Description("Specifies a description for the collection. Only set when creating a new session collection")] string CollectionDescription;
     [write, Description("Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.")] string ConnectionBroker;
+    [write, Description("Specifies if new connections are allowed after adding to session collection."), ValueMap{"Yes", "NotUntilReboot", "No"}, Values{"Yes", "NotUntilReboot", "No"}] string NewConnectionAllowed;
 };
 
 
