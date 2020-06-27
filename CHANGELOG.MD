@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     the same server. (Issue #62)
 - Changes to xRemoteApp
   - Fix xRDRemoteApp Test-TargetResource to not test PowerShell common parameters
+- Changes to tests
+  - Pin tests to use Pester v4 instead of latest (v5)
 
 ## 1.9.0.0
 
