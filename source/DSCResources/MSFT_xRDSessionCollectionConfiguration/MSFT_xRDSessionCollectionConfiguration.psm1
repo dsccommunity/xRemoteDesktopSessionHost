@@ -381,14 +381,50 @@ function Test-TargetResource
 
     foreach ($name in $PSBoundParameters.Keys)
     {
-        if ($PSBoundParameters[$name] -ne $get[$name])
+        Write-Verbose -Message "Property: $($name)"
+
+        if ($PSBoundParameters[$name] -is [Array])
         {
-            Write-Verbose ('Property: {0} with value {1} does not match value {2}' -f $name, $PSBoundParameters[$name], $get[$name])
+            $parameterValue = (($PSBoundParameters[$name] | Select-Object -Unique | Sort-Object) -join ', ').Trim()
+        }
+        elseif ($PSBoundParameters[$name] -is [String])
+        {
+            $parameterValue = ($PSBoundParameters[$name]).Trim()
+        }
+        elseif ($null -eq $PSBoundParameters[$name])
+        {
+            $parameterValue = ''
+        }
+        else
+        {
+            $parameterValue = $PSBoundParameters[$name]
+        }
+
+        if ($get[$name] -is [Array])
+        {
+            $currentValue = (($get[$name] | Select-Object -Unique | Sort-Object) -join ', ').Trim()
+        }
+        elseif ($get[$name] -is [String])
+        {
+            $currentValue = ($get[$name]).Trim()
+        }
+        elseif ($null -eq $get[$name])
+        {
+            $currentValue = ''
+        }
+        else
+        {
+            $currentValue = $get[$name]
+        }
+
+        if ($currentValue -ne $parameterValue)
+        {
+            Write-Verbose -Message "  - Intended value '$($PSBoundParameters[$name])' does not match current value '$($get[$name])'"
             $isInDesiredState = $false
         }
         else
         {
-            Write-Verbose "Property: $name - InDesiredState: True"
+            Write-Verbose -Message "  - InDesiredState: True"
         }
     }
 
