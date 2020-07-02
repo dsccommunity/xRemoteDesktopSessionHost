@@ -383,6 +383,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message "Property: $($name)"
 
+        # Create a new variable to represent a normalized string value for various types of parameter values
         if ($PSBoundParameters[$name] -is [Array])
         {
             $parameterValue = (($PSBoundParameters[$name] | Select-Object -Unique | Sort-Object) -join ', ').Trim()
@@ -400,6 +401,7 @@ function Test-TargetResource
             $parameterValue = $PSBoundParameters[$name]
         }
 
+        # Create a new variable to represent a normalized string value for various types of current values
         if ($get[$name] -is [Array])
         {
             $currentValue = (($get[$name] | Select-Object -Unique | Sort-Object) -join ', ').Trim()
@@ -417,6 +419,7 @@ function Test-TargetResource
             $currentValue = $get[$name]
         }
 
+        # Compare the normalized values against each other for more accurate comparison
         if ($currentValue -ne $parameterValue)
         {
             Write-Verbose -Message "  - Intended value '$($PSBoundParameters[$name])' does not match current value '$($get[$name])'"

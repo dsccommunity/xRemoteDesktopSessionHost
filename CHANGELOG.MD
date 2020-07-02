@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changes to tests
   - Pin tests to use Pester v4 instead of latest (v5)
 
+### Fixed
+
+- xRDSessionCollectionConfiguration
+  - Fixed comparison of some RD Session Collection Configuration properties and
+    supplied parameters by performing some normalization prior to the comparison.
+    ([issue #82](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/82)).
+
 ## 1.9.0.0
 
 - Changes to xRDRemoteApp
