@@ -351,6 +351,8 @@ function Test-TargetResource
         [string[]] $ExcludeFilePath
     )
 
+    $verbose = $PSBoundParameters.Verbose -eq $true
+
     Write-Verbose "Testing DSC collection properties"
 
     $null = $PSBoundParameters.Remove('Verbose')
@@ -386,6 +388,8 @@ function Test-TargetResource
     $testDscParameterStateSplat = @{
         CurrentValues = Get-TargetResource -CollectionName $CollectionName
         DesiredValues = $PSBoundParameters
+        TurnOffTypeChecking = $true
+        Verbose = $verbose
     }
 
     Test-DscParameterState @testDscParameterStateSplat
