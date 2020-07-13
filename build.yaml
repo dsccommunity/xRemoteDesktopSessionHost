@@ -29,6 +29,12 @@ VersionedOutputDirectory: true
 #     # suffix:
 #     # prefix:
 
+NestedModule:
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Sampler Pipeline Configuration             #

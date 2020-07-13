@@ -1,10 +1,17 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
+
+$rdCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'xRemoteDesktopSessionHostCommon.psm1'
+Import-Module -Name $rdCommonModulePath
+
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
 if (!(Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw "The minimum OS requirement was not met."
 }
 Import-Module RemoteDesktop
-
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -349,7 +356,6 @@ function Test-TargetResource
     $null = $PSBoundParameters.Remove('Verbose')
     $null = $PSBoundParameters.Remove('Debug')
     $null = $PSBoundParameters.Remove('ConnectionBroker')
-    $isInDesiredState = $true
 
     if ((Get-xRemoteDesktopSessionHostOsVersion).Major -lt 10)
     {
@@ -377,61 +383,12 @@ function Test-TargetResource
         $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
     }
 
-    $get = Get-TargetResource -CollectionName $CollectionName
-
-    foreach ($name in $PSBoundParameters.Keys)
-    {
-        Write-Verbose -Message "Property: $($name)"
-
-        # Create a new variable to represent a normalized string value for various types of parameter values
-        if ($PSBoundParameters[$name] -is [Array])
-        {
-            $parameterValue = (($PSBoundParameters[$name] | Select-Object -Unique | Sort-Object) -join ', ').Trim()
-        }
-        elseif ($PSBoundParameters[$name] -is [String])
-        {
-            $parameterValue = ($PSBoundParameters[$name]).Trim()
-        }
-        elseif ($null -eq $PSBoundParameters[$name])
-        {
-            $parameterValue = ''
-        }
-        else
-        {
-            $parameterValue = $PSBoundParameters[$name]
-        }
-
-        # Create a new variable to represent a normalized string value for various types of current values
-        if ($get[$name] -is [Array])
-        {
-            $currentValue = (($get[$name] | Select-Object -Unique | Sort-Object) -join ', ').Trim()
-        }
-        elseif ($get[$name] -is [String])
-        {
-            $currentValue = ($get[$name]).Trim()
-        }
-        elseif ($null -eq $get[$name])
-        {
-            $currentValue = ''
-        }
-        else
-        {
-            $currentValue = $get[$name]
-        }
-
-        # Compare the normalized values against each other for more accurate comparison
-        if ($currentValue -ne $parameterValue)
-        {
-            Write-Verbose -Message "  - Intended value '$($PSBoundParameters[$name])' does not match current value '$($get[$name])'"
-            $isInDesiredState = $false
-        }
-        else
-        {
-            Write-Verbose -Message "  - InDesiredState: True"
-        }
+    $testDscParameterStateSplat = @{
+        CurrentValues = Get-TargetResource -CollectionName $CollectionName
+        DesiredValues = $PSBoundParameters
     }
 
-    $isInDesiredState
+    Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource

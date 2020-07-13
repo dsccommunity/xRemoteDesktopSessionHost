@@ -259,7 +259,7 @@ try
                 [pscustomobject]@{
                     CollectionName           = 'TestCollection'
                     IncludeFolderPath        = $null
-                    ExcludeFolderPath        = $null
+                    ExcludeFolderPath        = @('c:\temp\foo', 'c:\temp\bar')
                     IncludeFilePath          = $null
                     ExcludeFilePath          = $null
                     DiskPath                 = 'c:\temp'
