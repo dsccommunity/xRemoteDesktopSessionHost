@@ -20,15 +20,6 @@ VersionedOutputDirectory: true
 #      ModuleBuilder Submodules Configuration      #
 ####################################################
 
-# NestedModule:
-#   HelperSubmodule: # This is the first submodule to build into the output
-#     Path: ./Sampler/Modules/HelperSubmodule/HelperSubmodule.psd1
-#     # $ModuleVersionFolder is trimmed (remove -.*) and OutputDirectory expanded (the only one)
-#     OutputDirectory: ./output/Sampler/$ModuleVersionFolder/Modules/HelperSubmodule
-#     VersionedOutputDirectory: false
-#     # suffix:
-#     # prefix:
-
 NestedModule:
   DscResource.Common:
     CopyOnly: true
@@ -77,7 +68,7 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
   OutputFormat: NUnitXML
   # Will look at every *.ps1 & *.psm1 under ModulePath, excepts when $_.FullName -match (Join-Path $ProjectPath $ExcludeFromCodeCoverageItem)
   ExcludeFromCodeCoverage:
-    # - Template
+    - Modules/DscResource.Common
   # Default is to use the tests folder in the project folder or source folder (if present)
   # can use it to prioritize: tests/QA, tests/Unit, tests/Integration
   Script:
@@ -97,8 +88,7 @@ DscTest:
   ExcludeSourceFile:
     - output
   ExcludeModuleFile:
-  #  - Templates
-  #  - Modules/DscResource.Common
+    - Modules/DscResource.Common
 
 Resolve-Dependency: #Parameters for Resolve-Dependency
   #PSDependTarget: ./output/modules
