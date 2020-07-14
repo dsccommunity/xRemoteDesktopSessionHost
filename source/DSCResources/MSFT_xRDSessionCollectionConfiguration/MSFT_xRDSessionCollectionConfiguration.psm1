@@ -95,7 +95,7 @@ function Get-TargetResource
             ClientPrinterRedirected = $collectionClient.ClientPrinterRedirected
             CollectionDescription = $collectionGeneral.CollectionDescription
             # For whatever reason this value gets returned with a trailing carriage return
-            CustomRdpProperty = $collectionGeneral.CustomRdpProperty.Trim()
+            CustomRdpProperty = ([string]$collectionGeneral.CustomRdpProperty).Trim()
             DisconnectedSessionLimitMin = $collectionConnection.DisconnectedSessionLimitMin
             EncryptionLevel = $collectionSecurity.EncryptionLevel
             IdleSessionLimitMin = $collectionConnection.IdleSessionLimitMin
