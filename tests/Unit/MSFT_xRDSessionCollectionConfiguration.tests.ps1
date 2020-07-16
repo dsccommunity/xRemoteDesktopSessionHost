@@ -251,7 +251,8 @@ try
 
             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
                 [pscustomobject]@{
-                    CollectionName = 'TestCollection'
+                    CollectionName    = 'TestCollection'
+                    CustomRdpProperty = "use redirection server name:i:1`n"
                 }
             }
 
@@ -297,6 +298,28 @@ try
 
                 It "Running on Windows Server 2016+ with EnableUserProfile disk set to False and current setting set to false should return Test result True - In Desired State" {
                     Test-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $false | Should be $True
+                }
+
+                It "Running on Windows Server 2016+ with CustomRdpProperties specified and existing setting matching with a trailing newline should return Test result True - In Desired State" {
+                    Test-TargetResource -CollectionName $collectionName -CustomRdpProperty "use redirection server name:i:1" |
+                        Should be $true
+                }
+
+                It "Running on Windows Server 2016+ with out-of-order ExcludeFolderPath values and current EnableUserProfile setting set to true should return Test result True - In Desired State" {
+                    Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                        [pscustomobject]@{
+                            CollectionName        = 'TestCollection'
+                            EnableUserProfileDisk = $true
+                            ExcludeFolderPath     = @('c:\temp\foo', 'c:\temp\bar')
+                        }
+                    } -ParameterFilter {$UserProfileDisk -eq $true}
+
+                    $testTargetSplat = @{
+                        CollectionName = $collectionName
+                        EnableUserProfileDisk = $true
+                        ExcludeFolderPath = @('c:\temp\bar', 'c:\temp\foo')
+                    }
+                    Test-TargetResource @testTargetSplat | Should be $true
                 }
             }
         }

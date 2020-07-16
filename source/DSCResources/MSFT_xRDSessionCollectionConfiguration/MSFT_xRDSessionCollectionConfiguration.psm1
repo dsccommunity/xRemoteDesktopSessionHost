@@ -390,6 +390,7 @@ function Test-TargetResource
         CurrentValues = Get-TargetResource -CollectionName $CollectionName
         DesiredValues = $PSBoundParameters
         TurnOffTypeChecking = $true
+        SortArrayValues = $true
         Verbose = $verbose
     }
 
