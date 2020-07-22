@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changes to xRDSessionCollectionConfiguration
+  - Fixing comparison of some RD Session Collection Configuration properties and
+    supplied parameters by moving to the DscResource.Common `Test-DscParameterState` cmdlet.
+    ([issue #82](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/82)).
 - Changes to xRDSessionDeployment
   - Fixing Get-TargetResource to target the connection broker, instead of
     assuming localhost

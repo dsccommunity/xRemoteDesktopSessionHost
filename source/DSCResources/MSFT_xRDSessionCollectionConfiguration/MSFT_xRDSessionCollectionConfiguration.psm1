@@ -1,10 +1,17 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
+
+$rdCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'xRemoteDesktopSessionHostCommon.psm1'
+Import-Module -Name $rdCommonModulePath
+
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
 if (!(Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw "The minimum OS requirement was not met."
 }
 Import-Module RemoteDesktop
-
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -87,7 +94,8 @@ function Get-TargetResource
             ClientPrinterAsDefault = $collectionClient.ClientPrinterAsDefault
             ClientPrinterRedirected = $collectionClient.ClientPrinterRedirected
             CollectionDescription = $collectionGeneral.CollectionDescription
-            CustomRdpProperty = $collectionGeneral.CustomRdpProperty
+            # For whatever reason this value gets returned with a trailing carriage return
+            CustomRdpProperty = ([string]$collectionGeneral.CustomRdpProperty).Trim()
             DisconnectedSessionLimitMin = $collectionConnection.DisconnectedSessionLimitMin
             EncryptionLevel = $collectionSecurity.EncryptionLevel
             IdleSessionLimitMin = $collectionConnection.IdleSessionLimitMin
@@ -344,12 +352,13 @@ function Test-TargetResource
         [string[]] $ExcludeFilePath
     )
 
+    $verbose = $PSBoundParameters.Verbose -eq $true
+
     Write-Verbose "Testing DSC collection properties"
 
     $null = $PSBoundParameters.Remove('Verbose')
     $null = $PSBoundParameters.Remove('Debug')
     $null = $PSBoundParameters.Remove('ConnectionBroker')
-    $isInDesiredState = $true
 
     if ((Get-xRemoteDesktopSessionHostOsVersion).Major -lt 10)
     {
@@ -377,22 +386,15 @@ function Test-TargetResource
         $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
     }
 
-    $get = Get-TargetResource -CollectionName $CollectionName
-
-    foreach ($name in $PSBoundParameters.Keys)
-    {
-        if ($PSBoundParameters[$name] -ne $get[$name])
-        {
-            Write-Verbose ('Property: {0} with value {1} does not match value {2}' -f $name, $PSBoundParameters[$name], $get[$name])
-            $isInDesiredState = $false
-        }
-        else
-        {
-            Write-Verbose "Property: $name - InDesiredState: True"
-        }
+    $testDscParameterStateSplat = @{
+        CurrentValues = Get-TargetResource -CollectionName $CollectionName
+        DesiredValues = $PSBoundParameters
+        TurnOffTypeChecking = $true
+        SortArrayValues = $true
+        Verbose = $verbose
     }
 
-    $isInDesiredState
+    Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource
