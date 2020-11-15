@@ -1,4 +1,12 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
+
+$rdCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'xRemoteDesktopSessionHostCommon.psm1'
+Import-Module -Name $rdCommonModulePath
+
+$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
+Import-Module -Name $dscResourceCommonModulePath
+
 if (!(Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw "The minimum OS requirement was not met."
@@ -41,7 +49,7 @@ function Get-TargetResource
         [Parameter()]
         [string] $IconPath,
         [Parameter()]
-        [string] $UserGroups,
+        [string[]] $UserGroups,
         [Parameter()]
         [boolean] $ShowInWebAccess
     )
@@ -121,7 +129,7 @@ function Set-TargetResource
         [Parameter()]
         [string] $IconPath,
         [Parameter()]
-        [string] $UserGroups,
+        [string[]] $UserGroups,
         [Parameter()]
         [boolean] $ShowInWebAccess
     )
@@ -188,7 +196,7 @@ function Test-TargetResource
         [Parameter()]
         [string] $IconPath,
         [Parameter()]
-        [string] $UserGroups,
+        [string[]] $UserGroups,
         [Parameter()]
         [boolean] $ShowInWebAccess
     )
@@ -204,23 +212,20 @@ function Test-TargetResource
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
-    $testTargetResourceResult = $true
-
     $getTargetResourceResult = Get-TargetResource @PSBoundParameters
     [System.Management.Automation.PSCmdlet]::CommonParameters | Foreach-Object -Process {
         $null = $PSBoundParameters.Remove($_)
     }
 
-    $PSBoundParameters.Keys | ForEach-Object -Process {
-        if ($PSBoundParameters[$_] -ne $getTargetResourceResult[$_])
-        {
-            Write-Verbose "Property [ $_ ] with value $($PSBoundParameters[$_]) does not match $($getTargetResourceResult[$_])"
-            $testTargetResourceResult = $false
-        }
+    $testDscParameterStateSplat = @{
+        CurrentValues       = $getTargetResourceResult
+        DesiredValues       = $PSBoundParameters
+        TurnOffTypeChecking = $true
+        SortArrayValues     = $true
+        Verbose             = $verbose
     }
 
-    $testTargetResourceResult
+    Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource
-
