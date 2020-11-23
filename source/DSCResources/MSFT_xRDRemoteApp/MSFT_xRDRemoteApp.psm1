@@ -222,7 +222,6 @@ function Test-TargetResource
         DesiredValues       = $PSBoundParameters
         TurnOffTypeChecking = $true
         SortArrayValues     = $true
-        Verbose             = $verbose
     }
 
     Test-DscParameterState @testDscParameterStateSplat
