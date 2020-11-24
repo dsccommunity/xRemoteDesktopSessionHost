@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated filename for CHANGELOG.MD to CHANGELOG.md
+- Changes to xRemoteApp
+  - Updating `UserGroups` parameter to allow for an array to be supplied
+  - Updating comparison of current properties and supplied parameters by moving
+    to the DscResource.Common `Test-DscParameterState` cmdlet. This was necessary
+    to allow for the change with the `UserGroups` parameter to allow an array object.
+- Change to xRDGatewayConfiguration
+  - Updated call to `Set-RDDeploymentGatewayConfiguration` cmdlet to use `ErrorAction` 'Stop'
+  - Updated call to `Set-RDDeploymentGatewayConfiguration` cmdlet to use a splat for better formatting
+- Changes to tests
+  - xRDRemoteApp
+    - Fixed tests for error scenarios to behave correctly
+  - xRDGatewayConfiguration
+    - Fixed tests for error scenarios to behave correctly
 
 ## 2.0.0
 

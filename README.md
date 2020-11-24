@@ -88,7 +88,7 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 * **RequiredCommandLine**: Specifies a string that contains command-line arguments that the client can use at connection time with the RemoteApp program.
 * **IconIndex**: Specifies the index within the icon file (specified by the IconPath parameter) where the RemoteApp program's icon can be found.
 * **IconPath**: Specifies the path to a file containing the icon to display for the RemoteApp program identified by the Alias parameter.
-* **UserGroups**: Specifies a domain group that can view the RemoteApp in RD Web Access, and in RemoteApp and Desktop Connections.  To allow all users to see a RemoteApp program, provide a value of Null.
+* **UserGroups**: Specifies a list of domain groups that can view the RemoteApp in RD Web Access, and in RemoteApp and Desktop Connections.  To allow all users to see a RemoteApp program, provide a value of Null.
 * **ShowInWebAccess**: Specifies whether to show the RemoteApp program in the RD Web Access server, and in RemoteApp and Desktop Connections that the user subscribes to.
 
 ### xRDServer
