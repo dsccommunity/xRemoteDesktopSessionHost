@@ -132,7 +132,7 @@ try
 
                 It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
                     { Get-TargetResource @xRDRemoteAppSplat -ErrorAction Stop } |
-                        Should -Throw 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
+                        Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
                 }
             }
         }
@@ -194,7 +194,7 @@ try
 
                 It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
                     { Set-TargetResource @xRDRemoteAppSplat -ErrorAction Stop } |
-                        Should -Throw 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
+                        Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
                 }
             }
         }
@@ -274,7 +274,7 @@ try
 
                 It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
                     { Test-TargetResource @xRDRemoteAppSplat -ErrorAction Stop } |
-                        Should -Throw 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
+                        Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
                 }
             }
         }
