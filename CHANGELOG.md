@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change to xRDGatewayConfiguration
   - Updated call to `Set-RDDeploymentGatewayConfiguration` cmdlet to use `ErrorAction` 'Stop'
   - Updated call to `Set-RDDeploymentGatewayConfiguration` cmdlet to use a splat for better formatting
+- Change to xRDSessionDeployment
+  - Updating `SessionHost` parameter to allow for an array to be supplied
+  - Added unit tests to check that specifying an array does not throw an error
 - Changes to tests
   - xRDRemoteApp
     - Fixed tests for error scenarios to behave correctly
