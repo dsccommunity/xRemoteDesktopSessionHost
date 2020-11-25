@@ -33,11 +33,15 @@ try
 
         Import-Module RemoteDesktop -Force
 
-        $sessionDeploymentSplat = @{
+        $sourceSessionDeploymentValues = @{
             SessionHost      = 'sessionhost.lan'
             ConnectionBroker = 'connectionbroker.lan'
             WebAccessServer  = 'webaccess.lan'
         }
+
+        $sessionDeploymentSplat = $sourceSessionDeploymentValues.Clone()
+
+        $sessionHostArray = @('RDHOSTA.domain.local', 'RDHOSTB.domain.local')
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
@@ -147,6 +151,12 @@ try
                         $ConnectionBroker -eq $sessionDeploymentSplat['ConnectionBroker']
                     }
                 }
+
+                $sessionDeploymentSplat.SessionHost = $sessionHostArray
+                It 'Should not generate an error, given that an array was specified for SessionHost' {
+                    { Get-TargetResource @sessionDeploymentSplat } | Should -Not -Throw
+                }
+                $sessionDeploymentSplat.SessionHost = $sourceSessionDeploymentValues.SessionHost
             }
         }
         #endregion
@@ -164,6 +174,12 @@ try
                     $WebAccessServer -eq $sessionDeploymentSplat.WebAccessServer
                 }
             }
+
+            $sessionDeploymentSplat.SessionHost = $sessionHostArray
+            It 'Should not generate an error, given that an array was specified for SessionHost' {
+                { Set-TargetResource @sessionDeploymentSplat } | Should -Not -Throw
+            }
+            $sessionDeploymentSplat.SessionHost = $sourceSessionDeploymentValues.SessionHost
         }
         #endregion
 
@@ -224,6 +240,12 @@ try
             It 'Should return true, given the SessionDeployment is completed' {
                 Test-TargetResource @sessionDeploymentSplat | Should Be $true
             }
+
+            $sessionDeploymentSplat.SessionHost = $sessionHostArray
+            It 'Should not generate an error, given that an array was specified for SessionHost' {
+                { Test-TargetResource @sessionDeploymentSplat } | Should -Not -Throw
+            }
+            $sessionDeploymentSplat.SessionHost = $sourceSessionDeploymentValues.SessionHost
         }
         #endregion
     }
