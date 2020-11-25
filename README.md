@@ -35,7 +35,7 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 
 ### xRDSessionDeployment
 
-* **SessionHost**: Specifies the FQDN of a servers to host the RD Session Host role service.
+* **SessionHost**: Specifies the FQDN of the server(s) to host the RD Session Host role service.
 * **ConnectionBroker**: The FQDN of a server to host the RD Connection Broker role service.
 * **WebAccessServer**: The FQDN of a server to host the RD Web Access role service.
 
