@@ -256,8 +256,17 @@ function Set-TargetResource
         write-verbose ">> UseCachedCredentials:  $UseCachedCredentials"
         write-verbose ">> BypassLocal:           $BypassLocal"
 
-        Set-RdDeploymentGatewayConfiguration -ConnectionBroker $ConnectionBroker -gatewaymode $GatewayMode -gatewayexternalfqdn $ExternalFqdn `
-            -logonmethod $LogonMethod -usecachedcredentials $UseCachedCredentials -bypasslocal $BypassLocal -force
+        $setRdDeploymentGatewayConfigurationParams = @{
+            ConnectionBroker = $ConnectionBroker
+            GatewayMode = $GatewayMode
+            GatewayExternalFqdn = $ExternalFqdn
+            LogonMethod = $LogonMethod
+            UseCachedCredentials = $UseCachedCredentials
+            BypassLocal = $BypassLocal
+            Force = $true
+            ErrorAction = 'Stop'
+        }
+        Set-RDDeploymentGatewayConfiguration @setRdDeploymentGatewayConfigurationParams
     }
     else   # 'DoNotUse' or 'Automatic'
     {

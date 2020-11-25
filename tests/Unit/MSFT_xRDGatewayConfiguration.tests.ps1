@@ -156,8 +156,9 @@ try
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when if GatewayMode is Custom and a parameter is missing." {
-                    {Set-TargetResource -ConnectionBroker "connectionbroker.lan" -GatewayMode "Custom"} | should throw
+                It 'Should error when if GatewayMode is Custom and a parameter is missing.' {
+                    { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -GatewayMode 'Custom' -ErrorAction Stop } |
+                        Should -Throw
                 }
             }
 
@@ -369,8 +370,9 @@ try
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
             Context "Parameter Values,Validations and Errors" {
 
-                It "Should error when if GatewayMode is Custom and a parameter is missing." {
-                    {Set-TargetResource -ConnectionBroker "connectionbroker.lan" -GatewayMode "Custom"} | should throw
+                It 'Should error when if GatewayMode is Custom and a parameter is missing.' {
+                    { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -GatewayMode 'Custom' -ErrorAction Stop } |
+                        Should -Throw
                 }
             }
 
