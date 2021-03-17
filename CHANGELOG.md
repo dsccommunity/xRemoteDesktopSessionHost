@@ -4,7 +4,9 @@ The format is based on and uses the types of changes according to [Keep a Change
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
+- MSFT_xRDSessionCollection: Workaround for bug in Windows Server 2019
+  - Added a conditional match on returned Collections from `Get-RDSessionCollection` to
+   workaround bug scenario where multiple collections are returned instead of a single collection
 ## [2.0.0] - 2020-09-29
 
 ### Changed
