@@ -47,7 +47,22 @@ try
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-RDSessionCollection {
+                return @(
+                    {
+                        CollectionName = $testCollectionName
+                        CollectionDescription = 'Test Collection'
+                        SessionHost = $testSessionHost
+                        ConnectionBroker = $testConnectionBroker
+                    },
+                    {
+                        CollectionName = $testCollectionName2
+                        CollectionDescription = 'Test Collection 2'
+                        SessionHost = $testSessionHost
+                        ConnectionBroker = $testConnectionBroker
+                    }
+                )
+            }
 
             Context "Parameter Values,Validations and Errors" {
 
