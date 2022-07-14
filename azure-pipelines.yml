@@ -20,7 +20,7 @@ stages:
             name: dotNetCore
             inputs:
               packageType: runtime
-              version: 2.x
+              version: 2.1.0
 
           - task: GitVersion@5
             name: gitversion
