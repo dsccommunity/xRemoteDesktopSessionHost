@@ -14,12 +14,18 @@ stages:
     jobs:
       - job: BuildModuleJob
         pool:
-          vmImage: 'ubuntu 16.04'
+          vmImage: 'ubuntu 18.04'
         steps:
-          - task: GitVersion@5
-            name: gitversion
+          - task: gitversion/setup@0
+            displayName: Install GitVersion
             inputs:
+              versionSpec: '5.x'
               runtime: 'core'
+
+          - task: gitversion/execute@0
+            displayName: Determine Version
+            inputs:
+              useConfigFile: true
               configFilePath: 'GitVersion.yml'
 
           - task: PowerShell@2
