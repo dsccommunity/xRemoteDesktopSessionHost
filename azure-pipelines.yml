@@ -21,12 +21,12 @@ stages:
             inputs:
               versionSpec: '5.x'
               runtime: 'core'
-              configFilePath: 'GitVersion.yml'
 
           - task: gitversion/execute@0
             displayName: Determine Version
             inputs:
               useConfigFile: true
+              configFilePath: 'GitVersion.yml'
 
           - task: PowerShell@2
             name: Build
