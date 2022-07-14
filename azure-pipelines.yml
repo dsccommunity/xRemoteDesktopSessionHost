@@ -16,6 +16,12 @@ stages:
         pool:
           vmImage: 'ubuntu 18.04'
         steps:
+          - task: UseDotNet@2
+            name: dotNetCore
+            inputs:
+              packageType: runtime
+              version: 2.x
+
           - task: GitVersion@5
             name: gitversion
             inputs:
