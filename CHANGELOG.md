@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Change to xRDCertificateConfiguration
+  - import of RemoteDesktop module is now global; resolves [issue #79](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/79)
+
 ## [2.0.0] - 2020-09-29
 
 ### Changed
