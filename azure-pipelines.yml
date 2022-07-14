@@ -16,15 +16,10 @@ stages:
         pool:
           vmImage: 'ubuntu 18.04'
         steps:
-          - task: UseDotNet@2
-            name: dotNetCore
+          - task: gitversion/setup@0
+            displayName: Install GitVersion
             inputs:
-              packageType: runtime
-              version: 2.1.0
-
-          - task: GitVersion@5
-            name: gitversion
-            inputs:
+              versionSpec: '5.x'
               runtime: 'core'
               configFilePath: 'GitVersion.yml'
 
