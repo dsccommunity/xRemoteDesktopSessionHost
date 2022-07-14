@@ -5,6 +5,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- xRemoteDesktopSessionHost
+  - Pipeline deploy task updated to use image `ubuntu-latest`.
 - Change to xRDCertificateConfiguration
   - import of RemoteDesktop module is now global; resolves [issue #79](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/79)
 
