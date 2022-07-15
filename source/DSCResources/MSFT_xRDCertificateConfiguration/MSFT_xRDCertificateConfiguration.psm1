@@ -35,7 +35,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message (
-        $script:localizedData.GetCertificate -f $Role, $ConnectionBroker
+        $script:localizedData.VerboseGetCertificate -f $Role, $ConnectionBroker
     )
 
     Get-RDCertificate -Role $Role -ConnectionBroker $ConnectionBroker
@@ -86,7 +86,7 @@ function Set-TargetResource
     try
     {
         Write-Verbose -Message (
-            $script:localizedData.SetCertificate -f $Role, $ImportPath
+            $script:localizedData.VerboseSetCertificate -f $Role, $ImportPath
         )
 
         Set-RDCertificate @rdCertificateSplat
