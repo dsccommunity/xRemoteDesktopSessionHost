@@ -1,18 +1,26 @@
-# Change log for xRemoteDesktopSessionHost
+# Changelog for xRemoteDesktopSessionHost
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
 - xRemoteDesktopSessionHost
   - Pipeline deploy task updated to use image `ubuntu-latest`.
-- Change to xRDCertificateConfiguration
+  - Update pipeline files to the latest from Sampler's DSC Community template.
+- xRDCertificateConfiguration
   - import of RemoteDesktop module is now global; resolves [issue #79](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/79)
 - xRDSessionCollection
   - Workaround for bug in Windows Server 2019. Added a conditional match on returned
     Collections from `Get-RDSessionCollection` to workaround bug scenario where multiple
     collections are returned instead of a single collection.
+
+### Fixed
+
+- xRDCertificateConfiguration
+  - Verbose messages now uses the correct localized strings.
 
 ## [2.0.0] - 2020-09-29
 
