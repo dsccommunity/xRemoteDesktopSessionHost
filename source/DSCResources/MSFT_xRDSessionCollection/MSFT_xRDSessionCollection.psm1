@@ -134,13 +134,8 @@ function Test-TargetResource
         return $false
     }
 
-    if ($currentStatus.SessionHost.Count -ne $SessionHost.Count)
-    {
-        Write-Verbose -Message "Desired number of session hosts $($currentStatus.SessionHost.Count) <> Actual number of session hosts $($SessionHost.Count)"
-        return $false
-    }
-
-    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
+    $diff = if ($null -eq $currentStatus.SessionHost) { @() } else { $currentStatus.SessionHost }
+    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $diff
     if ($null -ne $compare)
     {
         Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
