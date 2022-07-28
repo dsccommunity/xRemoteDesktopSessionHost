@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Workaround for bug in Windows Server 2019. Added a conditional match on returned
     Collections from `Get-RDSessionCollection` to workaround bug scenario where multiple
     collections are returned instead of a single collection.
+  - Session Host supports array
+- xRDSessionDeployment
+  - Session Host supports array
 
 ### Fixed
 

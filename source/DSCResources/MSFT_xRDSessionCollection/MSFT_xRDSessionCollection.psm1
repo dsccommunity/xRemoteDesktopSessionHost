@@ -19,7 +19,7 @@ function Get-TargetResource
         [ValidateLength(1,256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
         [Parameter()]
@@ -54,7 +54,7 @@ function Set-TargetResource
         [ValidateLength(1,256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
         [Parameter()]
@@ -86,7 +86,7 @@ function Test-TargetResource
         [ValidateLength(1,256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
         [Parameter()]
