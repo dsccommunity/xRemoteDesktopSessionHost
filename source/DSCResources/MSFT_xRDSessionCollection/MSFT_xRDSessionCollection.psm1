@@ -35,7 +35,7 @@ function Get-TargetResource
     @{
         "CollectionName" = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
-        "SessionHost" = $localhost
+        "SessionHost" = (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
         "ConnectionBroker" = $ConnectionBroker
     }
 }
@@ -92,8 +92,30 @@ function Test-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
+
     Write-Verbose "Checking for existence of RDSH collection."
-    $null -ne (Get-TargetResource @PSBoundParameters).CollectionName
+    $currentStatus = Get-TargetResource @PSBoundParameters
+
+    if ($null -eq $currentStatus.CollectionName)
+    {
+        Write-Verbose -Message "No collection $CollectionName found"
+        return $false
+    }
+
+    if ($currentStatus.SessionHost.Count -ne $SessionHost.Count)
+    {
+        Write-Verbose -Message "Desired number of session hosts $($currentStatus.SessionHost.Count) <> Actual number of session hosts $($SessionHost.Count)"
+        return $false
+    }
+
+    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
+    if ($null -ne $compare)
+    {
+        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
+        return $false
+    }
+
+    $true
 }
 
 
