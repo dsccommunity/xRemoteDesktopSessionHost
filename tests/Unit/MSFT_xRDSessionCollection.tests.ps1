@@ -32,19 +32,12 @@ try
         $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
+        $testcollectionName = 'TestCollection'
+        $testcollectionNameMulti = 'TestCollectionMulti'
 
-        $testCollection = @(
-            @{
-                Name        = 'TestCollection1'
-                Description = 'Test Collection 1'
-            }
-            @{
-                Name        = 'TestCollection2'
-                Description = 'Test Collection 2'
-            }
-        )
-
-        $testSessionHost      = 'localhost'
+        $testSessionHost = 'localhost'
+        $testSessionHostMulti = 'rdsh1','rdsh2','rdsh3'
+        $invalidSessionHostMulti = 'rds1','rds2','rds3'
         $testConnectionBroker = 'localhost.fqdn'
 
         $validTargetResourceCall = @{
@@ -64,11 +57,48 @@ try
             SessionHost      = $testSessionHost
             ConnectionBroker = $testConnectionBroker
         }
+        $validMultiTargetResourceCall = @{
+            CollectionName = $testcollectionNameMulti
+            SessionHost = $testSessionHostMulti
+            ConnectionBroker = $testConnectionBroker
+        }
+        $invalidMultiTargetResourceCall = @{
+            CollectionName = $testcollectionNameMulti
+            SessionHost = $testSessionHostMulti | Select-Object -Skip 1
+            ConnectionBroker = $testConnectionBroker
+        }
 
         Import-Module RemoteDesktop -Force
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
+            Mock -CommandName Get-RDSessionCollection {
+                return @(
+                    {
+                        CollectionName = $testCollectionName
+                        CollectionDescription = 'Test Collection'
+                        SessionHost = $testSessionHost
+                        ConnectionBroker = $testConnectionBroker
+                    },
+                    {
+                        CollectionName = $testCollectionName2
+                        CollectionDescription = 'Test Collection 2'
+                        SessionHost = $testSessionHost
+                        ConnectionBroker = $testConnectionBroker
+                    }
+                )
+            }
+            Mock -CommandName Get-RDSessionHost {
+                return @{
+                    CollectionName = $testCollectionName
+                    SessionHost = $testSessionHost
+                }
+                return @{
+                    CollectionName = $testCollectionNameMulti
+                    SessionHost = $testSessionHostMulti
+                }
+            }
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 256" {
@@ -95,6 +125,14 @@ try
                     Get-TargetResource @validTargetResourceCall
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope It -ParameterFilter {
                         $CollectionName -eq $testCollection[0].Name -and
+                        $ConnectionBroker -eq $testConnectionBroker
+                    }
+                }
+
+                It 'Calls Get-RDSessionHost' {
+                    Get-TargetResource @validTargetResourceCall
+                    Assert-MockCalled -CommandName Get-RDSessionHost -Times 1 -Scope It -ParameterFilter {
+                        $CollectionName -eq $testCollectionName -and
                         $ConnectionBroker -eq $testConnectionBroker
                     }
                 }
@@ -264,6 +302,7 @@ try
 
             Context 'Validating Test-TargetResource output' {
                 Mock -CommandName Get-RDSessionCollection
+                Mock -CommandName Get-RDSessionHost
 
                 It 'Given Get-RDSessionCollection not returning a collection, test returns false' {
                     Test-TargetResource @validTargetResourceCall | Should Be $false
@@ -281,9 +320,49 @@ try
                         Size                         = 1
                     }
                 }
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollectionName
+                        SessionHost = $testSessionHost
+                    }
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $testSessionHostMulti
+                    }
+                }
 
                 It 'Given Get-RDSessionCollection returning a collection, test returns true' {
                     Test-TargetResource @validTargetResourceCall | Should Be $true
+                }
+
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollectionName
+                        SessionHost = $testSessionHost
+                    }
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $testSessionHostMulti
+                    }
+                }
+
+                It 'Given the incorrect number of session hosts it should return false' {
+                    Test-TargetResource @invalidMultiTargetResourceCall | Should Be $false
+                }
+
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollectionName
+                        SessionHost = $testSessionHost
+                    }
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $invalidTestSessionHostMulti
+                    }
+                }
+
+                It 'Given the list of session hosts is not equal, return false' {
+                    Test-TargetResource @validMultiTargetResourceCall | Should Be $false
                 }
             }
         }
