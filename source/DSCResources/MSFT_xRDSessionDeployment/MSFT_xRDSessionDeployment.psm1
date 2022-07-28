@@ -90,9 +90,34 @@ function Test-TargetResource
     )
 
     Write-Verbose "Checking RDSH role is deployed on this node."
+    $currentStatus = Get-TargetResource @PSBoundParameters
 
-    $get = Get-TargetResource @PSBoundParameters
-    $get.ConnectionBroker -eq $ConnectionBroker
+    if ($currentStatus.ConnectionBroker -ne $ConnectionBroker)
+    {
+        Write-Verbose -Message "Found connection broker '$($currentStatus.ConnectionBroker)', expected '$ConnectionBroker'"
+        return $false
+    }
+
+    if ($currentStatus.WebAccessServer -ne $WebAccessServer)
+    {
+        Write-Verbose -Message "Found web access '$($currentStatus.WebAccessServer)', expected '$WebAccessServer'"
+        return $false
+    }
+
+    if ($currentStatus.SessionHost -ne $SessionHost)
+    {
+        Write-Verbose -Message "Found session host(s) '$($currentStatus.SessionHost)', expected '$SessionHost'"
+        return $false
+    }
+
+    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
+    if ($null -ne $compare)
+    {
+        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
+        return $false
+    }
+
+    $true
 }
 
 Export-ModuleMember -Function *-TargetResource
