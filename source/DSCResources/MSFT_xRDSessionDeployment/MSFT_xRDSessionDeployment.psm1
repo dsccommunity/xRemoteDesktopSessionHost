@@ -15,7 +15,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
@@ -59,7 +59,7 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
@@ -82,7 +82,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
