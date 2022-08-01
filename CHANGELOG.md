@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- xRemoteDesktopSessionHost
+  - New examples for the resources
+
 ### Changed
 
 - xRemoteDesktopSessionHost
