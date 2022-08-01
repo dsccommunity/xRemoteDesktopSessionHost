@@ -246,6 +246,7 @@ try
 
     InModuleScope $script:DSCResourceName {
         $script:DSCResourceName    = 'MSFT_xRDGatewayConfiguration'
+
         Import-Module RemoteDesktop -Force
 
         #region Function Get-TargetResource
@@ -338,21 +339,25 @@ try
             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired LogonMethod AllowUserToSelectDuringConnection and current LogonMethod Password, test returns false' {
                 Test-TargetResource @testSplat | Should be $false
             }
+
             $testSplat.LogonMethod = 'Password'
             $testSplat.ExternalFqdn = 'testgateway.new.external.fqdn'
             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with different GatewayExternalFqdn, test returns false' {
                 Test-TargetResource @testSplat | Should be $false
             }
+
             $testSplat.ExternalFqdn = 'testgateway.external.fqdn'
             $testSplat.BypassLocal = $false
             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired BypassLocal false and current BypassLocal true, test returns false' {
                 Test-TargetResource @testSplat | Should be $false
             }
+
             $testSplat.BypassLocal = $true
             $testSplat.UseCachedCredentials = $false
             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired UseCachedCredentials false and current UseCachedCredentials true, test returns false' {
                 Test-TargetResource @testSplat | Should be $false
             }
+
             $testSplat.UseCachedCredentials = $true
             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with all properties validated, test returns true' {
                 Test-TargetResource @testSplat | Should be $true
@@ -394,10 +399,12 @@ try
                 }
                 Mock -CommandName Add-RDServer
                 Mock -CommandName Set-RdDeploymentGatewayConfiguration
+
                 It 'Given the role RDS-GATEWAY is already installed, Add-RDServer is not called' {
                     Set-TargetResource @setSplat
                     Assert-MockCalled -CommandName Add-RDServer -Times 0 -Scope It
                 }
+
                 Mock -CommandName Get-RDServer -MockWith {
                     [pscustomobject]@{
                         Server = 'testbroker.fqdn'
@@ -406,10 +413,12 @@ try
                         )
                     }
                 }
+
                 It 'Given the role RDS-GATEWAY is missing, Add-RDServer is called' {
                     Set-TargetResource @setSplat
                     Assert-MockCalled -CommandName Add-RDServer -Times 1 -Scope It
                 }
+
                 It 'Given GateWayMode Custom, Set-RdDeploymentGatewayConfiguration is called with all required parameters' {
                     Set-TargetResource @setSplat
                     Assert-MockCalled -CommandName Set-RdDeploymentGatewayConfiguration -Times 1 -Scope It -ParameterFilter {
