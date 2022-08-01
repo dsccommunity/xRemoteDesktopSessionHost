@@ -413,7 +413,6 @@ try
                         )
                     }
                 }
-
                 It 'Given the role RDS-GATEWAY is missing, Add-RDServer is called' {
                     Set-TargetResource @setSplat
                     Assert-MockCalled -CommandName Add-RDServer -Times 1 -Scope It
