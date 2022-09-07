@@ -69,8 +69,13 @@ try
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-            Mock -ParameterFilter { $CollectionName -and ($CollectionName -eq $testCollection[0].Name) } `
-                -CommandName Get-RDSessionCollection {
+            Context "Parameter Values,Validations and Errors" {
+
+                It "Should error when CollectionName length is greater than 256" {
+                    {Get-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                }
+
+                Mock -CommandName Get-RDSessionCollection {
                     $result = @()
 
                     foreach ($sessionCollection in $testCollection)
@@ -86,29 +91,6 @@ try
                     return $result
                 }
 
-                Mock -ParameterFilter { $CollectionName -and ($CollectionName -eq 'TestCollection4') } `
-                -CommandName Get-RDSessionCollection {
-                    return @(
-                        @{
-                            CollectionName = 'TestCollection3'
-                            CollectionDescription = 'Test Collection 3'
-                            SessionHost = $testSessionHost
-                            ConnectionBroker = $testConnectionBroker
-                        }
-                    )
-                }
-
-                Mock -ParameterFilter { $CollectionName -and ($CollectionName -eq 'TestCollection5') } `
-                -CommandName Get-RDSessionCollection {
-                    return $null
-                }
-
-            Context "Parameter Values,Validations and Errors" {
-
-                It "Should error when CollectionName length is greater than 256" {
-                    {Get-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
-                }
-
                 It 'Calls Get-RDSessionCollection with CollectionName and ConnectionBroker parameters' {
                     Get-TargetResource @validTargetResourceCall
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope It -ParameterFilter {
@@ -120,8 +102,23 @@ try
 
             Context "Non-existent Session Collection requested" {
 
+                Mock -CommandName Get-RDSessionCollection {
+                    return @(
+                        @{
+                            CollectionName = 'TestCollection3'
+                            CollectionDescription = 'Test Collection 3'
+                            SessionHost = $testSessionHost
+                            ConnectionBroker = $testConnectionBroker
+                        }
+                    )
+                }
+
                 It "Should return empty result set when requested CollectionName does not match single existing Session Collection (Win 2019)" {
                     Get-TargetResource @nonExistentTargetResourceCall1 | Should BeNullOrEmpty
+                }
+
+                Mock -CommandName Get-RDSessionCollection {
+                    return $null
                 }
 
                 It "Should return empty result set when requested CollectionName does not match single existing Session Collection (not Win 2019)" {
