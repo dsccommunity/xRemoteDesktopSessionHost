@@ -135,7 +135,7 @@ try
                 Mock -CommandName Add-RDSessionHost
 
                 It 'Given the configuration is executed on the Connection Broker, New-RDSessionCollection is called' {
-                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker ([System.Net.Dns]::GetHostByName((hostname)).HostName) -SessionHost $testSessionHost
+                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker ([System.Net.Dns]::GetHostByName((hostname)).HostName) -SessionHost $testSessionHost
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
                 }
 
