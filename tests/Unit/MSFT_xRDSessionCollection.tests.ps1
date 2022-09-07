@@ -61,7 +61,8 @@ try
                 -CommandName Get-RDSessionCollection {
                     $result = @()
 
-                    foreach ($sessionCollection in $testCollection){
+                    foreach ($sessionCollection in $testCollection)
+                    {
                         $result += @{
                             CollectionName = $sessionCollection.Name
                             CollectionDescription = $sessionCollection.Description
