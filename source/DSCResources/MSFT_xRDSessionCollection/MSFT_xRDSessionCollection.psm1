@@ -26,11 +26,14 @@ function Get-TargetResource
         [string] $ConnectionBroker
     )
     Write-Verbose "Getting information about RDSH collection."
-    $Collection = Get-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
-    if ($Collection.count -gt 1)
-    {
-        $Collection = $Collection | Where-Object CollectionName -eq $CollectionName
+    $params = @{
+        CollectionName   = $CollectionName
+        ConnectionBroker = $ConnectionBroker
+        ErrorAction      = 'SilentlyContinue'
     }
+
+    $Collection = Get-RDSessionCollection @params  | `
+        Where-Object  CollectionName -eq $CollectionName
 
     @{
         "CollectionName" = $Collection.CollectionName
