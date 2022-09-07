@@ -104,6 +104,14 @@ try
                     }
                 }
             }
+
+            Context "None-existent Session Collection requested" {
+
+                It "Should return empty result set when requested CollectionName does not match single existing Session Collection" {
+                    $validTargetResourceCall.CollectionName = 'TestCollection4'
+                    Get-TargetResource @validTargetResourceCall | Should BeNullOrEmpty
+                }
+            }
         }
         #endregion
 
