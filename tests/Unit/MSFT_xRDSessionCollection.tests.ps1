@@ -125,6 +125,29 @@ try
                     Get-TargetResource @nonExistentTargetResourceCall2 | Should BeNullOrEmpty
                 }
             }
+
+            Context "Two Session Collections exist with same CollectionName" {
+                Mock -CommandName Get-RDSessionCollection {
+                    $result = @()
+
+                    foreach ($sessionCollection in $testCollection)
+                    {
+                        $result += @{
+                            CollectionName = $testCollection[0].Name
+                            CollectionDescription = $sessionCollection.Description
+                            SessionHost = $testSessionHost
+                            ConnectionBroker = $testConnectionBroker
+                        }
+                    }
+
+                    return $result
+                }
+
+                It "should throw exception" {
+                    { Get-TargetResource @validTargetResourceCall } | Should throw
+                }
+            }
+
         }
         #endregion
 
