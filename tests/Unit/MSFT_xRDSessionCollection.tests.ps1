@@ -118,7 +118,7 @@ try
                 }
             }
 
-            Context "None-existent Session Collection requested" {
+            Context "Non-existent Session Collection requested" {
 
                 It "Should return empty result set when requested CollectionName does not match single existing Session Collection (Win 2019)" {
                     Get-TargetResource @nonExistentTargetResourceCall1 | Should BeNullOrEmpty
