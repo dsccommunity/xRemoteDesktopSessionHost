@@ -35,7 +35,12 @@ function Get-TargetResource
     $Collection = Get-RDSessionCollection @params  | `
         Where-Object  CollectionName -eq $CollectionName
 
-    @{
+
+    if ($Collection.Count -eq 0) {
+        return $null
+    }
+
+    return @{
         "CollectionName" = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
         "SessionHost" = $localhost
