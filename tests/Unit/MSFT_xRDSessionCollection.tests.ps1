@@ -32,13 +32,23 @@ try
         $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
-        $testcollectionName = 'TestCollection'
+
+        $testCollection = @(
+            @{
+                Name        = 'TestCollection1'
+                Description = 'Test Collection 1'
+            }
+            @{
+                Name        = 'TestCollection2'
+                Description = 'Test Collection 2'
+            }
+        )
 
         $testSessionHost = 'localhost'
         $testConnectionBroker = 'localhost.fqdn'
 
         $validTargetResourceCall = @{
-            CollectionName = $testCollectionName
+            CollectionName =  $testCollection[0].Name
             SessionHost = $testSessionHost
             ConnectionBroker = $testConnectionBroker
         }
@@ -48,20 +58,18 @@ try
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
             Mock -CommandName Get-RDSessionCollection {
-                return @(
-                    {
-                        CollectionName = $testCollectionName
-                        CollectionDescription = 'Test Collection'
-                        SessionHost = $testSessionHost
-                        ConnectionBroker = $testConnectionBroker
-                    },
-                    {
-                        CollectionName = $testCollectionName2
-                        CollectionDescription = 'Test Collection 2'
+                $result = @()
+
+                foreach ($sessionCollection in $testCollection){
+                    $result += @{
+                        CollectionName = $sessionCollection.Name
+                        CollectionDescription = $sessionCollection.Description
                         SessionHost = $testSessionHost
                         ConnectionBroker = $testConnectionBroker
                     }
-                )
+                }
+
+                return $result
             }
 
             Context "Parameter Values,Validations and Errors" {
