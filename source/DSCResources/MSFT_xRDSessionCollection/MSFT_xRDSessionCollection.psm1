@@ -40,6 +40,10 @@ function Get-TargetResource
         return $null
     }
 
+    if ($Collection.Count -gt 1) {
+        Throw 'non-singular RDSessionCollection in result set'
+    }
+
     return @{
         "CollectionName" = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
