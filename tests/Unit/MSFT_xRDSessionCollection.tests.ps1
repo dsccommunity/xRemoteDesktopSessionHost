@@ -181,9 +181,9 @@ try
                 Mock -CommandName Get-RDSessionCollection -MockWith {
                     [pscustomobject]@{
                         AutoAssignPersonalDesktop = $false
-                        CollectionAlias = $testcollectionName
+                        CollectionAlias = $testCollection[0].Name
                         CollectionDescription = 'Pester Test Collection Output'
-                        CollectionName = $testcollectionName
+                        CollectionName = $testCollection[0].Name
                         CollectionType = 'PooledUnmanaged'
                         GrantAdministrativePrivilege = $false
                         ResourceType = 'Remote Desktop'
