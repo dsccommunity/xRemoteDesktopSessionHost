@@ -36,11 +36,13 @@ function Get-TargetResource
         Where-Object  CollectionName -eq $CollectionName
 
 
-    if ($Collection.Count -eq 0) {
+    if ($Collection.Count -eq 0)
+    {
         return $null
     }
 
-    if ($Collection.GetType().Name -eq 'Array' -and $Collection.Count -gt 1) {
+    if ($Collection.GetType().Name -eq 'Array' -and $Collection.Count -gt 1)
+    {
         Throw 'non-singular RDSessionCollection in result set'
     }
 
