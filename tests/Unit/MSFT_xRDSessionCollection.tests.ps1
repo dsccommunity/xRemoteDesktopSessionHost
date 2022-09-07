@@ -85,6 +85,11 @@ try
                     )
                 }
 
+                Mock -ParameterFilter { $CollectionName -and ($CollectionName -eq 'TestCollection5') } `
+                -CommandName Get-RDSessionCollection {
+                    return $null
+                }
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 256" {
