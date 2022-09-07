@@ -82,7 +82,7 @@ try
                 It 'Calls Get-RDSessionCollection with CollectionName and ConnectionBroker parameters' {
                     Get-TargetResource @validTargetResourceCall
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope It -ParameterFilter {
-                        $CollectionName -eq $testCollectionName -and
+                        $CollectionName -eq $testCollection[0].Name -and
                         $ConnectionBroker -eq $testConnectionBroker
                     }
                 }
