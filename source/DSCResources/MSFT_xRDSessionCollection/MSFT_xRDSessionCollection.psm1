@@ -40,7 +40,7 @@ function Get-TargetResource
         return $null
     }
 
-    if ($Collection.Count -gt 1) {
+    if ($Collection.GetType().Name -eq 'Array' -and $Collection.Count -gt 1) {
         Throw 'non-singular RDSessionCollection in result set'
     }
 
