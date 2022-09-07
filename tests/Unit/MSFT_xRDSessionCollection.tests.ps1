@@ -73,6 +73,18 @@ try
                     return $result
                 }
 
+                Mock -ParameterFilter { $CollectionName -and ($CollectionName -eq 'TestCollection4') } `
+                -CommandName Get-RDSessionCollection {
+                    return @(
+                        @{
+                            CollectionName = 'TestCollection3'
+                            CollectionDescription = 'Test Collection 3'
+                            SessionHost = $testSessionHost
+                            ConnectionBroker = $testConnectionBroker
+                        }
+                    )
+                }
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 256" {
