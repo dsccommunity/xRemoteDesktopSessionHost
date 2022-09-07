@@ -107,8 +107,13 @@ try
 
             Context "None-existent Session Collection requested" {
 
-                It "Should return empty result set when requested CollectionName does not match single existing Session Collection" {
+                It "Should return empty result set when requested CollectionName does not match single existing Session Collection (Win 2019)" {
                     $validTargetResourceCall.CollectionName = 'TestCollection4'
+                    Get-TargetResource @validTargetResourceCall | Should BeNullOrEmpty
+                }
+
+                It "Should return empty result set when requested CollectionName does not match single existing Session Collection (not Win 2019)" {
+                    $validTargetResourceCall.CollectionName = 'TestCollection5'
                     Get-TargetResource @validTargetResourceCall | Should BeNullOrEmpty
                 }
             }
