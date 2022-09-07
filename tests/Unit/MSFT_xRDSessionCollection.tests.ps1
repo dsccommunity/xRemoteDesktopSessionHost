@@ -53,6 +53,18 @@ try
             ConnectionBroker = $testConnectionBroker
         }
 
+        $nonExistentTargetResourceCall1 = @{
+            CollectionName =  'TestCollection4'
+            SessionHost = $testSessionHost
+            ConnectionBroker = $testConnectionBroker
+        }
+
+        $nonExistentTargetResourceCall2 = @{
+            CollectionName =  'TestCollection5'
+            SessionHost = $testSessionHost
+            ConnectionBroker = $testConnectionBroker
+        }
+
         Import-Module RemoteDesktop -Force
 
         #region Function Get-TargetResource
@@ -109,13 +121,11 @@ try
             Context "None-existent Session Collection requested" {
 
                 It "Should return empty result set when requested CollectionName does not match single existing Session Collection (Win 2019)" {
-                    $validTargetResourceCall.CollectionName = 'TestCollection4'
-                    Get-TargetResource @validTargetResourceCall | Should BeNullOrEmpty
+                    Get-TargetResource @nonExistentTargetResourceCall1 | Should BeNullOrEmpty
                 }
 
                 It "Should return empty result set when requested CollectionName does not match single existing Session Collection (not Win 2019)" {
-                    $validTargetResourceCall.CollectionName = 'TestCollection5'
-                    Get-TargetResource @validTargetResourceCall | Should BeNullOrEmpty
+                    Get-TargetResource @nonExistentTargetResourceCall2 | Should BeNullOrEmpty
                 }
             }
         }
