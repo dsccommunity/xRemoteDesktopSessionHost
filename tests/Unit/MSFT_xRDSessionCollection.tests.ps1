@@ -106,8 +106,8 @@ try
 
                 It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
                     Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $ConnectionBroker -SessionHost $testSessionHost
-                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
 
@@ -121,8 +121,8 @@ try
 
                 It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
                     Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $ConnectionBroker -SessionHost $testSessionHost
-                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
 
