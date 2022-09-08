@@ -101,7 +101,10 @@ try
 
             Context 'Errors thrown by New-RDSessionCollection are ignored' {
                 Mock -CommandName New-RDSessionCollection -MockWith {
-                    throw 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
+                    if ($ErrorActionPreference -ne 'SilentlyContinue')
+                    {
+                        throw 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
+                    }
                 }
 
                 It 'Given the configuration is applied, New-RDSessionCollection is called' {
