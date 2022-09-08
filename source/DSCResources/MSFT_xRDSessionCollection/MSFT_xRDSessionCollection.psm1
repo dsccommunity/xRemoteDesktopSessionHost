@@ -59,6 +59,8 @@ function Set-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
+
+    $PSBoundParameters.Add('ErrorAction','SilentlyContinue')
     Write-Verbose "Creating a new RDSH collection."
     New-RDSessionCollection @PSBoundParameters
 }
