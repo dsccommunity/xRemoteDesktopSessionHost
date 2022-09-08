@@ -154,15 +154,6 @@ try
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
 
-            Mock -CommandName Get-RDSessionCollection {
-                return @{
-                    CollectionName        = $testCollectionName
-                    CollectionDescription = 'Test Collection'
-                    SessionHost           = $testSessionHost
-                    ConnectionBroker      = $testConnectionBroker
-                }
-            }
-
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 256" {
@@ -170,29 +161,20 @@ try
                 }
             }
 
-            Context 'Validate Set-TargetResource actions' {
-                Mock -CommandName New-RDSessionCollection
-                Mock -CommandName Add-RDSessionHost
-
-                It 'Given the configuration is executed on the Connection Broker, New-RDSessionCollection is called' {
-                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker ([System.Net.Dns]::GetHostByName((hostname)).HostName) -SessionHost $testSessionHost
-                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
+            Mock -CommandName Get-RDSessionCollection {
+                return @{
+                    CollectionName        = $testCollection[0].Name
+                    CollectionDescription = 'Test Collection'
+                    SessionHost           = $testSessionHost
+                    ConnectionBroker      = $testConnectionBroker
                 }
-
-                It 'Given the configuration is not executed on the Connection Broker, Add-RDSessionHost is called' {
-                    Set-TargetResource @validTargetResourceCall
-                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It
-                }
-
-                It 'Given the configuration is not executed on the Connection Broker, and a description is passed, Add-RDSessionHost is called without the collection description' {
-                    Set-TargetResource @validTargetResourceCall -CollectionDescription 'Pester Test Collection Output'
-                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It
+            }
 
             Context 'Validate Set-TargetResource actions' {
                 Mock -CommandName New-RDSessionCollection
 
                 It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
-                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
@@ -207,7 +189,7 @@ try
                 }
 
                 It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
-                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
@@ -219,11 +201,11 @@ try
                     return $null
                 }
 
-                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollectionName,$testConnectionBroker )
+                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollection[0].Name,$testConnectionBroker )
 
                 It 'throws an exception' {
                     {
-                        Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                        Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
                     } | should throw $exceptionMessage
 
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
