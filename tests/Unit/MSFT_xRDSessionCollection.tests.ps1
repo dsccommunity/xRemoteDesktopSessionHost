@@ -92,21 +92,10 @@ try
 
             Context 'Validate Set-TargetResource actions' {
                 Mock -CommandName New-RDSessionCollection
-                Mock -CommandName Add-RDSessionHost
 
-                It 'Given the configuration is executed on the Connection Broker, New-RDSessionCollection is called' {
+                It 'Given the configuration is applied, New-RDSessionCollection is called' {
                     Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker ([System.Net.Dns]::GetHostByName((hostname)).HostName) -SessionHost $testSessionHost
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
-                }
-
-                It 'Given the configuration is not executed on the Connection Broker, Add-RDSessionHost is called' {
-                    Set-TargetResource @validTargetResourceCall
-                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It
-                }
-
-                It 'Given the configuration is not executed on the Connection Broker, and a description is passed, Add-RDSessionHost is called without the collection description' {
-                    Set-TargetResource @validTargetResourceCall -CollectionDescription 'Pester Test Collection Output'
-                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It
                 }
             }
         }
