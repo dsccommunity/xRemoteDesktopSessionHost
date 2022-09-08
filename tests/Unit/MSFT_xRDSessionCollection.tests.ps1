@@ -92,12 +92,22 @@ try
 
             $ConnectionBroker = ([System.Net.Dns]::GetHostByName((hostname))).HostName
 
+            Mock -CommandName Get-RDSessionCollection {
+                return @{
+                    CollectionName        = $testCollectionName
+                    CollectionDescription = 'Test Collection'
+                    SessionHost           = $testSessionHost
+                    ConnectionBroker      = $ConnectionBroker
+                }
+            }
+
             Context 'Validate Set-TargetResource actions' {
                 Mock -CommandName New-RDSessionCollection
 
-                It 'Given the configuration is applied, New-RDSessionCollection is called' {
+                It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
                     Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $ConnectionBroker -SessionHost $testSessionHost
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Context
                 }
             }
 
@@ -109,9 +119,10 @@ try
                     }
                 }
 
-                It 'Given the configuration is applied, New-RDSessionCollection is called' {
+                It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
                     Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $ConnectionBroker -SessionHost $testSessionHost
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Context
                 }
             }
 
