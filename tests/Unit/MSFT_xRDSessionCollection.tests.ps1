@@ -153,6 +153,16 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
+
+            Mock -CommandName Get-RDSessionCollection {
+                return @{
+                    CollectionName        = $testCollectionName
+                    CollectionDescription = 'Test Collection'
+                    SessionHost           = $testSessionHost
+                    ConnectionBroker      = $testConnectionBroker
+                }
+            }
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 256" {
@@ -177,8 +187,50 @@ try
                 It 'Given the configuration is not executed on the Connection Broker, and a description is passed, Add-RDSessionHost is called without the collection description' {
                     Set-TargetResource @validTargetResourceCall -CollectionDescription 'Pester Test Collection Output'
                     Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope It
+
+            Context 'Validate Set-TargetResource actions' {
+                Mock -CommandName New-RDSessionCollection
+
+                It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
+                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
+
+            Context 'Errors thrown by New-RDSessionCollection are ignored' {
+                Mock -CommandName New-RDSessionCollection -MockWith {
+                    if ($ErrorActionPreference -ne 'SilentlyContinue')
+                    {
+                        throw 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
+                    }
+                }
+
+                It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
+                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
+                }
+            }
+
+            Context 'Get-RDSessionCollection returning empty result set after calling New-RDSessionCollection' {
+                Mock -CommandName New-RDSessionCollection
+                Mock -CommandName Get-RDSessionCollection {
+                    return $null
+                }
+
+                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollectionName,$testConnectionBroker )
+
+                It 'throws an exception' {
+                    {
+                        Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    } | should throw $exceptionMessage
+
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
+                }
+            }
+
         }
         #endregion
 

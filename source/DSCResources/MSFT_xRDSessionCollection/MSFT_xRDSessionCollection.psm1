@@ -4,7 +4,6 @@ if (!(Test-xRemoteDesktopSessionHostOsRequirement))
     throw "The minimum OS requirement was not met."
 }
 Import-Module RemoteDesktop
-$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -54,7 +53,7 @@ function Get-TargetResource
     return @{
         "CollectionName" = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
-        "SessionHost" = $localhost
+        "SessionHost" = $SessionHost
         "ConnectionBroker" = $ConnectionBroker
     }
 }
@@ -79,15 +78,16 @@ function Set-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
+
+    $PSBoundParameters.Add('ErrorAction','SilentlyContinue')
     Write-Verbose "Creating a new RDSH collection."
-    if ($localhost -eq $ConnectionBroker)
+    New-RDSessionCollection @PSBoundParameters
+
+    $PSBoundParameters.Remove('ErrorAction')
+    if (-not (Test-TargetResource @PSBoundParameters))
     {
-        New-RDSessionCollection @PSBoundParameters
-    }
-    else
-    {
-        $PSBoundParameters.Remove('CollectionDescription')
-        Add-RDSessionHost @PSBoundParameters
+        Write-Verbose ('Session Collection ''{0}'' does not exist following attempted creation' -f $CollectionName)
+        throw ('''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $CollectionName,$ConnectionBroker)
     }
 }
 
