@@ -4,7 +4,6 @@ if (!(Test-xRemoteDesktopSessionHostOsRequirement))
     throw "The minimum OS requirement was not met."
 }
 Import-Module RemoteDesktop
-$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -35,7 +34,7 @@ function Get-TargetResource
     @{
         "CollectionName" = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
-        "SessionHost" = $localhost
+        "SessionHost" = $SessionHost
         "ConnectionBroker" = $ConnectionBroker
     }
 }
@@ -61,15 +60,7 @@ function Set-TargetResource
         [string] $ConnectionBroker
     )
     Write-Verbose "Creating a new RDSH collection."
-    if ($localhost -eq $ConnectionBroker)
-    {
-        New-RDSessionCollection @PSBoundParameters
-    }
-    else
-    {
-        $PSBoundParameters.Remove('CollectionDescription')
-        Add-RDSessionHost @PSBoundParameters
-    }
+    New-RDSessionCollection @PSBoundParameters
 }
 
 
