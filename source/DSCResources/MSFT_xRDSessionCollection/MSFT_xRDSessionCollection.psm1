@@ -63,6 +63,13 @@ function Set-TargetResource
     $PSBoundParameters.Add('ErrorAction','SilentlyContinue')
     Write-Verbose "Creating a new RDSH collection."
     New-RDSessionCollection @PSBoundParameters
+
+    $PSBoundParameters.Remove('ErrorAction')
+    if (-not (Test-TargetResource @PSBoundParameters))
+    {
+        Write-Verbose ('Session Collection ''{0}'' does not exist following attempted creation' -f $CollectionName)
+        throw ('''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $CollectionName,$ConnectionBroker)
+    }
 }
 
 
