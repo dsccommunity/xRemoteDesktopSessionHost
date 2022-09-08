@@ -98,6 +98,18 @@ try
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
                 }
             }
+
+            Context 'Errors thrown by New-RDSessionCollection are ignored' {
+                Mock -CommandName New-RDSessionCollection -MockWith {
+                    throw 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
+                }
+
+                It 'Given the configuration is applied, New-RDSessionCollection is called' {
+                    Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker ([System.Net.Dns]::GetHostByName((hostname)).HostName) -SessionHost $testSessionHost
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope It
+                }
+            }
+
         }
         #endregion
 
