@@ -126,6 +126,24 @@ try
                 }
             }
 
+            Context 'Get-RDSessionCollection returning empty result set after calling New-RDSessionCollection' {
+                Mock -CommandName New-RDSessionCollection
+                Mock -CommandName Get-RDSessionCollection {
+                    return $null
+                }
+
+                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollectionName,$ConnectionBroker )
+
+                It 'throws an exception' {
+                    {
+                        Set-TargetResource -CollectionName $testcollectionName -ConnectionBroker $ConnectionBroker -SessionHost $testSessionHost
+                    } | should throw $exceptionMessage
+
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
+                }
+            }
+
         }
         #endregion
 
