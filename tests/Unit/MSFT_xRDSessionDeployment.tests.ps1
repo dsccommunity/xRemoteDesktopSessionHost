@@ -39,6 +39,12 @@ try
             WebAccessServer  = 'webaccess.lan'
         }
 
+        $sessionDeploymentMultiSplat = @{
+            SessionHost      = 'sessionhost1.lan','sessionhost2.lan'
+            ConnectionBroker = 'connectionbroker.lan'
+            WebAccessServer  = 'webaccess.lan'
+        }
+
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
 
@@ -198,6 +204,56 @@ try
 
             It 'Should return false, given the ConnectionBroker is not targeted in this deployment' {
                 Test-TargetResource @sessionDeploymentSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                [pscustomobject]@{
+                    Server = $sessionDeploymentSplat.SessionHost
+                    Roles = @(
+                        'RDS-RD-SERVER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = 'webaccessnew.lan'
+                    Roles = @(
+                        'RDS-WEB-ACCESS'
+                    )
+                }
+            }
+
+            It 'Should return false, given the WebAccessServer is not targeted in this deployment' {
+                Test-TargetResource @sessionDeploymentSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                [pscustomobject]@{
+                    Server = 'sessionhost1.lan','sessionhost2.lan','sessionhost3.lan'
+                    Roles = @(
+                        'RDS-RD-SERVER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.WebAccessServer
+                    Roles = @(
+                        'RDS-WEB-ACCESS'
+                    )
+                }
+            }
+
+            It 'Should return false, given the list of Session Hosts is different in this deployment' {
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
             }
 
             Mock -CommandName Get-RDServer -MockWith {
