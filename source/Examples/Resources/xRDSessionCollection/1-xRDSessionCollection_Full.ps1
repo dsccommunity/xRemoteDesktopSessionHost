@@ -1,4 +1,4 @@
-﻿<#PSScriptInfo
+<#PSScriptInfo
 .VERSION 1.0.0
 .GUID 627c0685-8348-4514-bbf7-f7616b814a53
 .AUTHOR DSC Community

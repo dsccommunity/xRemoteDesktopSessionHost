@@ -21,7 +21,7 @@ function Get-TargetResource
         [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker
     )
     Write-Verbose -Message "Getting information about RDSH collection."
@@ -54,7 +54,7 @@ function Get-TargetResource
         "ConnectionBroker"      = $ConnectionBroker
         "CollectionDescription" = $Collection.CollectionDescription
         "CollectionName"        = $Collection.CollectionName
-        "SessionHost"           = (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
+        "SessionHost"           = [System.String[]] (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
     }
 }
 
@@ -75,7 +75,7 @@ function Set-TargetResource
         [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker
     )
 
@@ -121,7 +121,7 @@ function Test-TargetResource
         [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker
     )
 

@@ -41,7 +41,7 @@ function Get-TargetResource
     $deployed = Get-RDServer -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
 
     @{
-        SessionHost = $deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server
+        SessionHost = [System.String[]] ($deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server)
         ConnectionBroker = $deployed | Where-Object Roles -contains "RDS-CONNECTION-BROKER" | ForEach-Object Server
         WebAccessServer = $deployed | Where-Object Roles -contains "RDS-WEB-ACCESS" | ForEach-Object Server
     }
@@ -104,9 +104,9 @@ function Test-TargetResource
         return $false
     }
 
-    if ($currentStatus.SessionHost -ne $SessionHost)
+    if ($SessionHost.Count -gt 0 -and $null -eq $currentStatus.SessionHost)
     {
-        Write-Verbose -Message "Found session host(s) '$($currentStatus.SessionHost)', expected '$SessionHost'"
+        Write-Verbose -Message "Desired list of session hosts is empty, while $($SessionHost.Count) session hosts should have been configured."
         return $false
     }
 
