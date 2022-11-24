@@ -48,17 +48,13 @@ try
                         ClientAccessName         = ''
                         DatabaseConnectionString = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     }
-                } -ParameterFilter {
-                    $ConnectionBroker -eq 'RDCB1' -and
-                    $DatabaseConnectionString -eq 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS' -and
-                    $ClientAccessName -eq 'rdsfarm.contoso.com'
                 }
 
                 $resourceNotConfiguredSplat = @{
-                    ConnectionBroker                  = 'RDCB1'
                     DatabaseConnectionString          = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     DatabaseSecondaryConnectionString = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1.contoso.com;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     ClientAccessName                  = 'rdsfarm.contoso.com'
+                    DatabaseFilePath                  = 'C:\RDFiles\RemoteDesktopDeployment.mdf'
                 }
 
                 It 'Get-TargetResource returns no active management server' {
@@ -72,7 +68,6 @@ try
                 It 'Set-TargetResource runs Set-RDConnectionBrokerHighAvailability' {
                     Set-TargetResource @resourceNotConfiguredSplat
                     Assert-MockCalled -CommandName Set-RDConnectionBrokerHighAvailability -Times 1 -Exactly -ParameterFilter {
-                        $ConnectionBroker -eq 'RDCB1' -and
                         $DatabaseConnectionString -eq 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS' -and
                         $ClientAccessName -eq 'rdsfarm.contoso.com'
                     }
@@ -88,16 +83,15 @@ try
                         ClientAccessName         = 'rdsfarm.contoso.com'
                         DatabaseConnectionString = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     }
-                } -ParameterFilter { $ConnectionBroker -eq 'RDCB1' }
+                }
 
                 $resourceConfiguredSplat = @{
-                    ConnectionBroker         = 'RDCB1'
                     DatabaseConnectionString = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     ClientAccessName         = 'rdsfarm.contoso.com'
                 }
 
                 It 'Get-TargetResource returns an active management server' {
-                    (Get-TargetResource @resourceConfiguredSplat).ActiveManagementServer | Should -Be $resourceConfiguredSplat.ConnectionBroker
+                    (Get-TargetResource @resourceConfiguredSplat).ActiveManagementServer | Should -Be 'RDCB1'
                 }
 
                 It 'Test-TargetResource returns true' {
