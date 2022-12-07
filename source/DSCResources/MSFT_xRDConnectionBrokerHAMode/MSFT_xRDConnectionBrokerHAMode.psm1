@@ -31,7 +31,7 @@ function Get-TargetResource
         [ValidateLength(1, 256)]
         [string] $ClientAccessName
     )
-    Write-Verbose "Getting information about RD Connection Broker High Availability Mode."
+    Write-Verbose -Message ($script:localizedData.VerboseGetHAMode -f $ConnectionBroker, $ClientAccessName)
 
     if ([string]::IsNullOrWhiteSpace($ConnectionBroker))
     {
@@ -77,7 +77,8 @@ function Set-TargetResource
         [ValidateLength(1, 256)]
         [string] $ClientAccessName
     )
-    Write-Verbose "Set RD Connection Broker for high availability mode."
+
+    Write-Verbose -Message ($script:localizedData.VerboseConfigureHAMode -f $ConnectionBroker, $ClientAccessName)
 
     if ([string]::IsNullOrWhiteSpace($ConnectionBroker))
     {
@@ -129,7 +130,7 @@ function Test-TargetResource
         [ValidateLength(1, 256)]
         [string] $ClientAccessName
     )
-    Write-Verbose "Checking for existence of RD Connection Broker for high availability mode."
+    Write-Verbose ($script:localizedData.VerboseTestHAMode -f $ConnectionBroker, $ClientAccessName)
 
     if ([string]::IsNullOrWhiteSpace($ConnectionBroker))
     {
