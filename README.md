@@ -139,3 +139,11 @@ The resource examples are also available in the [xRemoteDesktopSessionHost Wiki]
 * **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
 * **ImportPath**: The certificate that should be used, should point to a PFX file on the filesystem.
 * **Credential**: The password (if applicable) for the PFX file. The username is ignored.
+
+### xRDConnectionBrokerHAMode
+
+* **ConnectionBroker**: Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **DatabaseConnectionString**: Specifies the primary connection string to the database.
+* **DatabaseSecondaryConnectionString**: Specifies the secondary connection string to the database.
+* **DatabaseFilePath**: Specifies the database file path of SQL Server.
+* **ClientAccessName**: Specifies the FQDN of client access name.
