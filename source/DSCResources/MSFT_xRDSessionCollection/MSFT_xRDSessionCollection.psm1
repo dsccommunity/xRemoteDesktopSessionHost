@@ -47,9 +47,7 @@ function Get-TargetResource
 
     if ($Collection.Count -gt 1)
     {
-        $CollectionType = $Collection.GetType()
-
-        if ($CollectionType.Name -eq 'Array' -or $CollectionType.BaseType.Name -eq 'Array')
+        if ($Collection -is [System.Array] -or $Collection.GetType().BaseType -is [System.Array])
         {
             throw 'non-singular RDSessionCollection in result set'
         }
