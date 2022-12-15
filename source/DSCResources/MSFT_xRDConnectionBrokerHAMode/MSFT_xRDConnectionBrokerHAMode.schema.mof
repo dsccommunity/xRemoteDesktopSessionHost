@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0.0"), FriendlyName("xRDConnectionBrokerHAMode")]
+class MSFT_xRDConnectionBrokerHAMode : OMI_BaseResource
+{
+    [Key, Description("Specifies the FQDN of client access name.")] string ClientAccessName;
+    [write, required, Description("Specifies the primary connection string to the database.")] string DatabaseConnectionString;
+    [write, Description("Specifies the secondary connection string to the database.")] string DatabaseSecondaryConnectionString;
+    [write, Description("Specifies the FQDN of a server to host the RD Connection Broker role service.")] string ConnectionBroker;
+    [write, Description("Specifies the database file path of SQL Server.")] string DatabaseFilePath;
+};

@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- xRDConnectionBrokerHAMode
+  - New resource to configure HA mode on a connection broker
+
 ## [2.1.0] - 2022-08-07
 
 ### Added
