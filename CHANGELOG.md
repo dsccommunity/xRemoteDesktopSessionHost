@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ignore errors from New-RDSessionCollection and instead checks the collection is created; resolves [issue #105](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/105)
   - Always filter SessionCollection result; resolves [issue #106](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/106)
 
+### Added
+
+- xRDConnectionBrokerHAMode
+  - New resource to configure HA mode on a connection broker
+
 ## [2.1.0] - 2022-08-07
 
 ### Added
