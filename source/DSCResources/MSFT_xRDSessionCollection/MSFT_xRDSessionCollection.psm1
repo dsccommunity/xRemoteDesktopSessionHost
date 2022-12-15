@@ -37,7 +37,12 @@ function Get-TargetResource
 
     if ($Collection.Count -eq 0)
     {
-        return $null
+        return @{
+            "CollectionName" = $null
+            "CollectionDescription" = $null
+            "SessionHost" = $SessionHost
+            "ConnectionBroker" = $null
+        }
     }
 
     if ($Collection.Count -gt 1)
