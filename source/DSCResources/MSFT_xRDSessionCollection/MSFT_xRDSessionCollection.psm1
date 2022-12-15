@@ -26,8 +26,8 @@ function Get-TargetResource
     )
     Write-Verbose "Getting information about RDSH collection."
     $params = @{
-        CollectionName   = $CollectionName
         ConnectionBroker = $ConnectionBroker
+        CollectionName   = $CollectionName
         ErrorAction      = 'SilentlyContinue'
     }
 
@@ -38,10 +38,10 @@ function Get-TargetResource
     if ($Collection.Count -eq 0)
     {
         return @{
-            "CollectionName"        = $null
-            "CollectionDescription" = $null
-            "SessionHost"           = $SessionHost
             "ConnectionBroker"      = $null
+            "CollectionDescription" = $null
+            "CollectionName"        = $null
+            "SessionHost"           = $SessionHost
         }
     }
 
@@ -56,10 +56,10 @@ function Get-TargetResource
     }
 
     return @{
-        "CollectionName"        = $Collection.CollectionName
-        "CollectionDescription" = $Collection.CollectionDescription
-        "SessionHost"           = $SessionHost
         "ConnectionBroker"      = $ConnectionBroker
+        "CollectionDescription" = $Collection.CollectionDescription
+        "CollectionName"        = $Collection.CollectionName
+        "SessionHost"           = $SessionHost
     }
 }
 
