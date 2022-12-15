@@ -44,24 +44,24 @@ try
             }
         )
 
-        $testSessionHost = 'localhost'
+        $testSessionHost      = 'localhost'
         $testConnectionBroker = 'localhost.fqdn'
 
         $validTargetResourceCall = @{
-            CollectionName =  $testCollection[0].Name
-            SessionHost = $testSessionHost
+            CollectionName   = $testCollection[0].Name
+            SessionHost      = $testSessionHost
             ConnectionBroker = $testConnectionBroker
         }
 
         $nonExistentTargetResourceCall1 = @{
-            CollectionName =  'TestCollection4'
-            SessionHost = $testSessionHost
+            CollectionName   = 'TestCollection4'
+            SessionHost      = $testSessionHost
             ConnectionBroker = $testConnectionBroker
         }
 
         $nonExistentTargetResourceCall2 = @{
-            CollectionName =  'TestCollection5'
-            SessionHost = $testSessionHost
+            CollectionName   = 'TestCollection5'
+            SessionHost      = $testSessionHost
             ConnectionBroker = $testConnectionBroker
         }
 
@@ -81,10 +81,10 @@ try
                     foreach ($sessionCollection in $testCollection)
                     {
                         $result += @{
-                            CollectionName = $sessionCollection.Name
+                            CollectionName        = $sessionCollection.Name
                             CollectionDescription = $sessionCollection.Description
-                            SessionHost = $testSessionHost
-                            ConnectionBroker = $testConnectionBroker
+                            SessionHost           = $testSessionHost
+                            ConnectionBroker      = $testConnectionBroker
                         }
                     }
 
@@ -105,10 +105,10 @@ try
                 Mock -CommandName Get-RDSessionCollection {
                     return @(
                         @{
-                            CollectionName = 'TestCollection3'
+                            CollectionName        = 'TestCollection3'
                             CollectionDescription = 'Test Collection 3'
-                            SessionHost = $testSessionHost
-                            ConnectionBroker = $testConnectionBroker
+                            SessionHost           = $testSessionHost
+                            ConnectionBroker      = $testConnectionBroker
                         }
                     )
                 }
@@ -119,10 +119,10 @@ try
                 }
 
                 It 'Should return supplied session host, with other values being $null' {
-                    $result.ConnectionBroker = $null
-                    $result.CollectionName = $null
+                    $result.ConnectionBroker      = $null
+                    $result.CollectionName        = $null
                     $result.CollectionDescription = $null
-                    $result.SessionHost = $testSessionHost
+                    $result.SessionHost           = $testSessionHost
                 }
             }
 
@@ -138,10 +138,10 @@ try
                 }
 
                 It 'Should return supplied session host, with other values being $null' {
-                    $result.ConnectionBroker = $null
-                    $result.CollectionName = $null
+                    $result.ConnectionBroker      = $null
+                    $result.CollectionName        = $null
                     $result.CollectionDescription = $null
-                    $result.SessionHost = $testSessionHost
+                    $result.SessionHost           = $testSessionHost
                 }
             }
 
@@ -153,10 +153,10 @@ try
                     foreach ($sessionCollection in $testCollection)
                     {
                         $result += @{
-                            CollectionName = $testCollection[0].Name
+                            CollectionName        = $testCollection[0].Name
                             CollectionDescription = $sessionCollection.Description
-                            SessionHost = $testSessionHost
-                            ConnectionBroker = $testConnectionBroker
+                            SessionHost           = $testSessionHost
+                            ConnectionBroker      = $testConnectionBroker
                         }
                     }
 
@@ -254,14 +254,14 @@ try
 
                 Mock -CommandName Get-RDSessionCollection -MockWith {
                     [pscustomobject]@{
-                        AutoAssignPersonalDesktop = $false
-                        CollectionAlias = $testCollection[0].Name
-                        CollectionDescription = 'Pester Test Collection Output'
-                        CollectionName = $testCollection[0].Name
-                        CollectionType = 'PooledUnmanaged'
+                        AutoAssignPersonalDesktop    = $false
+                        CollectionAlias              = $testCollection[0].Name
+                        CollectionDescription        = 'Pester Test Collection Output'
+                        CollectionName               = $testCollection[0].Name
+                        CollectionType               = 'PooledUnmanaged'
                         GrantAdministrativePrivilege = $false
-                        ResourceType = 'Remote Desktop'
-                        Size = 1
+                        ResourceType                 = 'Remote Desktop'
+                        Size                         = 1
                     }
                 }
 
