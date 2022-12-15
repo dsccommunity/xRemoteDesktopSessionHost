@@ -38,10 +38,10 @@ function Get-TargetResource
     if ($Collection.Count -eq 0)
     {
         return @{
-            "CollectionName" = $null
+            "CollectionName"        = $null
             "CollectionDescription" = $null
-            "SessionHost" = $SessionHost
-            "ConnectionBroker" = $null
+            "SessionHost"           = $SessionHost
+            "ConnectionBroker"      = $null
         }
     }
 
@@ -56,10 +56,10 @@ function Get-TargetResource
     }
 
     return @{
-        "CollectionName" = $Collection.CollectionName
+        "CollectionName"        = $Collection.CollectionName
         "CollectionDescription" = $Collection.CollectionDescription
-        "SessionHost" = $SessionHost
-        "ConnectionBroker" = $ConnectionBroker
+        "SessionHost"           = $SessionHost
+        "ConnectionBroker"      = $ConnectionBroker
     }
 }
 
