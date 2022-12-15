@@ -80,7 +80,7 @@ try
 
                     foreach ($sessionCollection in $testCollection)
                     {
-                        $result += @{
+                        $result += New-Object -TypeName PSObject -Property @{
                             CollectionName        = $sessionCollection.Name
                             CollectionDescription = $sessionCollection.Description
                             SessionHost           = $testSessionHost
@@ -102,15 +102,13 @@ try
 
             Context "Non-existent Session Collection requested (other session collections returned - Win2019 behaviour)" {
 
-                Mock -CommandName Get-RDSessionCollection {
-                    return @(
-                        @{
-                            CollectionName        = 'TestCollection3'
-                            CollectionDescription = 'Test Collection 3'
-                            SessionHost           = $testSessionHost
-                            ConnectionBroker      = $testConnectionBroker
-                        }
-                    )
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    [pscustomobject]@{
+                        CollectionName        = 'TestCollection3'
+                        CollectionDescription = 'Test Collection 3'
+                        SessionHost           = $testSessionHost
+                        ConnectionBroker      = $testConnectionBroker
+                    }
                 }
 
                 $result = Get-TargetResource @nonExistentTargetResourceCall1
@@ -152,7 +150,7 @@ try
 
                     foreach ($sessionCollection in $testCollection)
                     {
-                        $result += @{
+                        $result += New-Object -TypeName PSObject -Property @{
                             CollectionName        = $testCollection[0].Name
                             CollectionDescription = $sessionCollection.Description
                             SessionHost           = $testSessionHost
@@ -181,8 +179,8 @@ try
                 }
             }
 
-            Mock -CommandName Get-RDSessionCollection {
-                return @{
+            Mock -CommandName Get-RDSessionCollection -MockWith {
+                [PSCustomObject]@{
                     CollectionName        = $testCollection[0].Name
                     CollectionDescription = 'Test Collection'
                     SessionHost           = $testSessionHost
