@@ -100,7 +100,7 @@ try
                 }
             }
 
-            Context "Non-existent Session Collection requested" {
+            Context "Non-existent Session Collection requested (other session collections returned - Win2019 behaviour)" {
 
                 Mock -CommandName Get-RDSessionCollection {
                     return @(
@@ -113,18 +113,38 @@ try
                     )
                 }
 
-                It "Should return empty result set when requested CollectionName does not match single existing Session Collection (Win 2019)" {
-                    Get-TargetResource @nonExistentTargetResourceCall1 | Should BeNullOrEmpty
+                $result = Get-TargetResource @nonExistentTargetResourceCall1
+                It "Should return return a hash table" {
+                    $result | Should -BeOfType System.Collections.Hashtable
                 }
+
+                It 'Should return supplied session host, with other values being $null' {
+                    $result.ConnectionBroker = $null
+                    $result.CollectionName = $null
+                    $result.CollectionDescription = $null
+                    $result.SessionHost = $testSessionHost
+                }
+            }
+
+            Context "Non-existent Session Collection requested (no session collections returned - normal behaviour)" {
 
                 Mock -CommandName Get-RDSessionCollection {
                     return $null
                 }
 
-                It "Should return empty result set when requested CollectionName does not match single existing Session Collection (not Win 2019)" {
-                    Get-TargetResource @nonExistentTargetResourceCall2 | Should BeNullOrEmpty
+                $result = Get-TargetResource @nonExistentTargetResourceCall2
+                It "Should return return a hash table (Win 2019)" {
+                    $result | Should -BeOfType System.Collections.Hashtable
+                }
+
+                It 'Should return supplied session host, with other values being $null' {
+                    $result.ConnectionBroker = $null
+                    $result.CollectionName = $null
+                    $result.CollectionDescription = $null
+                    $result.SessionHost = $testSessionHost
                 }
             }
+
 
             Context "Two Session Collections exist with same CollectionName" {
                 Mock -CommandName Get-RDSessionCollection {
