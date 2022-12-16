@@ -180,7 +180,7 @@ try
             }
 
             Mock -CommandName Get-RDSessionCollection -MockWith {
-                [PSCustomObject]@{
+                return [PSCustomObject]@{
                     CollectionName        = $testCollection[0].Name
                     CollectionDescription = 'Test Collection'
                     SessionHost           = $testSessionHost
@@ -188,11 +188,30 @@ try
                 }
             }
 
-            Context 'Validate Set-TargetResource actions' {
-                Mock -CommandName New-RDSessionCollection
+            Mock -CommandName New-RDSessionCollection
 
+            Context 'Validate Set-TargetResource actions' {
                 It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
                     Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
+                }
+            }
+
+            Context 'Get-RDSessionCollection returns no RDSessionCollection after calling New-RDSessionCollection with no exception' {
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    $null
+                }
+
+                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollection[0].Name,$testConnectionBroker )
+
+                It 'throws an exception' {
+                    {
+                        Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                    } | should throw $exceptionMessage
+                }
+
+                It 'calls New-RDSessionCollection and Get-RDSessionCollection' {
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
@@ -204,50 +223,33 @@ try
                 }
 
                 It 'does not return an exception' {
-                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost | Should -Not -Throw
+                    { Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost } | Should -Not -Throw
+                }
+
+                It 'calls New-RDSessionCollection and Get-RDSessionCollection' {
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
 
-            Context 'Get-RDSessionCllection returns an exception, without creating the desired RDSessionCollection' {
+            Context 'Get-RDSessionCollection returns an exception, without creating the desired RDSessionCollection' {
                 Mock -CommandName New-RDSessionCollection -MockWith {
                     throw [Microsoft.PowerShell.Commands.WriteErrorException] "A Remote Desktop Services deployment does not exist on $testConnectionBroker. This operation can be performed after creating a deployment. For information about creating a deployment, run `"Get-Help New-RDVirtualDesktopDeployment`" or `"Get-Help New-RDSessionDeployment`""
                 }
 
-                Mock -CommandName Get-RDSessionCollection -MockWith @{
-                    "ConnectionBroker"      = $null
-                    "CollectionDescription" = $null
-                    "CollectionName"        = $null
-                    "SessionHost"           = $SessionHost
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    $null
                 }
 
                 It 'returns an exception' {
-                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost | Should -Throw
+                    { Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost } | Should -Throw
+                }
+
+                It 'calls New-RDSessionCollection and Get-RDSessionCollection' {
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
-
-            Context 'Get-RDSessionCollection returning empty result set after calling New-RDSessionCollection' {
-                Mock -CommandName New-RDSessionCollection
-                Mock -CommandName Get-RDSessionCollection {
-                    return $null
-                }
-
-                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollection[0].Name,$testConnectionBroker )
-
-                It 'throws an exception' {
-                    {
-                        Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
-                    } | should throw $exceptionMessage
-
-                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
-                }
-            }
-
-
         }
         #endregion
 
