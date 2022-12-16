@@ -198,16 +198,32 @@ try
                 }
             }
 
-            Context 'Errors thrown by New-RDSessionCollection are ignored' {
+            Context 'Get-RDSessionCollection returns an exception, but creates the desired RDSessionCollection' {
                 Mock -CommandName New-RDSessionCollection -MockWith {
-                    if ($ErrorActionPreference -ne 'SilentlyContinue')
-                    {
-                        throw 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
-                    }
+                    throw [Microsoft.PowerShell.Commands.WriteErrorException] 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
                 }
 
-                It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
-                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                It 'does not return an exception' {
+                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost | Should -Not -Throw
+                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
+                }
+            }
+
+            Context 'Get-RDSessionCllection returns an exception, without creating the desired RDSessionCollection' {
+                Mock -CommandName New-RDSessionCollection -MockWith {
+                    throw [Microsoft.PowerShell.Commands.WriteErrorException] "A Remote Desktop Services deployment does not exist on $testConnectionBroker. This operation can be performed after creating a deployment. For information about creating a deployment, run `"Get-Help New-RDVirtualDesktopDeployment`" or `"Get-Help New-RDSessionDeployment`""
+                }
+
+                Mock -CommandName Get-RDSessionCollection -MockWith @{
+                    "ConnectionBroker"      = $null
+                    "CollectionDescription" = $null
+                    "CollectionName"        = $null
+                    "SessionHost"           = $SessionHost
+                }
+
+                It 'returns an exception' {
+                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost | Should -Throw
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
@@ -230,6 +246,7 @@ try
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
+
 
         }
         #endregion
