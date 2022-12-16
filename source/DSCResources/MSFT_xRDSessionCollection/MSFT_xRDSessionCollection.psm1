@@ -82,6 +82,7 @@ function Set-TargetResource
     try
     {
         Write-Verbose "Creating a new RDSH collection."
+        $PSBoundParameters.Add('ErrorAction','SilentlyContinue')
         New-RDSessionCollection @PSBoundParameters
     }
     catch
@@ -89,6 +90,7 @@ function Set-TargetResource
         $exception = $_
     }
 
+    $PSBoundParameters.Remove('ErrorAction')
     if (-not (Test-TargetResource @PSBoundParameters))
     {
         Write-Verbose ('Session Collection ''{0}'' does not exist following attempted creation' -f $CollectionName)
