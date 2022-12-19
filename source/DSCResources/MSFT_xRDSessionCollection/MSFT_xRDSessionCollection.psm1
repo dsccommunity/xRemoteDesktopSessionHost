@@ -86,17 +86,21 @@ function Set-TargetResource
     }
     catch
     {
-        $exception = $_
+        $exception = $_.Exception
     }
 
     if (-not (Test-TargetResource @PSBoundParameters))
     {
-        Write-Verbose ('Session Collection ''{0}'' does not exist following attempted creation' -f $CollectionName)
+        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}, ConnectionBroker {1}'  -f $CollectionName,$ConnectionBroker)
+        Write-Verbose -Message $exceptionString
+
         if ($exception)
         {
-            throw $exception
+            $exception = [System.Management.Automation.ItemNotFoundException]::new($exceptionString, $exception)
+        } else {
+            $exception = [System.Management.Automation.ItemNotFoundException]::new($exceptionString)
         }
-        throw ('''Test-TargetResource returns false after call to ''New-RDSessionCollection''; CollectionName: {0}, ConnectionBroker {1}' -f $CollectionName,$ConnectionBroker)
+        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::ObjectNotFound,$CollectionName)
     }
 }
 
