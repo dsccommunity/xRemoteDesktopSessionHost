@@ -24,7 +24,7 @@ function Get-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
-    Write-Verbose "Getting information about RDSH collection."
+    Write-Verbose -Message "Getting information about RDSH collection."
     $params = @{
         ConnectionBroker = $ConnectionBroker
         CollectionName   = $CollectionName
@@ -81,7 +81,7 @@ function Set-TargetResource
 
     try
     {
-        Write-Verbose "Creating a new RDSH collection."
+        Write-Verbose -Message "Creating a new RDSH collection."
         New-RDSessionCollection @PSBoundParameters -ErrorAction Stop
     }
     catch
@@ -124,7 +124,7 @@ function Test-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
-    Write-Verbose "Checking for existence of RDSH collection."
+    Write-Verbose -Message "Checking for existence of RDSH collection."
     $null -ne (Get-TargetResource @PSBoundParameters).CollectionName
 }
 
