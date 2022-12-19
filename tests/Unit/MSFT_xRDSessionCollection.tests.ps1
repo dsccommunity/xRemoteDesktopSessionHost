@@ -203,7 +203,7 @@ try
                     $null
                 }
 
-                $exceptionMessage = ( '''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $testCollection[0].Name,$testConnectionBroker )
+                $exceptionMessage = ( '''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.' -f $testCollection[0].Name,$testConnectionBroker )
 
                 It 'throws an exception' {
                     {
