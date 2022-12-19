@@ -91,7 +91,7 @@ function Set-TargetResource
 
     if (-not (Test-TargetResource @PSBoundParameters))
     {
-        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}, ConnectionBroker {1}'  -f $CollectionName,$ConnectionBroker)
+        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}: ConnectionBroker {1}.'  -f $CollectionName,$ConnectionBroker)
         Write-Verbose -Message $exceptionString
 
         if ($exception)
