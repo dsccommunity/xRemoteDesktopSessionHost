@@ -91,7 +91,7 @@ function Set-TargetResource
 
     if (-not (Test-TargetResource @PSBoundParameters))
     {
-        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.'  -f $CollectionName,$ConnectionBroker)
+        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.'  -f $CollectionName, $ConnectionBroker)
         Write-Verbose -Message $exceptionString
 
         if ($exception)
@@ -100,7 +100,7 @@ function Set-TargetResource
         } else {
             $exception = [System.Management.Automation.RuntimeException]::new($exceptionString)
         }
-        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult,$CollectionName)
+        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName)
     }
 }
 
