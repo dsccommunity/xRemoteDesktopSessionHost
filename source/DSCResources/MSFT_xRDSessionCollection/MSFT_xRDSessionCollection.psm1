@@ -96,11 +96,11 @@ function Set-TargetResource
 
         if ($exception)
         {
-            $exception = [System.Management.Automation.ItemNotFoundException]::new($exceptionString, $exception)
+            $exception = [System.Management.Automation.RuntimeException]::new($exceptionString, $exception)
         } else {
-            $exception = [System.Management.Automation.ItemNotFoundException]::new($exceptionString)
+            $exception = [System.Management.Automation.RuntimeException]::new($exceptionString)
         }
-        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::ObjectNotFound,$CollectionName)
+        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult,$CollectionName)
     }
 }
 
