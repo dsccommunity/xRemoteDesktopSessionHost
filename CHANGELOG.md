@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- xRDSessionCollection
+  - Ignore errors from New-RDSessionCollection and instead checks the collection is created; resolves [issue #105](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/105)
+  - Always filter SessionCollection result; resolves [issue #106](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/106)
+
 ### Added
 
 - xRDConnectionBrokerHAMode

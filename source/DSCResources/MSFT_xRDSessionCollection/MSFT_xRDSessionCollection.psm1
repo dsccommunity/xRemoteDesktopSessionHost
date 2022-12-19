@@ -4,7 +4,6 @@ if (!(Test-xRemoteDesktopSessionHostOsRequirement))
     throw "The minimum OS requirement was not met."
 }
 Import-Module RemoteDesktop
-$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -25,18 +24,37 @@ function Get-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
-    Write-Verbose "Getting information about RDSH collection."
-    $Collection = Get-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
-    if ($Collection.count -gt 1)
-    {
-        $Collection = $Collection | Where-Object CollectionName -eq $CollectionName
+    Write-Verbose -Message "Getting information about RDSH collection."
+    $params = @{
+        ConnectionBroker = $ConnectionBroker
+        CollectionName   = $CollectionName
+        ErrorAction      = 'SilentlyContinue'
     }
 
-    @{
-        "CollectionName" = $Collection.CollectionName
+    $Collection = Get-RDSessionCollection @params  | `
+        Where-Object  CollectionName -eq $CollectionName
+
+
+    if ($Collection.Count -eq 0)
+    {
+        return @{
+            "ConnectionBroker"      = $null
+            "CollectionDescription" = $null
+            "CollectionName"        = $null
+            "SessionHost"           = $SessionHost
+        }
+    }
+
+    if ($Collection.Count -gt 1)
+    {
+        throw 'non-singular RDSessionCollection in result set'
+    }
+
+    return @{
+        "ConnectionBroker"      = $ConnectionBroker
         "CollectionDescription" = $Collection.CollectionDescription
-        "SessionHost" = $localhost
-        "ConnectionBroker" = $ConnectionBroker
+        "CollectionName"        = $Collection.CollectionName
+        "SessionHost"           = $SessionHost
     }
 }
 
@@ -60,15 +78,29 @@ function Set-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
-    Write-Verbose "Creating a new RDSH collection."
-    if ($localhost -eq $ConnectionBroker)
+
+    try
     {
-        New-RDSessionCollection @PSBoundParameters
+        Write-Verbose -Message "Creating a new RDSH collection."
+        New-RDSessionCollection @PSBoundParameters -ErrorAction Stop
     }
-    else
+    catch
     {
-        $PSBoundParameters.Remove('CollectionDescription')
-        Add-RDSessionHost @PSBoundParameters
+        $exception = $_.Exception
+    }
+
+    if (-not (Test-TargetResource @PSBoundParameters))
+    {
+        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.'  -f $CollectionName, $ConnectionBroker)
+        Write-Verbose -Message $exceptionString
+
+        if ($exception)
+        {
+            $exception = [System.Management.Automation.RuntimeException]::new($exceptionString, $exception)
+        } else {
+            $exception = [System.Management.Automation.RuntimeException]::new($exceptionString)
+        }
+        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName)
     }
 }
 
@@ -92,7 +124,7 @@ function Test-TargetResource
         [Parameter()]
         [string] $ConnectionBroker
     )
-    Write-Verbose "Checking for existence of RDSH collection."
+    Write-Verbose -Message "Checking for existence of RDSH collection."
     $null -ne (Get-TargetResource @PSBoundParameters).CollectionName
 }
 
