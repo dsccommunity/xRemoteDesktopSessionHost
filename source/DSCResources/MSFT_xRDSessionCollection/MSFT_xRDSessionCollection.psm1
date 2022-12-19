@@ -96,7 +96,7 @@ function Set-TargetResource
         {
             throw $exception
         }
-        throw ('''Get-RDSessionCollection -CollectionName {0} -ConnectionBroker {1}'' returns empty result set after call to ''New-RDSessionCollection''' -f $CollectionName,$ConnectionBroker)
+        throw ('''Test-TargetResource returns false after call to ''New-RDSessionCollection''; CollectionName: {0}, ConnectionBroker {1}' -f $CollectionName,$ConnectionBroker)
     }
 }
 
