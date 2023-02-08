@@ -63,6 +63,8 @@ try
                     Write-Error "MOCK Get-Service with parameter RDMS"
                 }
 
+                Mock -CommandName Get-RDServer
+
                 It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
                     Assert-MockCalled -CommandName Get-Service -Times 1
