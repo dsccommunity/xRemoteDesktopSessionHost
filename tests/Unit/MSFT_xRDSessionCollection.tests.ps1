@@ -356,17 +356,26 @@ try
 
                 Mock -CommandName Get-RDSessionHost {
                     return @{
-                        CollectionName = $testCollection[0].Name
-                        SessionHost = $testSessionHost
-                    }
-                    return @{
                         CollectionName = $testCollectionNameMulti
                         SessionHost = $testSessionHostMulti
                     }
                 }
 
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    [pscustomobject]@{
+                        AutoAssignPersonalDesktop    = $false
+                        CollectionAlias              = $testCollectionNameMulti
+                        CollectionDescription        = 'Pester Test Collection Output'
+                        CollectionName               = $testCollectionNameMulti
+                        CollectionType               = 'PooledUnmanaged'
+                        GrantAdministrativePrivilege = $false
+                        ResourceType                 = 'Remote Desktop'
+                        Size                         = 1
+                    }
+                }
+
                 It 'Given the incorrect number of session hosts it should return false' {
-                    Test-TargetResource @invalidMultiTargetResourceCall | Should Be $false
+                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose | Should Be $false
                 }
 
                 Mock -CommandName Get-RDSessionHost {

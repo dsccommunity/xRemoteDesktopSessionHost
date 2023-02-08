@@ -260,6 +260,25 @@ try
 
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.WebAccessServer
+                    Roles = @(
+                        'RDS-WEB-ACCESS'
+                    )
+                }
+            }
+
+            It 'Should return false, given the list of Session Hosts is empty in this deployment' {
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                [pscustomobject]@{
                     Server = $sessionDeploymentSplat.SessionHost
                     Roles = @(
                         'RDS-RD-SERVER'
