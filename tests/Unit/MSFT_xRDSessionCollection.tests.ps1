@@ -32,12 +32,21 @@ try
         $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
-        $testcollectionName = 'TestCollection'
         $testcollectionNameMulti = 'TestCollectionMulti'
 
-        $testSessionHost = 'localhost'
+        $testCollection = @(
+            @{
+                Name        = 'TestCollection1'
+                Description = 'Test Collection 1'
+            }
+            @{
+                Name        = 'TestCollection2'
+                Description = 'Test Collection 2'
+            }
+        )
+
+        $testSessionHost      = 'localhost'
         $testSessionHostMulti = 'rdsh1','rdsh2','rdsh3'
-        $invalidSessionHostMulti = 'rds1','rds2','rds3'
         $testConnectionBroker = 'localhost.fqdn'
 
         $validTargetResourceCall = @{
@@ -75,7 +84,7 @@ try
             Mock -CommandName Get-RDSessionCollection {
                 return @(
                     {
-                        CollectionName = $testCollectionName
+                        CollectionName = $testCollection[0].Name
                         CollectionDescription = 'Test Collection'
                         SessionHost = $testSessionHost
                         ConnectionBroker = $testConnectionBroker
@@ -90,7 +99,7 @@ try
             }
             Mock -CommandName Get-RDSessionHost {
                 return @{
-                    CollectionName = $testCollectionName
+                    CollectionName = $testCollection[0].Name
                     SessionHost = $testSessionHost
                 }
                 return @{
@@ -132,7 +141,7 @@ try
                 It 'Calls Get-RDSessionHost' {
                     Get-TargetResource @validTargetResourceCall
                     Assert-MockCalled -CommandName Get-RDSessionHost -Times 1 -Scope It -ParameterFilter {
-                        $CollectionName -eq $testCollectionName -and
+                        $CollectionName -eq $testCollection[0].Name -and
                         $ConnectionBroker -eq $testConnectionBroker
                     }
                 }
@@ -227,6 +236,16 @@ try
             }
 
             Mock -CommandName New-RDSessionCollection
+            Mock -CommandName Get-RDSessionHost {
+                return @{
+                    CollectionName = $testCollection[0].Name
+                    SessionHost = $testSessionHost
+                }
+                return @{
+                    CollectionName = $testCollectionNameMulti
+                    SessionHost = $testSessionHostMulti
+                }
+            }
 
             Context 'Validate Set-TargetResource actions' {
                 It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
@@ -322,7 +341,7 @@ try
                 }
                 Mock -CommandName Get-RDSessionHost {
                     return @{
-                        CollectionName = $testCollectionName
+                        CollectionName = $testCollection[0].Name
                         SessionHost = $testSessionHost
                     }
                     return @{
@@ -337,7 +356,7 @@ try
 
                 Mock -CommandName Get-RDSessionHost {
                     return @{
-                        CollectionName = $testCollectionName
+                        CollectionName = $testCollection[0].Name
                         SessionHost = $testSessionHost
                     }
                     return @{
@@ -352,7 +371,7 @@ try
 
                 Mock -CommandName Get-RDSessionHost {
                     return @{
-                        CollectionName = $testCollectionName
+                        CollectionName = $testCollection[0].Name
                         SessionHost = $testSessionHost
                     }
                     return @{
