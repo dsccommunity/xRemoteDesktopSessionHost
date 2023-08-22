@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - xRDConnectionBrokerHAMode
   - New resource to configure HA mode on a connection broker
 
+### Changed
+
+- xRDSessionCollection
+  - Session Host supports array
+  - Collections are now tested for SessionHosts as well
+- xRDSessionDeployment
+  - Session Host supports array
+  - Deployments are now tested for WebAccess and SessionHosts as well
+  - Resource can extend an existing deployment with more session hosts
+
 ## [2.1.0] - 2022-08-07
 
 ### Added

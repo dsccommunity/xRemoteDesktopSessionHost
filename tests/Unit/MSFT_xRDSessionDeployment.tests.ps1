@@ -163,14 +163,30 @@ try
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
 
             Mock -CommandName New-RDSessionDeployment
+            Mock -CommandName Add-RDServer
+            Mock -CommandName Get-TargetResource
 
-            Set-TargetResource @sessionDeploymentSplat
             It 'should call New-RDSessionDeployment with all required parameters' {
+                Set-TargetResource @sessionDeploymentSplat
                 Assert-MockCalled -CommandName New-RDSessionDeployment -Times 1 -ParameterFilter {
                     $SessionHost -eq $sessionDeploymentSplat.SessionHost -and
                     $ConnectionBroker -eq $sessionDeploymentSplat.ConnectionBroker -and
                     $WebAccessServer -eq $sessionDeploymentSplat.WebAccessServer
                 }
+                Assert-MockCalled -CommandName Add-RDServer -Times 0
+            }
+
+            Mock -CommandName Get-TargetResource -MockWith {
+                [pscustomobject]@{
+                    SessionHost      = 'OtherSessionHost.Lan'
+                    ConnectionBroker = $sessionDeploymentSplat.ConnectionBroker
+                    WebAccessServer  = $sessionDeploymentSplat.WebAccessServer
+                }
+            }
+
+            It 'should call Add-RDServer with additional servers' {
+                Set-TargetResource @sessionDeploymentSplat
+                Assert-MockCalled -CommandName Add-RDServer -Times 1
             }
         }
         #endregion

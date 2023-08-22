@@ -52,7 +52,6 @@ function Get-TargetResource
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "global:DSCMachineStatus")]
     [CmdletBinding()]
@@ -66,9 +65,21 @@ function Set-TargetResource
         [string] $WebAccessServer
     )
 
-    Write-Verbose "Initiating new RDSH deployment."
-    New-RDSessionDeployment @PSBoundParameters
-    $global:DSCMachineStatus = 1
+    $currentStatus = Get-TargetResource @PSBoundParameters
+
+    if ($null -eq $currentStatus)
+    {
+        Write-Verbose "Initiating new RDSH deployment."
+        New-RDSessionDeployment @PSBoundParameters
+        $global:DSCMachineStatus = 1
+        return
+    }
+
+    foreach ($server in ($SessionHost | Where-Object {$_ -notin $currentStatus.SessionHost}))
+    {
+        Write-Verbose "Adding server '$server' to deployment."
+        Add-RDServer -Server $server -Role "RDS-RD-SERVER" -ConnectionBroker $ConnectionBroker
+    }
 }
 
 
