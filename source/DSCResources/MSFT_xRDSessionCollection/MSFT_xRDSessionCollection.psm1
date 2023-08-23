@@ -15,7 +15,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string[]] $SessionHost,
@@ -32,7 +32,7 @@ function Get-TargetResource
     }
 
     $Collection = Get-RDSessionCollection @params  | `
-        Where-Object  CollectionName -eq $CollectionName
+            Where-Object  CollectionName -eq $CollectionName
 
 
     if ($Collection.Count -eq 0)
@@ -63,13 +63,12 @@ function Get-TargetResource
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string[]] $SessionHost,
@@ -78,6 +77,33 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker
     )
+
+    $currentStatus = Get-TargetResource @PSBoundParameters
+    if ($null -ne $currentStatus.CollectionName)
+    {
+        Write-Verbose -Message "Session collection $CollectionName already exists. Updating Session Hosts."
+        if ($null -ne $currentStatus.SessionHost)
+        {
+            $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost -PassThru
+            $surplus, $missing = $compare.Where({ $_.SideIndicator -eq '=>' }, 'Split')
+        }
+        else
+        {
+            $missing = $SessionHost
+        }
+
+        foreach ($server in $missing)
+        {
+            Add-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -SessionHost $server
+        }
+
+        foreach ($server in $surplus)
+        {
+            Remove-RDSessionHost -ConnectionBroker $ConnectionBroker -SessionHost $server
+        }
+
+        return
+    }
 
     try
     {
@@ -91,13 +117,15 @@ function Set-TargetResource
 
     if (-not (Test-TargetResource @PSBoundParameters))
     {
-        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.'  -f $CollectionName, $ConnectionBroker)
+        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.' -f $CollectionName, $ConnectionBroker)
         Write-Verbose -Message $exceptionString
 
         if ($exception)
         {
             $exception = [System.Management.Automation.RuntimeException]::new($exceptionString, $exception)
-        } else {
+        }
+        else
+        {
             $exception = [System.Management.Automation.RuntimeException]::new($exceptionString)
         }
         throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName)
@@ -115,7 +143,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string[]] $SessionHost,
@@ -134,8 +162,13 @@ function Test-TargetResource
         return $false
     }
 
-    $diff = if ($null -eq $currentStatus.SessionHost) { @() } else { $currentStatus.SessionHost }
-    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $diff
+    if ($null -eq $currentStatus.SessionHost)
+    {
+        Write-Verbose -Message "No session host(s) found in collection $CollectionName"
+        return $false
+    }
+
+    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
     if ($null -ne $compare)
     {
         Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"

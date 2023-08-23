@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xRDSessionCollection
   - Session Host supports array
-  - Collections are now tested for SessionHosts as well
+  - Collections are now tested for SessionHosts as well, list of session hosts is amended
 - xRDSessionDeployment
   - Session Host supports array
   - Deployments are now tested for WebAccess and SessionHosts as well
