@@ -19,7 +19,7 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
-        [string] $WebAccessServer
+        [string[]] $WebAccessServer
     )
 
     Write-Verbose "Getting list of RD Server roles."
@@ -62,7 +62,7 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
-        [string] $WebAccessServer
+        [string[]] $WebAccessServer
     )
 
     $currentStatus = Get-TargetResource @PSBoundParameters
@@ -70,7 +70,13 @@ function Set-TargetResource
     if ($null -eq $currentStatus)
     {
         Write-Verbose "Initiating new RDSH deployment."
-        New-RDSessionDeployment @PSBoundParameters
+        $parameters = @{
+            ConnectionBroker = $ConnectionBroker
+            SessionHost      = $SessionHost
+            WebAccessServer  = $WebAccessServer | Select-Object -First 1
+        }
+
+        New-RDSessionDeployment @parameters
         $global:DSCMachineStatus = 1
         return
     }
@@ -79,6 +85,12 @@ function Set-TargetResource
     {
         Write-Verbose "Adding server '$server' to deployment."
         Add-RDServer -Server $server -Role "RDS-RD-SERVER" -ConnectionBroker $ConnectionBroker
+    }
+
+    foreach ($server in ($WebAccessServer | Select-Object -Skip 1 | Where-Object {$_ -notin $currentStatus.WebAccessServer}))
+    {
+        Write-Verbose "Adding server '$server' to deployment."
+        Add-RDServer -Server $server -Role "RDS-WEB-ACCESS" -ConnectionBroker $ConnectionBroker
     }
 }
 
@@ -97,7 +109,7 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
-        [string] $WebAccessServer
+        [string[]] $WebAccessServer
     )
 
     Write-Verbose "Checking RDSH role is deployed on this node."
@@ -109,9 +121,16 @@ function Test-TargetResource
         return $false
     }
 
-    if ($currentStatus.WebAccessServer -ne $WebAccessServer)
+    if ($WebAccessServer.Count -gt 0 -and $null -eq $currentStatus.WebAccessServer)
     {
-        Write-Verbose -Message "Found web access '$($currentStatus.WebAccessServer)', expected '$WebAccessServer'"
+        Write-Verbose -Message "Desired list of Web Access Servers is empty, while $($WebAccessServer.Count) Web Access Servers should have been configured."
+        return $false
+    }
+
+    $compare = Compare-Object -ReferenceObject $WebAccessServer -DifferenceObject $currentStatus.WebAccessServer
+    if ($null -ne $compare)
+    {
+        Write-Verbose -Message "Desired list of Web Access Servers not equal`r`n$($compare | Out-String)"
         return $false
     }
 
