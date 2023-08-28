@@ -299,7 +299,7 @@ try
                 Mock -CommandName Remove-RDSessionHost
 
                 It 'calls Add and Remove-RDSessionHost' {
-                    Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost'
+                    Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost' -Force $true
                     Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope Context
                     Assert-MockCalled -CommandName Remove-RDSessionHost -Times 1 -Scope Context
                 }
@@ -313,7 +313,7 @@ try
                     }
                 }
                 It 'calls Add-RDSessionHost if no session hosts exist' {
-                    Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost'
+                    Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost' -Force $true
                     Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope Context
                 }
             }
@@ -385,7 +385,7 @@ try
                 }
 
                 It 'Given the incorrect number of session hosts it should return false' {
-                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose | Should Be $false
+                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose -Force $true | Should Be $false
                 }
 
                 Mock -CommandName Get-RDSessionHost {
@@ -410,7 +410,7 @@ try
                 }
 
                 It 'Given the list of session hosts is not equal, return false' {
-                    Test-TargetResource @validMultiTargetResourceCall | Should Be $false
+                    Test-TargetResource @validMultiTargetResourceCall -Force $true | Should Be $false
                 }
             }
         }

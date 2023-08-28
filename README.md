@@ -56,7 +56,7 @@ The resource examples are also available in the [xRemoteDesktopSessionHost Wiki]
 
 * **SessionHost**: Specifies the FQDNs of the servers to host the RD Session Host role service.
 * **ConnectionBroker**: The FQDN of a server to host the RD Connection Broker role service.
-* **WebAccessServer**: The FQDN of a server to host the RD Web Access role service.
+* **WebAccessServer**: The FQDNs of the servers to host the RD Web Access role service.
 
 ### xRDSessionCollection
 
@@ -64,6 +64,7 @@ The resource examples are also available in the [xRemoteDesktopSessionHost Wiki]
 * **SessionHost**: Specifies one or more RD Session Host servers to include in the session collection.
 * **CollectionDescription**: A description for the collection.
 * **ConnectionBroker**: The Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.
+* **Force**: Indicates that servers may be added to or removed from the collection.
 
 ### xRDSessionCollectionConfiguration
 

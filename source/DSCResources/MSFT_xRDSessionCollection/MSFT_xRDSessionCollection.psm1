@@ -22,7 +22,9 @@ function Get-TargetResource
         [Parameter()]
         [string] $CollectionDescription,
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker
+        [string] $ConnectionBroker,
+        [Parameter()]
+        [bool] $Force
     )
     Write-Verbose -Message "Getting information about RDSH collection."
     $params = @{
@@ -42,6 +44,7 @@ function Get-TargetResource
             "CollectionDescription" = $null
             "CollectionName"        = $null
             "SessionHost"           = $SessionHost
+            "Force"                 = $Force
         }
     }
 
@@ -55,6 +58,7 @@ function Get-TargetResource
         "CollectionDescription" = $Collection.CollectionDescription
         "CollectionName"        = $Collection.CollectionName
         "SessionHost"           = [System.String[]] (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
+        "Force"                 = $Force
     }
 }
 
@@ -75,11 +79,13 @@ function Set-TargetResource
         [Parameter()]
         [string] $CollectionDescription,
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker
+        [string] $ConnectionBroker,
+        [Parameter()]
+        [bool] $Force
     )
 
     $currentStatus = Get-TargetResource @PSBoundParameters
-    if ($null -ne $currentStatus.CollectionName)
+    if ($null -ne $currentStatus.CollectionName -and $Force)
     {
         Write-Verbose -Message "Session collection $CollectionName already exists. Updating Session Hosts."
         if ($null -ne $currentStatus.SessionHost)
@@ -150,7 +156,9 @@ function Test-TargetResource
         [Parameter()]
         [string] $CollectionDescription,
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker
+        [string] $ConnectionBroker,
+        [Parameter()]
+        [bool] $Force
     )
 
     Write-Verbose "Checking for existence of RDSH collection."
@@ -169,13 +177,13 @@ function Test-TargetResource
     }
 
     $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
-    if ($null -ne $compare)
+    if ($null -ne $compare -and $Force)
     {
-        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
+        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String) and Force is true"
         return $false
     }
 
-    $true
+    return $true
 }
 
 
