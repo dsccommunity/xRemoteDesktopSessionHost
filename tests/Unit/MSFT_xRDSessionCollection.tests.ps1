@@ -405,8 +405,12 @@ try
                     }
                 }
 
-                It 'Given an empty collection of session hosts it should return false' {
-                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose | Should Be $false
+                It 'Given an empty collection of session hosts without the force it should return true' {
+                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose | Should Be $true
+                }
+
+                It 'Given an empty collection of session hosts with the force it should return false' {
+                    Test-TargetResource @invalidMultiTargetResourceCall -Force $true -Verbose | Should Be $false
                 }
 
                 It 'Given the list of session hosts is not equal, return false' {

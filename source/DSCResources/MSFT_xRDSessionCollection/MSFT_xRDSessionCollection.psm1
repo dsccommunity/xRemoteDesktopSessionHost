@@ -173,7 +173,7 @@ function Test-TargetResource
     if ($null -eq $currentStatus.SessionHost)
     {
         Write-Verbose -Message "No session host(s) found in collection $CollectionName"
-        return $false
+        return (-not $Force)
     }
 
     $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
