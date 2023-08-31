@@ -15,11 +15,11 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
-        [string] $WebAccessServer
+        [string[]] $WebAccessServer
     )
 
     Write-Verbose "Getting list of RD Server roles."
@@ -41,7 +41,7 @@ function Get-TargetResource
     $deployed = Get-RDServer -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
 
     @{
-        SessionHost = $deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server
+        SessionHost = [System.String[]] ($deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server)
         ConnectionBroker = $deployed | Where-Object Roles -contains "RDS-CONNECTION-BROKER" | ForEach-Object Server
         WebAccessServer = $deployed | Where-Object Roles -contains "RDS-WEB-ACCESS" | ForEach-Object Server
     }
@@ -52,23 +52,46 @@ function Get-TargetResource
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "global:DSCMachineStatus")]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
-        [string] $WebAccessServer
+        [string[]] $WebAccessServer
     )
 
-    Write-Verbose "Initiating new RDSH deployment."
-    New-RDSessionDeployment @PSBoundParameters
-    $global:DSCMachineStatus = 1
+    $currentStatus = Get-TargetResource @PSBoundParameters
+
+    if ($null -eq $currentStatus)
+    {
+        Write-Verbose "Initiating new RDSH deployment."
+        $parameters = @{
+            ConnectionBroker = $ConnectionBroker
+            SessionHost      = $SessionHost
+            WebAccessServer  = $WebAccessServer | Select-Object -First 1
+        }
+
+        New-RDSessionDeployment @parameters
+        $global:DSCMachineStatus = 1
+        return
+    }
+
+    foreach ($server in ($SessionHost | Where-Object {$_ -notin $currentStatus.SessionHost}))
+    {
+        Write-Verbose "Adding server '$server' to deployment."
+        Add-RDServer -Server $server -Role "RDS-RD-SERVER" -ConnectionBroker $ConnectionBroker
+    }
+
+    foreach ($server in ($WebAccessServer | Select-Object -Skip 1 | Where-Object {$_ -notin $currentStatus.WebAccessServer}))
+    {
+        Write-Verbose "Adding server '$server' to deployment."
+        Add-RDServer -Server $server -Role "RDS-WEB-ACCESS" -ConnectionBroker $ConnectionBroker
+    }
 }
 
 
@@ -82,17 +105,49 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter(Mandatory = $true)]
         [string] $ConnectionBroker,
         [Parameter(Mandatory = $true)]
-        [string] $WebAccessServer
+        [string[]] $WebAccessServer
     )
 
     Write-Verbose "Checking RDSH role is deployed on this node."
+    $currentStatus = Get-TargetResource @PSBoundParameters
 
-    $get = Get-TargetResource @PSBoundParameters
-    $get.ConnectionBroker -eq $ConnectionBroker
+    if ($currentStatus.ConnectionBroker -ne $ConnectionBroker)
+    {
+        Write-Verbose -Message "Found connection broker '$($currentStatus.ConnectionBroker)', expected '$ConnectionBroker'"
+        return $false
+    }
+
+    if ($WebAccessServer.Count -gt 0 -and $null -eq $currentStatus.WebAccessServer)
+    {
+        Write-Verbose -Message "Desired list of Web Access Servers is empty, while $($WebAccessServer.Count) Web Access Servers should have been configured."
+        return $false
+    }
+
+    $compare = Compare-Object -ReferenceObject $WebAccessServer -DifferenceObject $currentStatus.WebAccessServer
+    if ($null -ne $compare)
+    {
+        Write-Verbose -Message "Desired list of Web Access Servers not equal`r`n$($compare | Out-String)"
+        return $false
+    }
+
+    if ($SessionHost.Count -gt 0 -and $null -eq $currentStatus.SessionHost)
+    {
+        Write-Verbose -Message "Desired list of session hosts is empty, while $($SessionHost.Count) session hosts should have been configured."
+        return $false
+    }
+
+    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
+    if ($null -ne $compare)
+    {
+        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
+        return $false
+    }
+
+    $true
 }
 
 Export-ModuleMember -Function *-TargetResource

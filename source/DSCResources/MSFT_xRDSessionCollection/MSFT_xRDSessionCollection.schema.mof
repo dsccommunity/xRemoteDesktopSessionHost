@@ -3,10 +3,8 @@
 class MSFT_xRDSessionCollection : OMI_BaseResource
 {
     [key, Description("Specifies a name for the session collection. ")] string CollectionName;
-    [key, Description("Specifies an RD Session Host server to include in the session collection. ")] string SessionHost;
+    [required, Description("Specifies one or more RD Session Host servers to include in the session collection. ")] string SessionHost[];
     [write, Description("Specifies a description for the collection.")] string CollectionDescription;
-    [write, Description("Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.")] string ConnectionBroker;
+    [required, Description("Specifies the Remote Desktop Connection Broker (RD Connection Broker) server for a Remote Desktop deployment.")] string ConnectionBroker;
+    [write, Description("Indicates that servers may be added to or removed from the collection.")] boolean Force;
 };
-
-
-

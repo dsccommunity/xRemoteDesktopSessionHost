@@ -39,6 +39,12 @@ try
             WebAccessServer  = 'webaccess.lan'
         }
 
+        $sessionDeploymentMultiSplat = @{
+            SessionHost      = 'sessionhost1.lan','sessionhost2.lan'
+            ConnectionBroker = 'connectionbroker.lan'
+            WebAccessServer  = 'webaccess1.lan', 'webaccess2.lan'
+        }
+
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
 
@@ -56,6 +62,8 @@ try
                 Mock -CommandName Get-Service -ParameterFilter {$Name -eq 'RDMS' } -MockWith {
                     Write-Error "MOCK Get-Service with parameter RDMS"
                 }
+
+                Mock -CommandName Get-RDServer
 
                 It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
@@ -155,14 +163,30 @@ try
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
 
             Mock -CommandName New-RDSessionDeployment
+            Mock -CommandName Add-RDServer
+            Mock -CommandName Get-TargetResource
 
-            Set-TargetResource @sessionDeploymentSplat
             It 'should call New-RDSessionDeployment with all required parameters' {
+                Set-TargetResource @sessionDeploymentSplat
                 Assert-MockCalled -CommandName New-RDSessionDeployment -Times 1 -ParameterFilter {
                     $SessionHost -eq $sessionDeploymentSplat.SessionHost -and
                     $ConnectionBroker -eq $sessionDeploymentSplat.ConnectionBroker -and
                     $WebAccessServer -eq $sessionDeploymentSplat.WebAccessServer
                 }
+                Assert-MockCalled -CommandName Add-RDServer -Times 0
+            }
+
+            Mock -CommandName Get-TargetResource -MockWith {
+                [pscustomobject]@{
+                    SessionHost      = 'OtherSessionHost.Lan'
+                    ConnectionBroker = $sessionDeploymentSplat.ConnectionBroker
+                    WebAccessServer  = $sessionDeploymentSplat.WebAccessServer
+                }
+            }
+
+            It 'should call Add-RDServer with additional servers' {
+                Set-TargetResource @sessionDeploymentMultiSplat
+                Assert-MockCalled -CommandName Add-RDServer -Times 3
             }
         }
         #endregion
@@ -214,15 +238,158 @@ try
                     )
                 }
                 [pscustomobject]@{
-                    Server = $sessionDeploymentSplat.WebAccessServer
+                    Server = 'webaccessnew.lan'
                     Roles = @(
                         'RDS-WEB-ACCESS'
                     )
                 }
             }
 
+            It 'Should return false, given the WebAccessServer is not targeted in this deployment' {
+                Test-TargetResource @sessionDeploymentSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                [pscustomobject]@{
+                    Server = 'sessionhost1.lan'
+                    Roles = @(
+                        'RDS-RD-SERVER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = 'sessionhost2.lan'
+                    Roles = @(
+                        'RDS-RD-SERVER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = 'sessionhost3.lan'
+                    Roles = @(
+                        'RDS-RD-SERVER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                foreach ($waserver in $sessionDeploymentMultiSplat.WebAccessServer)
+                {
+                    [pscustomobject]@{
+                        Server = $waserver
+                        Roles  = @(
+                            'RDS-WEB-ACCESS'
+                        )
+                    }
+                }
+            }
+
+            It 'Should return false, given the list of Session Hosts is different in this deployment' {
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                foreach ($waserver in $sessionDeploymentMultiSplat.WebAccessServer)
+                {
+                    [pscustomobject]@{
+                        Server = $waserver
+                        Roles  = @(
+                            'RDS-WEB-ACCESS'
+                        )
+                    }
+                }
+            }
+
+            It 'Should return false, given the list of Session Hosts is empty in this deployment' {
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                foreach ($shserver in $sessionDeploymentMultiSplat.SessionHost)
+                {
+                    [pscustomobject]@{
+                        Server = $shserver
+                        Roles  = @(
+                            'RDS-RD-SERVER'
+                        )
+                    }
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+            }
+
+            It 'Should return false, given the list of Web Hosts is empty in this deployment' {
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                foreach ($shserver in $sessionDeploymentMultiSplat.SessionHost)
+                {
+                    [pscustomobject]@{
+                        Server = $shserver
+                        Roles  = @(
+                            'RDS-RD-SERVER'
+                        )
+                    }
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                foreach ($waserver in $sessionDeploymentMultiSplat.WebAccessServer)
+                {
+                    [pscustomobject]@{
+                        Server = $waserver
+                        Roles  = @(
+                            'RDS-WEB-ACCESS'
+                        )
+                    }
+                }
+            }
+
             It 'Should return true, given the SessionDeployment is completed' {
-                Test-TargetResource @sessionDeploymentSplat | Should Be $true
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $true
+            }
+
+            Mock -CommandName Get-RDServer -MockWith {
+                foreach ($shserver in $sessionDeploymentMultiSplat.SessionHost)
+                {
+                    [pscustomobject]@{
+                        Server = $shserver
+                        Roles  = @(
+                            'RDS-RD-SERVER'
+                        )
+                    }
+                }
+                [pscustomobject]@{
+                    Server = $sessionDeploymentMultiSplat.ConnectionBroker
+                    Roles = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                [pscustomobject]@{
+                    Server = 'SomeWebAccessServer.lan'
+                    Roles  = @(
+                        'RDS-WEB-ACCESS'
+                    )
+                }
+            }
+
+            It 'Should return false if Web Access Server list is different' {
+                Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
             }
         }
         #endregion

@@ -32,6 +32,7 @@ try
         $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
+        $testcollectionNameMulti = 'TestCollectionMulti'
 
         $testCollection = @(
             @{
@@ -45,6 +46,7 @@ try
         )
 
         $testSessionHost      = 'localhost'
+        $testSessionHostMulti = 'rdsh1','rdsh2','rdsh3'
         $testConnectionBroker = 'localhost.fqdn'
 
         $validTargetResourceCall = @{
@@ -64,11 +66,48 @@ try
             SessionHost      = $testSessionHost
             ConnectionBroker = $testConnectionBroker
         }
+        $validMultiTargetResourceCall = @{
+            CollectionName = $testcollectionNameMulti
+            SessionHost = $testSessionHostMulti
+            ConnectionBroker = $testConnectionBroker
+        }
+        $invalidMultiTargetResourceCall = @{
+            CollectionName = $testcollectionNameMulti
+            SessionHost = $testSessionHostMulti | Select-Object -Skip 1
+            ConnectionBroker = $testConnectionBroker
+        }
 
         Import-Module RemoteDesktop -Force
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
+            Mock -CommandName Get-RDSessionCollection {
+                return @(
+                    {
+                        CollectionName = $testCollection[0].Name
+                        CollectionDescription = 'Test Collection'
+                        SessionHost = $testSessionHost
+                        ConnectionBroker = $testConnectionBroker
+                    },
+                    {
+                        CollectionName = $testCollectionName2
+                        CollectionDescription = 'Test Collection 2'
+                        SessionHost = $testSessionHost
+                        ConnectionBroker = $testConnectionBroker
+                    }
+                )
+            }
+            Mock -CommandName Get-RDSessionHost {
+                return @{
+                    CollectionName = $testCollection[0].Name
+                    SessionHost = $testSessionHost
+                }
+                return @{
+                    CollectionName = $testCollectionNameMulti
+                    SessionHost = $testSessionHostMulti
+                }
+            }
+
             Context "Parameter Values,Validations and Errors" {
 
                 It "Should error when CollectionName length is greater than 256" {
@@ -94,6 +133,14 @@ try
                 It 'Calls Get-RDSessionCollection with CollectionName and ConnectionBroker parameters' {
                     Get-TargetResource @validTargetResourceCall
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope It -ParameterFilter {
+                        $CollectionName -eq $testCollection[0].Name -and
+                        $ConnectionBroker -eq $testConnectionBroker
+                    }
+                }
+
+                It 'Calls Get-RDSessionHost' {
+                    Get-TargetResource @validTargetResourceCall
+                    Assert-MockCalled -CommandName Get-RDSessionHost -Times 1 -Scope It -ParameterFilter {
                         $CollectionName -eq $testCollection[0].Name -and
                         $ConnectionBroker -eq $testConnectionBroker
                     }
@@ -179,45 +226,30 @@ try
                 }
             }
 
-            Mock -CommandName Get-RDSessionCollection -MockWith {
-                return [PSCustomObject]@{
-                    CollectionName        = $testCollection[0].Name
-                    CollectionDescription = 'Test Collection'
-                    SessionHost           = $testSessionHost
-                    ConnectionBroker      = $testConnectionBroker
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName New-RDSessionCollection
+            Mock -CommandName Compare-Object
+            Mock -CommandName Get-RDSessionHost {
+                return @{
+                    CollectionName = $testCollection[0].Name
+                    SessionHost = $testSessionHost
+                }
+                return @{
+                    CollectionName = $testCollectionNameMulti
+                    SessionHost = $testSessionHostMulti
                 }
             }
-
-            Mock -CommandName New-RDSessionCollection
 
             Context 'Validate Set-TargetResource actions' {
-                It 'Given the configuration is applied, New-RDSessionCollection and Get-RDSessionCollection are called' {
-                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
+                It 'Given the configuration is applied, New-RDSessionCollection is called' {
+                    Mock -CommandName Test-TargetResource -MockWith { return $true }
+                    Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost -Verbose
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
-
-            Context 'Get-RDSessionCollection returns no RDSessionCollection after calling New-RDSessionCollection with no exception' {
-                Mock -CommandName Get-RDSessionCollection -MockWith {
-                    $null
-                }
-
-                $exceptionMessage = ( '''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.' -f $testCollection[0].Name,$testConnectionBroker )
-
-                It 'throws an exception' {
-                    {
-                        Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost
-                    } | should throw $exceptionMessage
-                }
-
-                It 'calls New-RDSessionCollection and Get-RDSessionCollection' {
-                    Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
-                }
-            }
-
-            Context 'Get-RDSessionCollection returns an exception, but creates the desired RDSessionCollection' {
+            Context 'New-RDSessionCollection returns an exception, but creates the desired RDSessionCollection' {
+                Mock -CommandName Test-TargetResource -MockWith { return $true }
+                Mock -CommandName Compare-Object
                 Mock -CommandName New-RDSessionCollection -MockWith {
                     throw [Microsoft.PowerShell.Commands.WriteErrorException] 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
                 }
@@ -226,9 +258,8 @@ try
                     { Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost } | Should -Not -Throw
                 }
 
-                It 'calls New-RDSessionCollection and Get-RDSessionCollection' {
+                It 'calls New-RDSessionCollection' {
                     Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-                    Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
 
@@ -250,6 +281,42 @@ try
                     Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
                 }
             }
+
+            Context 'Session Collection exists, but list of session hosts is different' {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        "ConnectionBroker"      = 'CB'
+                        "CollectionDescription" = 'Description'
+                        "CollectionName"        = 'ExistingCollection'
+                        "SessionHost"           = 'SurplusHost'
+                    }
+                }
+                Mock -CommandName Compare-Object -MockWith {
+                    'SurplusHost' | Add-Member -NotePropertyName SideIndicator -NotePropertyValue '<=' -PassThru
+                    'MissingHost' | Add-Member -NotePropertyName SideIndicator -NotePropertyValue '=>' -PassThru
+                }
+                Mock -CommandName Add-RDSessionHost
+                Mock -CommandName Remove-RDSessionHost
+
+                It 'calls Add and Remove-RDSessionHost' {
+                    Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost' -Force $true
+                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope Context
+                    Assert-MockCalled -CommandName Remove-RDSessionHost -Times 1 -Scope Context
+                }
+
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        "ConnectionBroker"      = 'CB'
+                        "CollectionDescription" = 'Description'
+                        "CollectionName"        = 'ExistingCollection'
+                        "SessionHost"           = $null
+                    }
+                }
+                It 'calls Add-RDSessionHost if no session hosts exist' {
+                    Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost' -Force $true
+                    Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope Context
+                }
+            }
         }
         #endregion
 
@@ -264,6 +331,7 @@ try
 
             Context 'Validating Test-TargetResource output' {
                 Mock -CommandName Get-RDSessionCollection
+                Mock -CommandName Get-RDSessionHost
 
                 It 'Given Get-RDSessionCollection not returning a collection, test returns false' {
                     Test-TargetResource @validTargetResourceCall | Should Be $false
@@ -281,9 +349,72 @@ try
                         Size                         = 1
                     }
                 }
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollection[0].Name
+                        SessionHost = $testSessionHost
+                    }
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $testSessionHostMulti
+                    }
+                }
 
                 It 'Given Get-RDSessionCollection returning a collection, test returns true' {
                     Test-TargetResource @validTargetResourceCall | Should Be $true
+                }
+
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $testSessionHostMulti
+                    }
+                }
+
+                Mock -CommandName Get-RDSessionCollection -MockWith {
+                    [pscustomobject]@{
+                        AutoAssignPersonalDesktop    = $false
+                        CollectionAlias              = $testCollectionNameMulti
+                        CollectionDescription        = 'Pester Test Collection Output'
+                        CollectionName               = $testCollectionNameMulti
+                        CollectionType               = 'PooledUnmanaged'
+                        GrantAdministrativePrivilege = $false
+                        ResourceType                 = 'Remote Desktop'
+                        Size                         = 1
+                    }
+                }
+
+                It 'Given the incorrect number of session hosts it should return false' {
+                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose -Force $true | Should Be $false
+                }
+
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $testSessionHostMulti
+                    }
+                }
+
+                Mock -CommandName Get-RDSessionHost {
+                    return @{
+                        CollectionName = $testCollection[0].Name
+                    }
+                    return @{
+                        CollectionName = $testCollectionNameMulti
+                        SessionHost = $invalidTestSessionHostMulti
+                    }
+                }
+
+                It 'Given an empty collection of session hosts without the force it should return true' {
+                    Test-TargetResource @invalidMultiTargetResourceCall -Verbose | Should Be $true
+                }
+
+                It 'Given an empty collection of session hosts with the force it should return false' {
+                    Test-TargetResource @invalidMultiTargetResourceCall -Force $true -Verbose | Should Be $false
+                }
+
+                It 'Given the list of session hosts is not equal, return false' {
+                    Test-TargetResource @validMultiTargetResourceCall -Force $true | Should Be $false
                 }
             }
         }

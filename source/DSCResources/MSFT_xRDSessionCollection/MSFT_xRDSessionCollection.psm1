@@ -15,14 +15,16 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
+        [Parameter(Mandatory = $true)]
+        [string] $ConnectionBroker,
         [Parameter()]
-        [string] $ConnectionBroker
+        [bool] $Force
     )
     Write-Verbose -Message "Getting information about RDSH collection."
     $params = @{
@@ -32,7 +34,7 @@ function Get-TargetResource
     }
 
     $Collection = Get-RDSessionCollection @params  | `
-        Where-Object  CollectionName -eq $CollectionName
+            Where-Object  CollectionName -eq $CollectionName
 
 
     if ($Collection.Count -eq 0)
@@ -42,6 +44,7 @@ function Get-TargetResource
             "CollectionDescription" = $null
             "CollectionName"        = $null
             "SessionHost"           = $SessionHost
+            "Force"                 = $Force
         }
     }
 
@@ -54,7 +57,8 @@ function Get-TargetResource
         "ConnectionBroker"      = $ConnectionBroker
         "CollectionDescription" = $Collection.CollectionDescription
         "CollectionName"        = $Collection.CollectionName
-        "SessionHost"           = $SessionHost
+        "SessionHost"           = [System.String[]] (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
+        "Force"                 = $Force
     }
 }
 
@@ -63,21 +67,49 @@ function Get-TargetResource
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
+        [Parameter(Mandatory = $true)]
+        [string] $ConnectionBroker,
         [Parameter()]
-        [string] $ConnectionBroker
+        [bool] $Force
     )
+
+    $currentStatus = Get-TargetResource @PSBoundParameters
+    if ($null -ne $currentStatus.CollectionName -and $Force)
+    {
+        Write-Verbose -Message "Session collection $CollectionName already exists. Updating Session Hosts."
+        if ($null -ne $currentStatus.SessionHost)
+        {
+            $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost -PassThru
+            $surplus, $missing = $compare.Where({ $_.SideIndicator -eq '=>' }, 'Split')
+        }
+        else
+        {
+            $missing = $SessionHost
+        }
+
+        foreach ($server in $missing)
+        {
+            Add-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -SessionHost $server
+        }
+
+        foreach ($server in $surplus)
+        {
+            Remove-RDSessionHost -ConnectionBroker $ConnectionBroker -SessionHost $server
+        }
+
+        return
+    }
 
     try
     {
@@ -91,13 +123,15 @@ function Set-TargetResource
 
     if (-not (Test-TargetResource @PSBoundParameters))
     {
-        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.'  -f $CollectionName, $ConnectionBroker)
+        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.' -f $CollectionName, $ConnectionBroker)
         Write-Verbose -Message $exceptionString
 
         if ($exception)
         {
             $exception = [System.Management.Automation.RuntimeException]::new($exceptionString, $exception)
-        } else {
+        }
+        else
+        {
             $exception = [System.Management.Automation.RuntimeException]::new($exceptionString)
         }
         throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName)
@@ -115,17 +149,41 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
-        [string] $SessionHost,
+        [string[]] $SessionHost,
         [Parameter()]
         [string] $CollectionDescription,
+        [Parameter(Mandatory = $true)]
+        [string] $ConnectionBroker,
         [Parameter()]
-        [string] $ConnectionBroker
+        [bool] $Force
     )
-    Write-Verbose -Message "Checking for existence of RDSH collection."
-    $null -ne (Get-TargetResource @PSBoundParameters).CollectionName
+
+    Write-Verbose "Checking for existence of RDSH collection."
+    $currentStatus = Get-TargetResource @PSBoundParameters
+
+    if ($null -eq $currentStatus.CollectionName)
+    {
+        Write-Verbose -Message "No collection $CollectionName found"
+        return $false
+    }
+
+    if ($null -eq $currentStatus.SessionHost)
+    {
+        Write-Verbose -Message "No session host(s) found in collection $CollectionName"
+        return (-not $Force)
+    }
+
+    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
+    if ($null -ne $compare -and $Force)
+    {
+        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String) and Force is true"
+        return $false
+    }
+
+    return $true
 }
 
 
