@@ -196,21 +196,26 @@ function Set-TargetResource
     {
         # workaround bug #3299246
 
-        Add-RDServer @PSBoundParameters -erroraction silentlycontinue -errorvariable e
+        Add-RDServer @PSBoundParameters -ErrorAction silentlycontinue -ErrorVariable rdsErrors
 
-        if ($e.count -eq 0)
+        if ($rdsErrors.count -eq 0)
         {
             Write-Verbose "Add-RDServer completed without errors..."
             # continue
         }
-        elseif ($e.count -eq 2 -and $e[0].FullyQualifiedErrorId -eq 'CommandNotFoundException')
+        elseif ($rdsErrors.count -eq 2 -and $rdsErrors[0].FullyQualifiedErrorId -eq 'CommandNotFoundException')
         {
             Write-Verbose "Add-RDServer: trapped 2 errors, that's ok, continuing..."
             # ignore & continue
         }
         else
         {
-            write-error "Add-RDServer threw $($e.count) errors."
+            Write-Verbose "'Add-RDServer' threw $($rdsErrors.Count) errors."
+            foreach ($rdsError in $rdsErrors)
+            {
+                Write-Error -ErrorRecord $rdsError
+            }
+            return
         }
     }
     else
