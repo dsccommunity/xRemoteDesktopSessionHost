@@ -27,7 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Resource can extend an existing deployment with more session hosts and web access servers
   - ConnectionBroker is only remaining key since the broker can only broker one deployment
 - xRDServer
-  - Improve error handling in Set-TargetResource function for Add-RDServer cmdlet.
+  - Improve error handling in Set-TargetResource function for Add-RDServer
+    cmdlet, fixes issue [#111](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/111).
 
 ## [2.1.0] - 2022-08-07
 
