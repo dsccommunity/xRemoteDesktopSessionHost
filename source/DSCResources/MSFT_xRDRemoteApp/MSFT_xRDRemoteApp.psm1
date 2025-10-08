@@ -7,12 +7,11 @@ Import-Module -Name $rdCommonModulePath
 $dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
 Import-Module -Name $dscResourceCommonModulePath
 
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop
-
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -24,7 +23,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string] $DisplayName,
@@ -33,14 +32,14 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $Alias,
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [string]$Ensure = 'Present',
         [Parameter()]
         [string] $FileVirtualPath,
         [Parameter()]
         [string] $FolderName,
         [Parameter()]
-        [ValidateSet('Allow','DoNotAllow','Require')]
+        [ValidateSet('Allow', 'DoNotAllow', 'Require')]
         [string] $CommandLineSetting,
         [Parameter()]
         [string] $RequiredCommandLine,
@@ -67,18 +66,18 @@ function Get-TargetResource
     $remoteApp = Get-RDRemoteApp -CollectionName $CollectionName -Alias $Alias -ErrorAction SilentlyContinue
 
     $return = @{
-        CollectionName = $remoteApp.CollectionName
-        DisplayName = $remoteApp.DisplayName
-        FilePath = $remoteApp.FilePath
-        Alias = $remoteApp.Alias
-        FileVirtualPath = $remoteApp.FileVirtualPath
-        FolderName = $remoteApp.FolderName
-        CommandLineSetting = $remoteApp.CommandLineSetting
+        CollectionName      = $remoteApp.CollectionName
+        DisplayName         = $remoteApp.DisplayName
+        FilePath            = $remoteApp.FilePath
+        Alias               = $remoteApp.Alias
+        FileVirtualPath     = $remoteApp.FileVirtualPath
+        FolderName          = $remoteApp.FolderName
+        CommandLineSetting  = $remoteApp.CommandLineSetting
         RequiredCommandLine = $remoteApp.RequiredCommandLine
-        IconIndex = $remoteApp.IconIndex
-        IconPath = $remoteApp.IconPath
-        UserGroups = $remoteApp.UserGroups
-        ShowInWebAccess = $remoteApp.ShowInWebAccess
+        IconIndex           = $remoteApp.IconIndex
+        IconPath            = $remoteApp.IconPath
+        UserGroups          = $remoteApp.UserGroups
+        ShowInWebAccess     = $remoteApp.ShowInWebAccess
     }
 
     if ($remoteApp)
@@ -93,18 +92,16 @@ function Get-TargetResource
     $return
 }
 
-
 ########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string] $DisplayName,
@@ -113,14 +110,14 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $Alias,
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [string]$Ensure = 'Present',
         [Parameter()]
         [string] $FileVirtualPath,
         [Parameter()]
         [string] $FolderName,
         [Parameter()]
-        [ValidateSet('Allow','DoNotAllow','Require')]
+        [ValidateSet('Allow', 'DoNotAllow', 'Require')]
         [string] $CommandLineSetting,
         [Parameter()]
         [string] $RequiredCommandLine,
@@ -144,7 +141,7 @@ function Set-TargetResource
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
-    Write-Verbose "Making updates to RemoteApp."
+    Write-Verbose 'Making updates to RemoteApp.'
     $remoteApp = Get-RDRemoteApp -CollectionName $CollectionName -Alias $Alias
     if (!$remoteApp -and $Ensure -eq 'Present')
     {
@@ -160,7 +157,6 @@ function Set-TargetResource
     }
 }
 
-
 #######################################################################
 # The Test-TargetResource cmdlet.
 #######################################################################
@@ -171,7 +167,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter(Mandatory = $true)]
         [string] $DisplayName,
@@ -180,14 +176,14 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [string] $Alias,
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [string]$Ensure = 'Present',
         [Parameter()]
         [string] $FileVirtualPath,
         [Parameter()]
         [string] $FolderName,
         [Parameter()]
-        [ValidateSet('Allow','DoNotAllow','Require')]
+        [ValidateSet('Allow', 'DoNotAllow', 'Require')]
         [string] $CommandLineSetting,
         [Parameter()]
         [string] $RequiredCommandLine,
@@ -201,7 +197,7 @@ function Test-TargetResource
         [boolean] $ShowInWebAccess
     )
 
-    Write-Verbose "Testing if RemoteApp is published."
+    Write-Verbose 'Testing if RemoteApp is published.'
 
     try
     {
@@ -213,7 +209,7 @@ function Test-TargetResource
     }
 
     $getTargetResourceResult = Get-TargetResource @PSBoundParameters
-    [System.Management.Automation.PSCmdlet]::CommonParameters | Foreach-Object -Process {
+    [System.Management.Automation.PSCmdlet]::CommonParameters | ForEach-Object -Process {
         $null = $PSBoundParameters.Remove($_)
     }
 

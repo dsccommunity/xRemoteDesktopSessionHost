@@ -1,7 +1,8 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop
 
@@ -22,7 +23,7 @@ function Get-TargetResource
         [string[]] $WebAccessServer
     )
 
-    Write-Verbose "Getting list of RD Server roles."
+    Write-Verbose 'Getting list of RD Server roles.'
 
     # Start service RDMS is needed because otherwise a reboot loop could happen due to
     # the RDMS Service being on Delay-Start by default, and DSC kicks in too quickly after a reboot.
@@ -34,26 +35,25 @@ function Get-TargetResource
         }
         catch
         {
-            Write-Warning "Failed to start RDMS service. Error: $_"
+            Write-Warning "Failed to start RDMS service. Error: '$_'."
         }
     }
 
     $deployed = Get-RDServer -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
 
     @{
-        SessionHost = [System.String[]] ($deployed | Where-Object Roles -contains "RDS-RD-SERVER" | ForEach-Object Server)
-        ConnectionBroker = $deployed | Where-Object Roles -contains "RDS-CONNECTION-BROKER" | ForEach-Object Server
-        WebAccessServer = $deployed | Where-Object Roles -contains "RDS-WEB-ACCESS" | ForEach-Object Server
+        SessionHost      = [System.String[]] ($deployed | Where-Object Roles -Contains 'RDS-RD-SERVER' | ForEach-Object Server)
+        ConnectionBroker = $deployed | Where-Object Roles -Contains 'RDS-CONNECTION-BROKER' | ForEach-Object Server
+        WebAccessServer  = $deployed | Where-Object Roles -Contains 'RDS-WEB-ACCESS' | ForEach-Object Server
     }
 }
-
 
 ########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
 {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "global:DSCMachineStatus")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', 'global:DSCMachineStatus')]
     [CmdletBinding()]
     param
     (
@@ -69,7 +69,7 @@ function Set-TargetResource
 
     if ($null -eq $currentStatus)
     {
-        Write-Verbose "Initiating new RDSH deployment."
+        Write-Verbose 'Initiating new RDSH deployment.'
         $parameters = @{
             ConnectionBroker = $ConnectionBroker
             SessionHost      = $SessionHost
@@ -81,19 +81,18 @@ function Set-TargetResource
         return
     }
 
-    foreach ($server in ($SessionHost | Where-Object {$_ -notin $currentStatus.SessionHost}))
+    foreach ($server in ($SessionHost | Where-Object { $_ -notin $currentStatus.SessionHost }))
     {
         Write-Verbose "Adding server '$server' to deployment."
-        Add-RDServer -Server $server -Role "RDS-RD-SERVER" -ConnectionBroker $ConnectionBroker
+        Add-RDServer -Server $server -Role 'RDS-RD-SERVER' -ConnectionBroker $ConnectionBroker
     }
 
-    foreach ($server in ($WebAccessServer | Select-Object -Skip 1 | Where-Object {$_ -notin $currentStatus.WebAccessServer}))
+    foreach ($server in ($WebAccessServer | Select-Object -Skip 1 | Where-Object { $_ -notin $currentStatus.WebAccessServer }))
     {
         Write-Verbose "Adding server '$server' to deployment."
-        Add-RDServer -Server $server -Role "RDS-WEB-ACCESS" -ConnectionBroker $ConnectionBroker
+        Add-RDServer -Server $server -Role 'RDS-WEB-ACCESS' -ConnectionBroker $ConnectionBroker
     }
 }
-
 
 #######################################################################
 # The Test-TargetResource cmdlet.
@@ -112,7 +111,7 @@ function Test-TargetResource
         [string[]] $WebAccessServer
     )
 
-    Write-Verbose "Checking RDSH role is deployed on this node."
+    Write-Verbose 'Checking RDSH role is deployed on this node.'
     $currentStatus = Get-TargetResource @PSBoundParameters
 
     if ($currentStatus.ConnectionBroker -ne $ConnectionBroker)

@@ -1,5 +1,5 @@
-$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
-$script:DSCResourceName    = 'MSFT_xRDServer'
+$script:DSCModuleName = 'xRemoteDesktopSessionHost'
+$script:DSCResourceName = 'MSFT_xRDServer'
 
 function Invoke-TestSetup
 {
@@ -29,7 +29,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDServer'
+        $script:DSCResourceName = 'MSFT_xRDServer'
 
         Import-Module RemoteDesktop -Force
 
@@ -38,7 +38,7 @@ try
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
                     Server = 'connectionbroker.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
@@ -76,7 +76,7 @@ try
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
                     Server = 'connectionbroker.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                         'RDS-GATEWAY'
                     )
@@ -94,10 +94,11 @@ try
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
             Mock -CommandName Get-RDServer -MockWith {
 
-                if($Role -eq 'RDS-Connection-Broker') {
+                if ($Role -eq 'RDS-Connection-Broker')
+                {
                     [pscustomobject]@{
                         Server = 'connectionbroker.lan'
-                        Roles = @(
+                        Roles  = @(
                             'RDS-CONNECTION-BROKER'
                         )
                     }
@@ -126,11 +127,11 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when if role is RDS-Gateway and GatewayExternalFqdn is missing." {
-                    {Set-TargetResource -ConnectionBroker "connectionbroker.lan" -Server "server1" -Role "RDS-Gateway"} `
-                        | should throw
+                It 'Should error when if role is RDS-Gateway and GatewayExternalFqdn is missing.' {
+                    { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -Server 'server1' -Role 'RDS-Gateway' } `
+                    | Should throw
                 }
             }
         }

@@ -22,29 +22,29 @@ try
     InModuleScope xRemoteDesktopSessionHostCommon {
 
         #region Function Test-xRemoteDesktopSessionHostOsRequirement
-        Describe "Test-xRemoteDesktopSessionHostOsRequirement" {
+        Describe 'Test-xRemoteDesktopSessionHostOsRequirement' {
             Context 'Windows 10' {
-                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 10,1,1,1)}
-                it 'Should return true' {
-                    Test-xRemoteDesktopSessionHostOsRequirement | should be $true
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 10, 1, 1, 1) }
+                It 'Should return true' {
+                    Test-xRemoteDesktopSessionHostOsRequirement | Should be $true
                 }
             }
             Context 'Windows 8.1' {
-                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 6,3,1,1)}
-                it 'Should return true' {
-                    Test-xRemoteDesktopSessionHostOsRequirement | should be $true
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 6, 3, 1, 1) }
+                It 'Should return true' {
+                    Test-xRemoteDesktopSessionHostOsRequirement | Should be $true
                 }
             }
             Context 'Windows 8' {
-                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 6,2,9200,0)}
-                it 'Should return true' {
-                    Test-xRemoteDesktopSessionHostOsRequirement | should be $true
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 6, 2, 9200, 0) }
+                It 'Should return true' {
+                    Test-xRemoteDesktopSessionHostOsRequirement | Should be $true
                 }
             }
             Context 'Windows 7' {
-                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith {return (new-object 'Version' 6,1,1,0)}
-                it 'Should return false' {
-                    Test-xRemoteDesktopSessionHostOsRequirement | should be $false
+                Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 6, 1, 1, 0) }
+                It 'Should return false' {
+                    Test-xRemoteDesktopSessionHostOsRequirement | Should be $false
                 }
             }
         }

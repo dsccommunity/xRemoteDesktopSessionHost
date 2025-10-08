@@ -3,11 +3,11 @@
         This example shows how to configure HA mode on a connection broker.
 #>
 
-Configuration Example
+configuration Example
 {
     Import-DscResource -ModuleName 'xRemoteDesktopSessionHost'
 
-    Node localhost {
+    node localhost {
 
         xRDConnectionBrokerHAMode MyGateway {
             ConnectionBroker         = 'RDCB1'

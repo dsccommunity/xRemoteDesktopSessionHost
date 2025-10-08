@@ -1,7 +1,7 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module -Name RemoteDesktop
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
@@ -48,15 +48,12 @@ function Get-TargetResource
         DatabaseSecondaryConnectionString = $DatabaseSecondaryConnectionString
         DatabaseFilePath                  = $ConnectionBrokerHighAvailability.DatabaseFilePath
     }
-
 }
-
 
 ########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [CmdletBinding()]
     param
@@ -103,7 +100,6 @@ function Set-TargetResource
 
     Set-RDConnectionBrokerHighAvailability @parameters
 }
-
 
 #######################################################################
 # The Test-TargetResource cmdlet.

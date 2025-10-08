@@ -3,17 +3,16 @@
         This example shows how to join a RDSH host to a deployment.
 #>
 
-Configuration Example
+configuration Example
 {
-
     Import-DscResource -ModuleName 'xRemoteDesktopSessionHost'
 
-    Node localhost {
+    node localhost {
 
         xRDServer RemoteDesktopSessionHost {
             ConnectionBroker = 'connectionbroker.server.fqdn'
-            Server = 'sessionhost.server.fqdn'
-            Role = 'RDS-RD-Server'
+            Server           = 'sessionhost.server.fqdn'
+            Role             = 'RDS-RD-Server'
         }
     }
 }
