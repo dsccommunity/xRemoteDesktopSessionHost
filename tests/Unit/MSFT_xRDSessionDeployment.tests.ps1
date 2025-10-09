@@ -72,7 +72,7 @@ try
 
                 It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-                    $serviceWarning | Should BeLike "Failed to start RDMS service. Error: Cannot find any service with service name 'RDMS'*"
+                    $serviceWarning | Should BeLike "Failed to start RDMS service. Error: 'Cannot find any service with service name 'RDMS'.'."
                 }
 
                 It 'Should return $null on property <property> in Get-TargetResource ' {
@@ -126,7 +126,7 @@ try
 
                 It 'Should generate a warning, given RDMS service is stopped and start fails' {
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-                    $serviceWarning | Should Be 'Failed to start RDMS service. Error: Throwing from Start-Service mock'
+                    $serviceWarning | Should Be "Failed to start RDMS service. Error: 'Throwing from Start-Service mock'."
                 }
 
                 Mock -CommandName Get-Service -MockWith {
@@ -394,6 +394,10 @@ try
         }
         #endregion
     }
+}
+catch
+{
+    throw $_
 }
 finally
 {
