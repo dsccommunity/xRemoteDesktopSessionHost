@@ -16,9 +16,16 @@
     Sampler                     = 'latest'
     'Sampler.GitHubTasks'       = 'latest'
     MarkdownLinkCheck           = 'latest'
-    'DscResource.Common'        = '0.9.0'
     'DscResource.Test'          = 'latest'
-    'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
+
+    # Build dependencies needed for using the module
+    'DscResource.Common'        = 'latest'
+
+    # Analyzer rules
+    'DscResource.AnalyzerRules'    = 'latest'
+
+    # Prerequisite modules for documentation.
     'DscResource.DocGenerator'  = 'latest'
+    PlatyPS                     = 'latest'
 }
