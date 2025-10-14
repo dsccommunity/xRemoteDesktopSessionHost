@@ -1,4 +1,7 @@
 @{
+    # Script module or binary module file associated with this manifest.
+    RootModule    = 'xRemoteDesktopSessionHost.psm1'
+
     # Version number of this module. This is controlled by gitversion.
     moduleVersion = '0.0.1'
 
@@ -18,7 +21,7 @@
     Description = 'Module with DSC Resources for Remote Desktop Session Host'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion = '4.0'
+    PowerShellVersion = '5.0'
 
     # Minimum version of the common language runtime (CLR) required by this module
     CLRVersion = '4.0'
@@ -30,17 +33,7 @@
     CmdletsToExport = @()
 
     # DSC resources to export from this module
-    DscResourcesToExport = @(
-        'xRDCertificateConfiguration'
-        'xRDGatewayConfiguration'
-        'xRDLicenseConfiguration'
-        'xRDRemoteApp'
-        'xRDServer'
-        'xRDSessionCollection'
-        'xRDSessionCollectionConfiguration'
-        'xRDsessionDeployment'
-        'xRDConnectionBrokerHAMode'
-    )
+    DscResourcesToExport = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData = @{
