@@ -1,4 +1,3 @@
-
 [ClassVersion("1.0.0.0"), FriendlyName("xRDSessionCollection")]
 class MSFT_xRDSessionCollection : OMI_BaseResource
 {

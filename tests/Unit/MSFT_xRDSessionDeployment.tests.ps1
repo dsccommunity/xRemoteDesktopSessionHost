@@ -1,5 +1,5 @@
-$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
-$script:DSCResourceName    = 'MSFT_xRDSessionDeployment'
+$script:DSCModuleName = 'xRemoteDesktopSessionHost'
+$script:DSCResourceName = 'MSFT_xRDSessionDeployment'
 
 function Invoke-TestSetup
 {
@@ -14,7 +14,7 @@ function Invoke-TestSetup
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
-        -DSCResourceName $script:dscResourceName `
+        -DscResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
 }
@@ -29,7 +29,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDSessionDeployment'
+        $script:DSCResourceName = 'MSFT_xRDSessionDeployment'
 
         Import-Module RemoteDesktop -Force
 
@@ -40,7 +40,7 @@ try
         }
 
         $sessionDeploymentMultiSplat = @{
-            SessionHost      = 'sessionhost1.lan','sessionhost2.lan'
+            SessionHost      = 'sessionhost1.lan', 'sessionhost2.lan'
             ConnectionBroker = 'connectionbroker.lan'
             WebAccessServer  = 'webaccess1.lan', 'webaccess2.lan'
         }
@@ -54,13 +54,13 @@ try
             $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $commonParameters } | ForEach-Object -Process {
                 @{
                     Property = $_
-                    Value = $sessionDeploymentSplat[$_]
+                    Value    = $sessionDeploymentSplat[$_]
                 }
             }
 
-            Context "RDSessionDeployment is not present" {
-                Mock -CommandName Get-Service -ParameterFilter {$Name -eq 'RDMS' } -MockWith {
-                    Write-Error "MOCK Get-Service with parameter RDMS"
+            Context 'RDSessionDeployment is not present' {
+                Mock -CommandName Get-Service -ParameterFilter { $Name -eq 'RDMS' } -MockWith {
+                    Write-Error 'MOCK Get-Service with parameter RDMS'
                 }
 
                 Mock -CommandName Get-RDServer
@@ -72,7 +72,7 @@ try
 
                 It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-                    $serviceWarning | Should BeLike "Failed to start RDMS service. Error: Cannot find any service with service name 'RDMS'*"
+                    $serviceWarning | Should BeLike "Failed to start RDMS service. Error: 'Cannot find any service with service name 'RDMS'.'."
                 }
 
                 It 'Should return $null on property <property> in Get-TargetResource ' {
@@ -86,23 +86,23 @@ try
                 } -TestCases $allParameters
             }
 
-            Context "RDSessionDeployment is present" {
+            Context 'RDSessionDeployment is present' {
                 Mock -CommandName Get-RDServer -MockWith {
                     [pscustomobject]@{
                         Server = $sessionDeploymentSplat.SessionHost
-                        Roles = @(
+                        Roles  = @(
                             'RDS-RD-SERVER'
                         )
                     }
                     [pscustomobject]@{
                         Server = $sessionDeploymentSplat.ConnectionBroker
-                        Roles = @(
+                        Roles  = @(
                             'RDS-CONNECTION-BROKER'
                         )
                     }
                     [pscustomobject]@{
                         Server = $sessionDeploymentSplat.WebAccessServer
-                        Roles = @(
+                        Roles  = @(
                             'RDS-WEB-ACCESS'
                         )
                     }
@@ -121,12 +121,12 @@ try
                 }
 
                 Mock -CommandName Start-Service -MockWith {
-                    throw "Throwing from Start-Service mock"
+                    throw 'Throwing from Start-Service mock'
                 }
 
                 It 'Should generate a warning, given RDMS service is stopped and start fails' {
                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-                    $serviceWarning | Should Be 'Failed to start RDMS service. Error: Throwing from Start-Service mock'
+                    $serviceWarning | Should Be "Failed to start RDMS service. Error: 'Throwing from Start-Service mock'."
                 }
 
                 Mock -CommandName Get-Service -MockWith {
@@ -202,19 +202,19 @@ try
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
                     Server = $sessionDeploymentSplat.SessionHost
-                    Roles = @(
+                    Roles  = @(
                         'RDS-RD-SERVER'
                     )
                 }
                 [pscustomobject]@{
                     Server = 'connectionbrokernew.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
                 [pscustomobject]@{
                     Server = $sessionDeploymentSplat.WebAccessServer
-                    Roles = @(
+                    Roles  = @(
                         'RDS-WEB-ACCESS'
                     )
                 }
@@ -227,19 +227,19 @@ try
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
                     Server = $sessionDeploymentSplat.SessionHost
-                    Roles = @(
+                    Roles  = @(
                         'RDS-RD-SERVER'
                     )
                 }
                 [pscustomobject]@{
                     Server = $sessionDeploymentSplat.ConnectionBroker
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
                 [pscustomobject]@{
                     Server = 'webaccessnew.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-WEB-ACCESS'
                     )
                 }
@@ -252,25 +252,25 @@ try
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
                     Server = 'sessionhost1.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-RD-SERVER'
                     )
                 }
                 [pscustomobject]@{
                     Server = 'sessionhost2.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-RD-SERVER'
                     )
                 }
                 [pscustomobject]@{
                     Server = 'sessionhost3.lan'
-                    Roles = @(
+                    Roles  = @(
                         'RDS-RD-SERVER'
                     )
                 }
                 [pscustomobject]@{
                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
@@ -292,7 +292,7 @@ try
             Mock -CommandName Get-RDServer -MockWith {
                 [pscustomobject]@{
                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
@@ -323,7 +323,7 @@ try
                 }
                 [pscustomobject]@{
                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
@@ -345,7 +345,7 @@ try
                 }
                 [pscustomobject]@{
                     Server = $sessionDeploymentSplat.ConnectionBroker
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
@@ -376,7 +376,7 @@ try
                 }
                 [pscustomobject]@{
                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-                    Roles = @(
+                    Roles  = @(
                         'RDS-CONNECTION-BROKER'
                     )
                 }
@@ -394,6 +394,10 @@ try
         }
         #endregion
     }
+}
+catch
+{
+    throw $_
 }
 finally
 {

@@ -1,7 +1,7 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop
 
@@ -23,7 +23,7 @@ function Get-TargetResource
         $LicenseServer,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
+        [ValidateSet('PerUser', 'PerDevice', 'NotConfigured')]
         [string]
         $LicenseMode
     )
@@ -34,20 +34,19 @@ function Get-TargetResource
 
     $config = Get-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -ea SilentlyContinue
 
-    if ($config)   # Microsoft.RemoteDesktopServices.Management.LicensingSetting
+    if ($config) # Microsoft.RemoteDesktopServices.Management.LicensingSetting
     {
-        Write-Verbose "configuration retrieved successfully:"
+        Write-Verbose 'configuration retrieved successfully:'
     }
     else
     {
         Write-Verbose "Failed to retrieve RD License configuration from broker '$ConnectionBroker'."
         throw ("Failed to retrieve RD License configuration from broker '$ConnectionBroker'.")
     }
-    $result =
-    @{
-        "ConnectionBroker" = $ConnectionBroker
-        "LicenseServer"   = $config.LicenseServer
-        "LicenseMode"      = $config.Mode.ToString()  # Microsoft.RemoteDesktopServices.Management.LicensingMode  .ToString()
+    $result = @{
+        ConnectionBroker = $ConnectionBroker
+        LicenseServer    = $config.LicenseServer
+        LicenseMode      = $config.Mode.ToString()  # Microsoft.RemoteDesktopServices.Management.LicensingMode  .ToString()
     }
 
     Write-Verbose ">> RD License mode:     $($result.LicenseMode)"
@@ -55,7 +54,6 @@ function Get-TargetResource
 
     $result
 }
-
 
 ########################################################################
 # The Set-TargetResource cmdlet.
@@ -74,28 +72,28 @@ function Set-TargetResource
         $LicenseServer,
 
         [Parameter(Mandatory = $true)] # required parameter in Set-RDLicenseConfiguration
-        [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
+        [ValidateSet('PerUser', 'PerDevice', 'NotConfigured')]
         [string]
         $LicenseMode
     )
 
-    Write-Verbose "Starting RD License server configuration..."
+    Write-Verbose 'Starting RD License server configuration...'
     Write-Verbose ">> RD Connection Broker:  $($ConnectionBroker.ToLower())"
 
     if ($LicenseServer)
     {
         Write-Verbose ">> RD License servers:    $($LicenseServer -join '; ')"
 
-        Write-Verbose "calling Set-RDLicenseConfiguration cmdlet..."
+        Write-Verbose 'Calling Set-RDLicenseConfiguration cmdlet...'
         Set-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -LicenseServer $LicenseServer -Mode $LicenseMode -Force
     }
     else
     {
-        Write-Verbose "calling Set-RDLicenseConfiguration cmdlet..."
+        Write-Verbose 'Calling Set-RDLicenseConfiguration cmdlet...'
         Set-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -Mode $LicenseMode -Force
     }
 
-    Write-Verbose "Set-RDLicenseConfiguration done."
+    Write-Verbose 'Set-RDLicenseConfiguration done.'
 }
 
 
@@ -117,7 +115,7 @@ function Test-TargetResource
         $LicenseServer,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("PerUser", "PerDevice", "NotConfigured")]
+        [ValidateSet('PerUser', 'PerDevice', 'NotConfigured')]
         [string] $LicenseMode
     )
 
@@ -127,7 +125,7 @@ function Test-TargetResource
     {
         Write-Verbose "Verifying RD Licensing mode: $($config.LicenseMode -eq $LicenseMode)"
 
-        Write-Verbose "Verifying RD license servers..."
+        Write-Verbose 'Verifying RD license servers...'
         $noChange = $true
         if ($LicenseServer)
         {
@@ -157,6 +155,5 @@ function Test-TargetResource
     Write-Verbose "Test-TargetResource returning:  $result"
     return $result
 }
-
 
 Export-ModuleMember -Function *-TargetResource

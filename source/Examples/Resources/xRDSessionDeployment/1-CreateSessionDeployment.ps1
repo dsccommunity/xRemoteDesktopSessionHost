@@ -3,16 +3,16 @@
         This example shows how to ensure a session deployment is created.
 #>
 
-Configuration Example
+configuration Example
 {
     Import-DscResource -ModuleName 'xRemoteDesktopSessionHost'
 
-    Node localhost {
+    node localhost {
 
         xRDSessionDeployment RDSDeployment {
-            SessionHost = 'rdsessionhost.server.fqdn'
+            SessionHost      = 'rdsessionhost.server.fqdn'
             ConnectionBroker = 'connectionbroker.server.fqdn'
-            WebAccessServer =  'webaccess.server.fqdn'
+            WebAccessServer  = 'webaccess.server.fqdn'
         }
     }
 }

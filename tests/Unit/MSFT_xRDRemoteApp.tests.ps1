@@ -1,5 +1,5 @@
-$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
-$script:DSCResourceName    = 'MSFT_xRDRemoteApp'
+$script:DSCModuleName = 'xRemoteDesktopSessionHost'
+$script:DSCResourceName = 'MSFT_xRDRemoteApp'
 
 #region HEADER
 
@@ -31,14 +31,14 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDRemoteApp'
+        $script:DSCResourceName = 'MSFT_xRDRemoteApp'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
         $testInvalidCollectionSplat = @{
             CollectionName = $testInvalidCollectionName
-            DisplayName = 'name'
-            FilePath = 'path'
-            Alias = 'alias'
+            DisplayName    = 'name'
+            FilePath       = 'path'
+            Alias          = 'alias'
         }
 
         $sourceRemoteAppValues = @{
@@ -66,9 +66,9 @@ try
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when CollectionName length is greater than 256" {
+                It 'Should error when CollectionName length is greater than 256' {
                     { Get-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
 
@@ -80,7 +80,7 @@ try
                 $xRDRemoteAppSplat.CommandLineSetting = $sourceRemoteAppValues.CommandLineSetting
             }
 
-            Context "When Get-TargetResource is called" {
+            Context 'When Get-TargetResource is called' {
 
                 Mock -CommandName Get-RDRemoteApp
                 Mock -CommandName Get-RDSessionCollection
@@ -108,17 +108,17 @@ try
                 $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
 
                 $allParameters = (Get-Command Get-TargetResource).Parameters.Keys |
-                    Where-Object -FilterScript { $_ -notin $commonParameters} |
+                    Where-Object -FilterScript { $_ -notin $commonParameters } |
                     ForEach-Object -Process {
                         @{
                             Property = $_
-                            Value = $xRDRemoteAppSplat[$_]
+                            Value    = $xRDRemoteAppSplat[$_]
                         }
                     }
 
                 $getTargetResourceResult = Get-TargetResource @xRDRemoteAppSplat
                 It 'Should return property <Property> with value <Value> in Get-TargetResource' {
-                    Param(
+                    param(
                         $Property,
                         $Value
                     )
@@ -140,9 +140,9 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when CollectionName length is greater than 256" {
+                It 'Should error when CollectionName length is greater than 256' {
                     { Set-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
 
@@ -202,9 +202,9 @@ try
 
         #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when CollectionName length is greater than 256" {
+                It 'Should error when CollectionName length is greater than 256' {
                     { Test-TargetResource @testInvalidCollectionSplat } | Should Throw
                 }
 

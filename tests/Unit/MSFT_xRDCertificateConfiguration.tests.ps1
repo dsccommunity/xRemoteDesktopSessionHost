@@ -1,5 +1,5 @@
-$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
-$script:DSCResourceName    = 'MSFT_xRDCertificateConfiguration'
+$script:DSCModuleName = 'xRemoteDesktopSessionHost'
+$script:DSCResourceName = 'MSFT_xRDCertificateConfiguration'
 
 #region HEADER
 
@@ -31,7 +31,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDCertificateConfiguration'
+        $script:DSCResourceName = 'MSFT_xRDCertificateConfiguration'
 
         Import-Module RemoteDesktop -Force
 
@@ -45,9 +45,9 @@ try
                 Mock -CommandName Get-RDCertificate -MockWith {
                     [pscustomobject]@{
                         Thumbprint = $null
-                        Role = 'RDPublishing'
+                        Role       = 'RDPublishing'
                     }
-                } -ParameterFilter {$Role -eq 'RDPublishing'}
+                } -ParameterFilter { $Role -eq 'RDPublishing' }
 
                 Mock -CommandName Get-PfxData -MockWith {
                     [pscustomobject]@{
@@ -55,13 +55,13 @@ try
                             Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
                         }
                     }
-                } -ParameterFilter {$ImportPath -eq 'testdrive:\RDPublishing.pfx'}
+                } -ParameterFilter { $ImportPath -eq 'testdrive:\RDPublishing.pfx' }
 
                 $resourceNotConfiguredSplat = @{
-                    Role = 'RDPublishing'
+                    Role             = 'RDPublishing'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath = 'testdrive:\RDPublishing.pfx'
-                    Credential = [pscredential]::new(
+                    ImportPath       = 'testdrive:\RDPublishing.pfx'
+                    Credential       = [pscredential]::new(
                         'Test',
                         (ConvertTo-SecureString -AsPlainText -String 'pester' -Force)
                     )
@@ -92,9 +92,9 @@ try
                 Mock -CommandName Get-RDCertificate -MockWith {
                     [pscustomobject]@{
                         Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
-                        Role = 'RDRedirector'
+                        Role       = 'RDRedirector'
                     }
-                } -ParameterFilter {$Role -eq 'RDRedirector'}
+                } -ParameterFilter { $Role -eq 'RDRedirector' }
 
                 Mock -CommandName Get-PfxData -MockWith {
                     [pscustomobject]@{
@@ -102,13 +102,13 @@ try
                             Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
                         }
                     }
-                } -ParameterFilter {$ImportPath -eq 'testdrive:\RDRedirector.pfx'}
+                } -ParameterFilter { $ImportPath -eq 'testdrive:\RDRedirector.pfx' }
 
                 $resourceConfiguredSplat = @{
-                    Role = 'RDRedirector'
+                    Role             = 'RDRedirector'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath = 'testdrive:\RDRedirector.pfx'
-                    Credential = [pscredential]::new(
+                    ImportPath       = 'testdrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new(
                         'Test',
                         (ConvertTo-SecureString -AsPlainText -String 'pester' -Force)
                     )
@@ -128,9 +128,9 @@ try
                 Mock -CommandName Get-RDCertificate -MockWith {
                     [pscustomobject]@{
                         Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
-                        Role = 'RDGateway'
+                        Role       = 'RDGateway'
                     }
-                } -ParameterFilter {$Role -eq 'RDGateway'}
+                } -ParameterFilter { $Role -eq 'RDGateway' }
 
                 Mock -CommandName Get-PfxData -MockWith {
                     [pscustomobject]@{
@@ -138,13 +138,13 @@ try
                             Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
                         }
                     }
-                } -ParameterFilter {$ImportPath -eq 'testdrive:\RDGateway.pfx'}
+                } -ParameterFilter { $ImportPath -eq 'testdrive:\RDGateway.pfx' }
 
                 $resourceWrongConfiguredSplat = @{
-                    Role = 'RDGateway'
+                    Role             = 'RDGateway'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath = 'testdrive:\RDGateway.pfx'
-                    Credential = [pscredential]::new(
+                    ImportPath       = 'testdrive:\RDGateway.pfx'
+                    Credential       = [pscredential]::new(
                         'Test',
                         (ConvertTo-SecureString -AsPlainText -String 'pester' -Force)
                     )
@@ -174,9 +174,9 @@ try
                 Mock -CommandName Get-RDCertificate -MockWith {
                     [pscustomobject]@{
                         Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
-                        Role = 'RDGateway'
+                        Role       = 'RDGateway'
                     }
-                } -ParameterFilter {$Role -eq 'RDGateway'}
+                } -ParameterFilter { $Role -eq 'RDGateway' }
 
                 Mock -CommandName Get-PfxData -MockWith {
                     [pscustomobject]@{
@@ -184,12 +184,12 @@ try
                             Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
                         }
                     }
-                } -ParameterFilter {$ImportPath -eq 'testdrive:\RDGateway.pfx'}
+                } -ParameterFilter { $ImportPath -eq 'testdrive:\RDGateway.pfx' }
 
                 $resourceWrongConfiguredSplat = @{
-                    Role = 'RDGateway'
+                    Role             = 'RDGateway'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath = 'testdrive:\RDGateway.pfx'
+                    ImportPath       = 'testdrive:\RDGateway.pfx'
                 }
 
                 It 'Get-TargetResource returns the thumbprint of the currently configured certificate' {
@@ -214,13 +214,13 @@ try
             Context 'When a certificate fails to test' {
                 Mock Get-RDCertificate
                 Mock Get-PfxData -MockWith {
-                    throw "Cannot import PFX file"
+                    throw 'Cannot import PFX file'
                 }
 
                 $resourceWrongConfiguredSplat = @{
-                    Role = 'RDGateway'
+                    Role             = 'RDGateway'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath = 'testdrive:\RDGateway.pfx'
+                    ImportPath       = 'testdrive:\RDGateway.pfx'
                 }
 
                 It 'Test-TargetResource displays a warning when a certificate fails to test' {
@@ -240,9 +240,9 @@ try
                 }
 
                 $resourceWrongConfiguredSplat = @{
-                    Role = 'RDGateway'
+                    Role             = 'RDGateway'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath = 'testdrive:\RDGateway.pfx'
+                    ImportPath       = 'testdrive:\RDGateway.pfx'
                 }
 
                 It 'Set-TargetResource returns an error when the certificate could not be applied' {

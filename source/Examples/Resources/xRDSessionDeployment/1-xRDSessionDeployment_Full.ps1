@@ -26,8 +26,8 @@ configuration xRDSessionDeployment_Full
         xRDSessionDeployment TheBigDeployment
         {
             ConnectionBroker = 'RDBC1.contoso.com'
-            WebAccessServer = 'RDWA1.contoso.com'
-            SessionHost = 'RDSH1.contoso.com', 'RDSH2.contoso.com'
+            WebAccessServer  = 'RDWA1.contoso.com'
+            SessionHost      = 'RDSH1.contoso.com', 'RDSH2.contoso.com'
         }
     }
 }

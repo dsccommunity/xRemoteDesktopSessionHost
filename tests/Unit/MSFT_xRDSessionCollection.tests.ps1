@@ -1,5 +1,5 @@
-$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
-$script:DSCResourceName    = 'MSFT_xRDSessionCollection'
+$script:DSCModuleName = 'xRemoteDesktopSessionHost'
+$script:DSCResourceName = 'MSFT_xRDSessionCollection'
 
 function Invoke-TestSetup
 {
@@ -29,7 +29,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDSessionCollection'
+        $script:DSCResourceName = 'MSFT_xRDSessionCollection'
 
         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
         $testcollectionNameMulti = 'TestCollectionMulti'
@@ -45,8 +45,8 @@ try
             }
         )
 
-        $testSessionHost      = 'localhost'
-        $testSessionHostMulti = 'rdsh1','rdsh2','rdsh3'
+        $testSessionHost = 'localhost'
+        $testSessionHostMulti = 'rdsh1', 'rdsh2', 'rdsh3'
         $testConnectionBroker = 'localhost.fqdn'
 
         $validTargetResourceCall = @{
@@ -67,13 +67,13 @@ try
             ConnectionBroker = $testConnectionBroker
         }
         $validMultiTargetResourceCall = @{
-            CollectionName = $testcollectionNameMulti
-            SessionHost = $testSessionHostMulti
+            CollectionName   = $testcollectionNameMulti
+            SessionHost      = $testSessionHostMulti
             ConnectionBroker = $testConnectionBroker
         }
         $invalidMultiTargetResourceCall = @{
-            CollectionName = $testcollectionNameMulti
-            SessionHost = $testSessionHostMulti | Select-Object -Skip 1
+            CollectionName   = $testcollectionNameMulti
+            SessionHost      = $testSessionHostMulti | Select-Object -Skip 1
             ConnectionBroker = $testConnectionBroker
         }
 
@@ -100,18 +100,18 @@ try
             Mock -CommandName Get-RDSessionHost {
                 return @{
                     CollectionName = $testCollection[0].Name
-                    SessionHost = $testSessionHost
+                    SessionHost    = $testSessionHost
                 }
                 return @{
                     CollectionName = $testCollectionNameMulti
-                    SessionHost = $testSessionHostMulti
+                    SessionHost    = $testSessionHostMulti
                 }
             }
 
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when CollectionName length is greater than 256" {
-                    {Get-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                It 'Should error when CollectionName length is greater than 256' {
+                    { Get-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost } | Should throw
                 }
 
                 Mock -CommandName Get-RDSessionCollection {
@@ -147,7 +147,7 @@ try
                 }
             }
 
-            Context "Non-existent Session Collection requested (other session collections returned - Win2019 behaviour)" {
+            Context 'Non-existent Session Collection requested (other session collections returned - Win2019 behaviour)' {
 
                 Mock -CommandName Get-RDSessionCollection -MockWith {
                     [pscustomobject]@{
@@ -159,39 +159,39 @@ try
                 }
 
                 $result = Get-TargetResource @nonExistentTargetResourceCall1
-                It "Should return return a hash table" {
+                It 'Should return return a hash table' {
                     $result | Should -BeOfType System.Collections.Hashtable
                 }
 
                 It 'Should return supplied session host, with other values being $null' {
-                    $result.ConnectionBroker      = $null
-                    $result.CollectionName        = $null
+                    $result.ConnectionBroker = $null
+                    $result.CollectionName = $null
                     $result.CollectionDescription = $null
-                    $result.SessionHost           = $testSessionHost
+                    $result.SessionHost = $testSessionHost
                 }
             }
 
-            Context "Non-existent Session Collection requested (no session collections returned - normal behaviour)" {
+            Context 'Non-existent Session Collection requested (no session collections returned - normal behaviour)' {
 
                 Mock -CommandName Get-RDSessionCollection {
                     return $null
                 }
 
                 $result = Get-TargetResource @nonExistentTargetResourceCall2
-                It "Should return return a hash table (Win 2019)" {
+                It 'Should return return a hash table (Win 2019)' {
                     $result | Should -BeOfType System.Collections.Hashtable
                 }
 
                 It 'Should return supplied session host, with other values being $null' {
-                    $result.ConnectionBroker      = $null
-                    $result.CollectionName        = $null
+                    $result.ConnectionBroker = $null
+                    $result.CollectionName = $null
                     $result.CollectionDescription = $null
-                    $result.SessionHost           = $testSessionHost
+                    $result.SessionHost = $testSessionHost
                 }
             }
 
 
-            Context "Two Session Collections exist with same CollectionName" {
+            Context 'Two Session Collections exist with same CollectionName' {
                 Mock -CommandName Get-RDSessionCollection {
                     $result = @()
 
@@ -208,7 +208,7 @@ try
                     return $result
                 }
 
-                It "should throw exception" {
+                It 'should throw exception' {
                     { Get-TargetResource @validTargetResourceCall } | Should throw
                 }
             }
@@ -219,10 +219,10 @@ try
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
 
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when CollectionName length is greater than 256" {
-                    {Set-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                It 'Should error when CollectionName length is greater than 256' {
+                    { Set-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost } | Should throw
                 }
             }
 
@@ -232,11 +232,11 @@ try
             Mock -CommandName Get-RDSessionHost {
                 return @{
                     CollectionName = $testCollection[0].Name
-                    SessionHost = $testSessionHost
+                    SessionHost    = $testSessionHost
                 }
                 return @{
                     CollectionName = $testCollectionNameMulti
-                    SessionHost = $testSessionHostMulti
+                    SessionHost    = $testSessionHostMulti
                 }
             }
 
@@ -285,10 +285,10 @@ try
             Context 'Session Collection exists, but list of session hosts is different' {
                 Mock -CommandName Get-TargetResource -MockWith {
                     @{
-                        "ConnectionBroker"      = 'CB'
-                        "CollectionDescription" = 'Description'
-                        "CollectionName"        = 'ExistingCollection'
-                        "SessionHost"           = 'SurplusHost'
+                        'ConnectionBroker'      = 'CB'
+                        'CollectionDescription' = 'Description'
+                        'CollectionName'        = 'ExistingCollection'
+                        'SessionHost'           = 'SurplusHost'
                     }
                 }
                 Mock -CommandName Compare-Object -MockWith {
@@ -306,10 +306,10 @@ try
 
                 Mock -CommandName Get-TargetResource -MockWith {
                     @{
-                        "ConnectionBroker"      = 'CB'
-                        "CollectionDescription" = 'Description'
-                        "CollectionName"        = 'ExistingCollection'
-                        "SessionHost"           = $null
+                        'ConnectionBroker'      = 'CB'
+                        'CollectionDescription' = 'Description'
+                        'CollectionName'        = 'ExistingCollection'
+                        'SessionHost'           = $null
                     }
                 }
                 It 'calls Add-RDSessionHost if no session hosts exist' {
@@ -322,10 +322,10 @@ try
 
         #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
-                It "Should error when CollectionName length is greater than 256" {
-                    {Test-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost} | Should throw
+                It 'Should error when CollectionName length is greater than 256' {
+                    { Test-TargetResource -CollectionName $testInvalidCollectionName -SessionHost $testSessionHost } | Should throw
                 }
             }
 
@@ -352,11 +352,11 @@ try
                 Mock -CommandName Get-RDSessionHost {
                     return @{
                         CollectionName = $testCollection[0].Name
-                        SessionHost = $testSessionHost
+                        SessionHost    = $testSessionHost
                     }
                     return @{
                         CollectionName = $testCollectionNameMulti
-                        SessionHost = $testSessionHostMulti
+                        SessionHost    = $testSessionHostMulti
                     }
                 }
 
@@ -367,7 +367,7 @@ try
                 Mock -CommandName Get-RDSessionHost {
                     return @{
                         CollectionName = $testCollectionNameMulti
-                        SessionHost = $testSessionHostMulti
+                        SessionHost    = $testSessionHostMulti
                     }
                 }
 
@@ -391,7 +391,7 @@ try
                 Mock -CommandName Get-RDSessionHost {
                     return @{
                         CollectionName = $testCollectionNameMulti
-                        SessionHost = $testSessionHostMulti
+                        SessionHost    = $testSessionHostMulti
                     }
                 }
 
@@ -401,7 +401,7 @@ try
                     }
                     return @{
                         CollectionName = $testCollectionNameMulti
-                        SessionHost = $invalidTestSessionHostMulti
+                        SessionHost    = $invalidTestSessionHostMulti
                     }
                 }
 

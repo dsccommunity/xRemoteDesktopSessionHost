@@ -1,5 +1,5 @@
-$script:dscModuleName      = 'xRemoteDesktopSessionHost'
-$script:dscResourceName    = 'MSFT_xRDGatewayConfiguration'
+$script:dscModuleName = 'xRemoteDesktopSessionHost'
+$script:dscResourceName = 'MSFT_xRDGatewayConfiguration'
 
 #region HEADER
 
@@ -31,7 +31,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:dscResourceName    = 'MSFT_xRDGatewayConfiguration'
+        $script:dscResourceName = 'MSFT_xRDGatewayConfiguration'
 
         Import-Module RemoteDesktop -Force
 
@@ -41,7 +41,7 @@ try
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
                     ConnectionBroker = 'testbroker.fqdn'
-                    Gatewaymode = 'DoNotUse'
+                    Gatewaymode      = 'DoNotUse'
                 }
             }
 
@@ -51,11 +51,11 @@ try
 
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
-                    Gatewaymode = 'Custom'
-                    GatewayExternalFqdn = 'testgateway.external.fqdn'
-                    BypassLocal = $true
-                    ConnectionBroker = 'testbroker.fqdn'
-                    LogonMethod = 'Password'
+                    Gatewaymode          = 'Custom'
+                    GatewayExternalFqdn  = 'testgateway.external.fqdn'
+                    BypassLocal          = $true
+                    ConnectionBroker     = 'testbroker.fqdn'
+                    LogonMethod          = 'Password'
                     UseCachedCredentials = $true
                 }
             }
@@ -88,16 +88,16 @@ try
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
                     ConnectionBroker = 'testbroker.fqdn'
-                    Gatewaymode = 'DoNotUse'
+                    Gatewaymode      = 'DoNotUse'
                 }
             }
 
             $testSplat = @{
-                ConnectionBroker = 'testbroker.fqdn'
-                GatewayMode = 'DoNotUse'
-                ExternalFqdn = 'testgateway.external.fqdn'
-                BypassLocal = $true
-                LogonMethod = 'Password'
+                ConnectionBroker     = 'testbroker.fqdn'
+                GatewayMode          = 'DoNotUse'
+                ExternalFqdn         = 'testgateway.external.fqdn'
+                BypassLocal          = $true
+                LogonMethod          = 'Password'
                 UseCachedCredentials = $true
             }
 
@@ -112,11 +112,11 @@ try
 
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
-                    Gatewaymode = 'Custom'
-                    GatewayExternalFqdn = 'testgateway.external.fqdn'
-                    BypassLocal = $true
-                    ConnectionBroker = 'testbroker.fqdn'
-                    LogonMethod = 'Password'
+                    Gatewaymode          = 'Custom'
+                    GatewayExternalFqdn  = 'testgateway.external.fqdn'
+                    BypassLocal          = $true
+                    ConnectionBroker     = 'testbroker.fqdn'
+                    LogonMethod          = 'Password'
                     UseCachedCredentials = $true
                 }
             }
@@ -154,7 +154,7 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
                 It 'Should error when if GatewayMode is Custom and a parameter is missing.' {
                     { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -GatewayMode 'Custom' -ErrorAction Stop } |
@@ -163,21 +163,21 @@ try
             }
 
             $setSplat = @{
-                ConnectionBroker = 'testbroker.fqdn'
-                GatewayServer = 'my.gateway.fqdn'
-                GatewayMode = 'Custom'
-                ExternalFqdn = 'testgateway.external.fqdn'
-                BypassLocal = $true
-                LogonMethod = 'Password'
+                ConnectionBroker     = 'testbroker.fqdn'
+                GatewayServer        = 'my.gateway.fqdn'
+                GatewayMode          = 'Custom'
+                ExternalFqdn         = 'testgateway.external.fqdn'
+                BypassLocal          = $true
+                LogonMethod          = 'Password'
                 UseCachedCredentials = $true
             }
 
-            Context "Configuration changes performed by Set" {
+            Context 'Configuration changes performed by Set' {
 
                 Mock -CommandName Get-RDServer -MockWith {
                     [pscustomobject]@{
                         Server = 'my.gateway.fqdn'
-                        Roles = @(
+                        Roles  = @(
                             'RDS-WEB-ACCESS',
                             'RDS-GATEWAY'
                         )
@@ -194,7 +194,7 @@ try
                 Mock -CommandName Get-RDServer -MockWith {
                     [pscustomobject]@{
                         Server = 'testbroker.fqdn'
-                        Roles = @(
+                        Roles  = @(
                             'RDS-WEB-ACCESS'
                         )
                     }
@@ -245,7 +245,7 @@ try
     Invoke-TestSetup
 
     InModuleScope $script:DSCResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDGatewayConfiguration'
+        $script:DSCResourceName = 'MSFT_xRDGatewayConfiguration'
 
         Import-Module RemoteDesktop -Force
 
@@ -255,7 +255,7 @@ try
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
                     ConnectionBroker = 'testbroker.fqdn'
-                    Gatewaymode = 'DoNotUse'
+                    Gatewaymode      = 'DoNotUse'
                 }
             }
 
@@ -265,11 +265,11 @@ try
 
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
-                    Gatewaymode = 'Custom'
-                    GatewayExternalFqdn = 'testgateway.external.fqdn'
-                    BypassLocal = $true
-                    ConnectionBroker = 'testbroker.fqdn'
-                    LogonMethod = 'Password'
+                    Gatewaymode          = 'Custom'
+                    GatewayExternalFqdn  = 'testgateway.external.fqdn'
+                    BypassLocal          = $true
+                    ConnectionBroker     = 'testbroker.fqdn'
+                    LogonMethod          = 'Password'
                     UseCachedCredentials = $true
                 }
             }
@@ -302,16 +302,16 @@ try
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
                     ConnectionBroker = 'testbroker.fqdn'
-                    Gatewaymode = 'DoNotUse'
+                    Gatewaymode      = 'DoNotUse'
                 }
             }
 
             $testSplat = @{
-                ConnectionBroker = 'testbroker.fqdn'
-                GatewayMode = 'DoNotUse'
-                ExternalFqdn = 'testgateway.external.fqdn'
-                BypassLocal = $true
-                LogonMethod = 'Password'
+                ConnectionBroker     = 'testbroker.fqdn'
+                GatewayMode          = 'DoNotUse'
+                ExternalFqdn         = 'testgateway.external.fqdn'
+                BypassLocal          = $true
+                LogonMethod          = 'Password'
                 UseCachedCredentials = $true
             }
 
@@ -326,11 +326,11 @@ try
 
             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
                 [pscustomobject]@{
-                    Gatewaymode = 'Custom'
-                    GatewayExternalFqdn = 'testgateway.external.fqdn'
-                    BypassLocal = $true
-                    ConnectionBroker = 'testbroker.fqdn'
-                    LogonMethod = 'Password'
+                    Gatewaymode          = 'Custom'
+                    GatewayExternalFqdn  = 'testgateway.external.fqdn'
+                    BypassLocal          = $true
+                    ConnectionBroker     = 'testbroker.fqdn'
+                    LogonMethod          = 'Password'
                     UseCachedCredentials = $true
                 }
             }
@@ -368,7 +368,7 @@ try
 
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
                 It 'Should error when if GatewayMode is Custom and a parameter is missing.' {
                     { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -GatewayMode 'Custom' -ErrorAction Stop } |
@@ -377,21 +377,21 @@ try
             }
 
             $setSplat = @{
-                ConnectionBroker = 'testbroker.fqdn'
-                GatewayServer = 'my.gateway.fqdn'
-                GatewayMode = 'Custom'
-                ExternalFqdn = 'testgateway.external.fqdn'
-                BypassLocal = $true
-                LogonMethod = 'Password'
+                ConnectionBroker     = 'testbroker.fqdn'
+                GatewayServer        = 'my.gateway.fqdn'
+                GatewayMode          = 'Custom'
+                ExternalFqdn         = 'testgateway.external.fqdn'
+                BypassLocal          = $true
+                LogonMethod          = 'Password'
                 UseCachedCredentials = $true
             }
 
-            Context "Configuration changes performed by Set" {
+            Context 'Configuration changes performed by Set' {
 
                 Mock -CommandName Get-RDServer -MockWith {
                     [pscustomobject]@{
                         Server = 'my.gateway.fqdn'
-                        Roles = @(
+                        Roles  = @(
                             'RDS-WEB-ACCESS',
                             'RDS-GATEWAY'
                         )
@@ -408,7 +408,7 @@ try
                 Mock -CommandName Get-RDServer -MockWith {
                     [pscustomobject]@{
                         Server = 'testbroker.fqdn'
-                        Roles = @(
+                        Roles  = @(
                             'RDS-WEB-ACCESS'
                         )
                     }

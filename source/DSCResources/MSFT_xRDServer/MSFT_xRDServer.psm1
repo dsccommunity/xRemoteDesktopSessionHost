@@ -1,10 +1,61 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
+
+function ValidateCustomModeParameters
+{
+    param
+    (
+        [Parameter()]
+        [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
+        [string]
+        $Role,
+
+        [Parameter()]
+        [string]
+        $GatewayExternalFqdn
+    )
+
+    Write-Verbose 'validating parameters...'
+
+    $customParams = @{
+        GatewayExternalFqdn = $GatewayExternalFqdn
+    }
+
+    if ($Role -eq 'RDS-Gateway')
+    {
+        # ensure GatewayExternalFqdn was passed in, otherwise 'Add-RDServer' will fail
+        $emptyBoundParameters = $null
+        $emptyBoundParameters = $customParams.GetEnumerator() | Where-Object { $_.Value -eq [string]::Empty }
+
+        if ($emptyBoundParameters)
+        {
+            $emptyBoundParameters | ForEach-Object { Write-Verbose ">> '$($_.Key)' parameter is empty" }
+
+            Write-Warning "[PARAMETER VALIDATION FAILURE] I'm gonna throw, right now..."
+
+            throw ("Requested server role 'RDS-Gateway', you must pass in the 'GatewayExternalFqdn' parameter.")
+        }
+    }
+    else
+    {
+        # give warning about incorrect usage of the resource (do not fail)
+
+        $parametersWithValues = $customParams.getenumerator() | Where-Object { $_.value }
+
+        if ($parametersWithValues.count -gt 0)
+        {
+            $parametersWithValues | ForEach-Object { Write-Verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
+
+            Write-Warning ("[WARNING]: Requested server role is '$Role', the following parameter can only be used with server role 'RDS-Gateway': " +
+                "$($parametersWithValues.Key -join ', '). The parameter will be ignored in the call to Add-RDServer to avoid error!")
+        }
+    }
+}
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -26,13 +77,13 @@ function Get-TargetResource
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("RDS-Connection-Broker", "RDS-Virtualization", "RDS-RD-Server", "RDS-Web-Access", "RDS-Gateway", "RDS-Licensing")]
+        [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
         [string]
         $Role,
 
         [Parameter()]
         [string]
-        $GatewayExternalFqdn   # only for RDS-Gateway
+        $GatewayExternalFqdn # only for RDS-Gateway
     )
 
     $result = $null
@@ -68,7 +119,7 @@ function Get-TargetResource
 
                 if ($config)
                 {
-                    Write-Verbose "RDS Gateway configuration retrieved successfully..."
+                    Write-Verbose 'RDS Gateway configuration retrieved successfully...'
                     $result.GatewayExternalFqdn = $config.GatewayExternalFqdn
                     Write-Verbose ">> GatewayExternalFqdn: '$($result.GatewayExternalFqdn)'"
                 }
@@ -78,7 +129,6 @@ function Get-TargetResource
         {
             Write-Verbose "The server '$Server' is not in the deployment as '$Role' yet."
         }
-
     }
     else
     {
@@ -89,62 +139,9 @@ function Get-TargetResource
     $result
 }
 
-
 ########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
-function ValidateCustomModeParameters
-{
-    param
-    (
-        [Parameter()]
-        [ValidateSet("RDS-Connection-Broker", "RDS-Virtualization", "RDS-RD-Server", "RDS-Web-Access", "RDS-Gateway", "RDS-Licensing")]
-        [string]
-        $Role,
-
-        [Parameter()]
-        [string]
-        $GatewayExternalFqdn
-    )
-
-    Write-Verbose "validating parameters..."
-
-    $customParams = @{
-        GatewayExternalFqdn = $GatewayExternalFqdn
-    }
-
-    if ($Role -eq 'RDS-Gateway')
-    {
-        # ensure GatewayExternalFqdn was passed in, otherwise Add-RDServer will fail
-        $emptyBoundParameters = $null
-        $emptyBoundParameters = $customParams.getenumerator() | Where-Object { $_.value -eq [string]::Empty }
-
-        if ($emptyBoundParameters)
-        {
-            $emptyBoundParameters | ForEach-Object { Write-Verbose ">> '$($_.Key)' parameter is empty" }
-
-            Write-Warning "[PARAMETER VALIDATION FAILURE] i'm gonna throw, right now..."
-
-            throw ("Requested server role 'RDS-Gateway', you must pass in the 'GatewayExternalFqdn' parameter.")
-        }
-    }
-    else
-    {
-        # give warning about incorrect usage of the resource (do not fail)
-
-        $parametersWithValues = $customParams.getenumerator() | Where-Object { $_.value }
-
-        if ($parametersWithValues.count -gt 0)
-        {
-            $parametersWithValues | ForEach-Object { Write-Verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
-
-            Write-Warning ("[WARNING]: Requested server role is '$Role', the following parameter can only be used with server role 'RDS-Gateway': " +
-                "$($parametersWithValues.Key -join ', '). The parameter will be ignored in the call to Add-RDServer to avoid error!")
-        }
-    }
-}
-
-
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -161,13 +158,13 @@ function Set-TargetResource
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("RDS-Connection-Broker", "RDS-Virtualization", "RDS-RD-Server", "RDS-Web-Access", "RDS-Gateway", "RDS-Licensing")]
+        [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
         [string]
         $Role,
 
         [Parameter()]
         [string]
-        $GatewayExternalFqdn   # only for RDS-Gateway
+        $GatewayExternalFqdn # only for RDS-Gateway
     )
 
     if (-not $ConnectionBroker)
@@ -186,21 +183,19 @@ function Set-TargetResource
     }
     else
     {
-        $PSBoundParameters.Remove("GatewayExternalFqdn")
+        $PSBoundParameters.Remove('GatewayExternalFqdn')
     }
 
+    Write-Verbose 'Calling Add-RDServer cmdlet...'
 
-    Write-Verbose "calling Add-RDServer cmdlet..."
-    #{
     if ($Role -eq 'RDS-Licensing' -or $Role -eq 'RDS-Gateway')
     {
         # workaround bug #3299246
-
-        Add-RDServer @PSBoundParameters -ErrorAction silentlycontinue -ErrorVariable rdsErrors
+        Add-RDServer @PSBoundParameters -ErrorAction SilentlyContinue -ErrorVariable rdsErrors
 
         if ($rdsErrors.count -eq 0)
         {
-            Write-Verbose "Add-RDServer completed without errors..."
+            Write-Verbose 'Add-RDServer completed without errors...'
             # continue
         }
         elseif ($rdsErrors.count -eq 2 -and $rdsErrors[0].FullyQualifiedErrorId -eq 'CommandNotFoundException')
@@ -222,11 +217,8 @@ function Set-TargetResource
     {
         Add-RDServer @PSBoundParameters
     }
-    #}
-    Write-Verbose "Add-RDServer done."
-
+    Write-Verbose 'Add-RDServer done.'
 }
-
 
 #######################################################################
 # The Test-TargetResource cmdlet.
@@ -248,15 +240,14 @@ function Test-TargetResource
         $Server,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("RDS-Connection-Broker", "RDS-Virtualization", "RDS-RD-Server", "RDS-Web-Access", "RDS-Gateway", "RDS-Licensing")]
+        [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
         [string]
         $Role,
 
         [Parameter()]
         [string]
-        $GatewayExternalFqdn   # only for RDS-Gateway
+        $GatewayExternalFqdn # only for RDS-Gateway
     )
-
 
     $target = Get-TargetResource @PSBoundParameters
 
@@ -265,6 +256,5 @@ function Test-TargetResource
     Write-Verbose "Test-TargetResource returning:  $result"
     return $result
 }
-
 
 Export-ModuleMember -Function *-TargetResource
