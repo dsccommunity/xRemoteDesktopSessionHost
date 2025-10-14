@@ -51,7 +51,6 @@ stages:
               targetPath: '$(buildFolderName)/'
               artifact: $(buildArtifactName)
               publishLocation: 'pipeline'
-              parallel: true
 
   - stage: Quality_Test_and_Unit_Test
     displayName: 'Quality Test and Unit Test'
