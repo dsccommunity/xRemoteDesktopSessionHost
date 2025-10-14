@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - xRDServer
   - Improve error handling in Set-TargetResource function for Add-RDServer
     cmdlet, fixes issue [#111](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/111).
+- Fixed formatting in all source files, issue [#113](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/113).
 - Update repo files to latest versions in Sampler. Fixes [#118](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/118).
 
 ## [2.1.0] - 2022-08-07

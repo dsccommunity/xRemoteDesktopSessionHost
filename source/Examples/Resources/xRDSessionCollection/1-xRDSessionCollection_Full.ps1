@@ -26,8 +26,8 @@ configuration xRDSessionCollection_Full
         xRDSessionCollection WeLoveDsc
         {
             ConnectionBroker = 'RDCB1.contoso.com'
-            CollectionName = 'WeLoveDsc'
-            SessionHost = 'RDSH1.contoso.com', 'RDSH2.contoso.com'
+            CollectionName   = 'WeLoveDsc'
+            SessionHost      = 'RDSH1.contoso.com', 'RDSH2.contoso.com'
         }
     }
 }

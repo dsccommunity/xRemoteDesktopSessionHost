@@ -1,5 +1,5 @@
-$script:DSCModuleName      = 'xRemoteDesktopSessionHost'
-$script:DSCResourceName    = 'MSFT_xRDLicenseConfiguration'
+$script:DSCModuleName = 'xRemoteDesktopSessionHost'
+$script:DSCResourceName = 'MSFT_xRDLicenseConfiguration'
 
 function Invoke-TestSetup
 {
@@ -29,16 +29,16 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        $script:DSCResourceName    = 'MSFT_xRDLicenseConfiguration'
+        $script:DSCResourceName = 'MSFT_xRDLicenseConfiguration'
 
         Import-Module RemoteDesktop -Force
 
         #region Function Get-TargetResource
         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
-                Mock Get-RDLicenseConfiguration -MockWith {return $null}
-                It "Should error if unable to get RD License config." {
-                    {Get-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "NotConfigured"} | should throw
+            Context 'Parameter Values,Validations and Errors' {
+                Mock Get-RDLicenseConfiguration -MockWith { return $null }
+                It 'Should error if unable to get RD License config.' {
+                    { Get-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'NotConfigured' } | Should throw
                 }
             }
         }
@@ -46,34 +46,34 @@ try
 
         #region Function Test-TargetResource
         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-            Context "Parameter Values,Validations and Errors" {
+            Context 'Parameter Values,Validations and Errors' {
 
                 Mock -CommandName Get-TargetResource -MockWith {
                     return @{
-                        "ConnectionBroker"="connectionbroker.lan"
-                        "LicenseServer"=@("One","Two")
-                        "LicenseMode"="PerUser"
+                        'ConnectionBroker' = 'connectionbroker.lan'
+                        'LicenseServer'    = @('One', 'Two')
+                        'LicenseMode'      = 'PerUser'
                     }
                 } -ModuleName MSFT_xRDLicenseConfiguration
 
                 It "Should return false if there's a change in license servers." {
-                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerUser" -LicenseServer "One" | should Be $false
+                    Test-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'PerUser' -LicenseServer 'One' | Should Be $false
                 }
 
                 Mock Get-TargetResource -MockWith {
                     return @{
-                        "ConnectionBroker"="connectionbroker.lan"
-                        "LicenseServer"=@("One","Two")
-                        "LicenseMode"="PerUser"
+                        'ConnectionBroker' = 'connectionbroker.lan'
+                        'LicenseServer'    = @('One', 'Two')
+                        'LicenseMode'      = 'PerUser'
                     }
                 }
 
                 It "Should return false if there's a change in license mode." {
-                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerDevice" -LicenseServer @("One","Two") | should Be $false
+                    Test-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'PerDevice' -LicenseServer @('One', 'Two') | Should Be $false
                 }
 
-                It "Should return true if there are no changes in license mode." {
-                    Test-TargetResource -ConnectionBroker "connectionbroker.lan" -LicenseMode "PerUser" -LicenseServer @("One","Two") | should Be $true
+                It 'Should return true if there are no changes in license mode.' {
+                    Test-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'PerUser' -LicenseServer @('One', 'Two') | Should Be $true
                 }
             }
         }
@@ -82,7 +82,7 @@ try
         #region Function Set-TargetResource
         Describe "$($script:DSCResourceName)\Set-TargetResource" {
 
-            Context "Configuration changes performed by Set" {
+            Context 'Configuration changes performed by Set' {
 
                 Mock -CommandName Set-RDLicenseConfiguration
 

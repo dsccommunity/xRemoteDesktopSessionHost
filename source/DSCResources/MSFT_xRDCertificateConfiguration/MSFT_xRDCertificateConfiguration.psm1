@@ -1,7 +1,7 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop -Global
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xRDCertificateConfiguration'
@@ -71,11 +71,11 @@ function Set-TargetResource
     )
 
     $rdCertificateSplat = @{
-        Role = $Role
+        Role             = $Role
         ConnectionBroker = $ConnectionBroker
-        ImportPath = $ImportPath
-        Force = $true
-        ErrorAction = 'Stop'
+        ImportPath       = $ImportPath
+        Force            = $true
+        ErrorAction      = 'Stop'
     }
 
     if ($Credential -ne [pscredential]::Empty)
@@ -129,7 +129,7 @@ function Test-TargetResource
     )
 
     $getPfxDataSplat = @{
-        FilePath = $ImportPath
+        FilePath    = $ImportPath
         ErrorAction = 'Stop'
     }
 

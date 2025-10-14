@@ -7,9 +7,9 @@ Import-Module -Name $rdCommonModulePath
 $dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
 Import-Module -Name $dscResourceCommonModulePath
 
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop
 
@@ -23,7 +23,7 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter()]
         [uint32] $ActiveSessionLimitMin,
@@ -76,66 +76,64 @@ function Get-TargetResource
         [Parameter()]
         [string[]] $ExcludeFilePath
     )
-        Write-Verbose "Getting currently configured RDSH Collection properties for collection $CollectionName"
+    Write-Verbose "Getting currently configured RDSH Collection properties for collection $CollectionName"
 
-        $collectionGeneral = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName
-        $collectionClient = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Client
-        $collectionConnection = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Connection
-        $collectionSecurity = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Security
-        $collectionUserGroup = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserGroup
+    $collectionGeneral = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName
+    $collectionClient = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Client
+    $collectionConnection = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Connection
+    $collectionSecurity = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -Security
+    $collectionUserGroup = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserGroup
 
-        $result = @{
-            CollectionName = $collectionGeneral.CollectionName
-            ActiveSessionLimitMin = $collectionConnection.ActiveSessionLimitMin
-            AuthenticateUsingNLA = $collectionSecurity.AuthenticateUsingNLA
-            AutomaticReconnectionEnabled = $collectionConnection.AutomaticReconnectionEnabled
-            BrokenConnectionAction = $collectionConnection.BrokenConnectionAction
-            ClientDeviceRedirectionOptions = $collectionClient.ClientDeviceRedirectionOptions
-            ClientPrinterAsDefault = $collectionClient.ClientPrinterAsDefault
-            ClientPrinterRedirected = $collectionClient.ClientPrinterRedirected
-            CollectionDescription = $collectionGeneral.CollectionDescription
-            # For whatever reason this value gets returned with a trailing carriage return
-            CustomRdpProperty = ([string]$collectionGeneral.CustomRdpProperty).Trim()
-            DisconnectedSessionLimitMin = $collectionConnection.DisconnectedSessionLimitMin
-            EncryptionLevel = $collectionSecurity.EncryptionLevel
-            IdleSessionLimitMin = $collectionConnection.IdleSessionLimitMin
-            MaxRedirectedMonitors = $collectionClient.MaxRedirectedMonitors
-            RDEasyPrintDriverEnabled = $collectionClient.RDEasyPrintDriverEnabled
-            SecurityLayer = $collectionSecurity.SecurityLayer
-            TemporaryFoldersDeletedOnExit = $collectionConnection.TemporaryFoldersDeletedOnExit
-            UserGroup = $collectionUserGroup.UserGroup
-        }
+    $result = @{
+        CollectionName                 = $collectionGeneral.CollectionName
+        ActiveSessionLimitMin          = $collectionConnection.ActiveSessionLimitMin
+        AuthenticateUsingNLA           = $collectionSecurity.AuthenticateUsingNLA
+        AutomaticReconnectionEnabled   = $collectionConnection.AutomaticReconnectionEnabled
+        BrokenConnectionAction         = $collectionConnection.BrokenConnectionAction
+        ClientDeviceRedirectionOptions = $collectionClient.ClientDeviceRedirectionOptions
+        ClientPrinterAsDefault         = $collectionClient.ClientPrinterAsDefault
+        ClientPrinterRedirected        = $collectionClient.ClientPrinterRedirected
+        CollectionDescription          = $collectionGeneral.CollectionDescription
+        # For whatever reason this value gets returned with a trailing carriage return
+        CustomRdpProperty              = ([string]$collectionGeneral.CustomRdpProperty).Trim()
+        DisconnectedSessionLimitMin    = $collectionConnection.DisconnectedSessionLimitMin
+        EncryptionLevel                = $collectionSecurity.EncryptionLevel
+        IdleSessionLimitMin            = $collectionConnection.IdleSessionLimitMin
+        MaxRedirectedMonitors          = $collectionClient.MaxRedirectedMonitors
+        RDEasyPrintDriverEnabled       = $collectionClient.RDEasyPrintDriverEnabled
+        SecurityLayer                  = $collectionSecurity.SecurityLayer
+        TemporaryFoldersDeletedOnExit  = $collectionConnection.TemporaryFoldersDeletedOnExit
+        UserGroup                      = $collectionUserGroup.UserGroup
+    }
 
-        # This part of the configuration only applies to Win 2016+
-        if ((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
-        {
-            Write-Verbose 'Running on W2016+, get UserProfileDisk configuration'
-            $collectionUserProfileDisk = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserProfileDisk
+    # This part of the configuration only applies to Win 2016+
+    if ((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
+    {
+        Write-Verbose 'Running on W2016+, get UserProfileDisk configuration'
+        $collectionUserProfileDisk = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserProfileDisk
 
-            $null = $result.Add('DiskPath', $collectionUserProfileDisk.DiskPath)
-            $null = $result.Add('EnableUserProfileDisk', $collectionUserProfileDisk.EnableUserProfileDisk)
-            $null = $result.Add('MaxUserProfileDiskSizeGB', $collectionUserProfileDisk.MaxUserProfileDiskSizeGB)
-            $null = $result.Add('IncludeFolderPath', $collectionUserProfileDisk.IncludeFolderPath)
-            $null = $result.Add('ExcludeFolderPath', $collectionUserProfileDisk.ExcludeFolderPath)
-            $null = $result.Add('IncludeFilePath', $collectionUserProfileDisk.IncludeFilePath)
-            $null = $result.Add('ExcludeFilePath', $collectionUserProfileDisk.ExcludeFilePath)
-        }
+        $null = $result.Add('DiskPath', $collectionUserProfileDisk.DiskPath)
+        $null = $result.Add('EnableUserProfileDisk', $collectionUserProfileDisk.EnableUserProfileDisk)
+        $null = $result.Add('MaxUserProfileDiskSizeGB', $collectionUserProfileDisk.MaxUserProfileDiskSizeGB)
+        $null = $result.Add('IncludeFolderPath', $collectionUserProfileDisk.IncludeFolderPath)
+        $null = $result.Add('ExcludeFolderPath', $collectionUserProfileDisk.ExcludeFolderPath)
+        $null = $result.Add('IncludeFilePath', $collectionUserProfileDisk.IncludeFilePath)
+        $null = $result.Add('ExcludeFilePath', $collectionUserProfileDisk.ExcludeFilePath)
+    }
 
-        $result
+    $result
 }
-
 
 ########################################################################
 # The Set-TargetResource cmdlet.
 ########################################################################
 function Set-TargetResource
-
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter()]
         [uint32] $ActiveSessionLimitMin,
@@ -188,7 +186,7 @@ function Set-TargetResource
         [Parameter()]
         [string[]] $ExcludeFilePath
     )
-    Write-Verbose "Setting DSC collection properties"
+    Write-Verbose 'Setting DSC collection properties'
 
     try
     {
@@ -233,7 +231,7 @@ function Set-TargetResource
             }
             else
             {
-                throw "No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True"
+                throw 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
             }
 
             if ($MaxUserProfileDiskSizeGB -gt 0)
@@ -246,13 +244,13 @@ function Set-TargetResource
             }
 
             $enableUserProfileDiskSplat = @{
-                CollectionName = $CollectionName
-                DiskPath = $DiskPath
-                EnableUserProfileDisk = $EnableUserProfileDisk
-                ExcludeFilePath = $ExcludeFilePath
-                ExcludeFolderPath = $ExcludeFolderPath
-                IncludeFilePath = $IncludeFilePath
-                IncludeFolderPath = $IncludeFolderPath
+                CollectionName           = $CollectionName
+                DiskPath                 = $DiskPath
+                EnableUserProfileDisk    = $EnableUserProfileDisk
+                ExcludeFilePath          = $ExcludeFilePath
+                ExcludeFolderPath        = $ExcludeFolderPath
+                IncludeFilePath          = $IncludeFilePath
+                IncludeFolderPath        = $IncludeFolderPath
                 MaxUserProfileDiskSizeGB = $MaxUserProfileDiskSizeGB
             }
 
@@ -298,7 +296,7 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateLength(1,256)]
+        [ValidateLength(1, 256)]
         [string] $CollectionName,
         [Parameter()]
         [uint32] $ActiveSessionLimitMin,
@@ -354,7 +352,7 @@ function Test-TargetResource
 
     $verbose = $PSBoundParameters.Verbose -eq $true
 
-    Write-Verbose "Testing DSC collection properties"
+    Write-Verbose 'Testing DSC collection properties'
 
     $null = $PSBoundParameters.Remove('Verbose')
     $null = $PSBoundParameters.Remove('Debug')
@@ -387,11 +385,11 @@ function Test-TargetResource
     }
 
     $testDscParameterStateSplat = @{
-        CurrentValues = Get-TargetResource -CollectionName $CollectionName
-        DesiredValues = $PSBoundParameters
+        CurrentValues       = Get-TargetResource -CollectionName $CollectionName
+        DesiredValues       = $PSBoundParameters
         TurnOffTypeChecking = $true
-        SortArrayValues = $true
-        Verbose = $verbose
+        SortArrayValues     = $true
+        Verbose             = $verbose
     }
 
     Test-DscParameterState @testDscParameterStateSplat

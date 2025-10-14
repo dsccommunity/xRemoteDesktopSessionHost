@@ -1,7 +1,7 @@
 Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
-if (!(Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
-    throw "The minimum OS requirement was not met."
+    throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop
 
@@ -26,42 +26,41 @@ function Get-TargetResource
         [Parameter()]
         [bool] $Force
     )
-    Write-Verbose -Message "Getting information about RDSH collection."
+    Write-Verbose -Message 'Getting information about RDSH collection.'
     $params = @{
         ConnectionBroker = $ConnectionBroker
         CollectionName   = $CollectionName
         ErrorAction      = 'SilentlyContinue'
     }
 
-    $Collection = Get-RDSessionCollection @params  | `
-            Where-Object  CollectionName -eq $CollectionName
+    $Collection = Get-RDSessionCollection @params | `
+            Where-Object CollectionName -EQ $CollectionName
 
 
     if ($Collection.Count -eq 0)
     {
         return @{
-            "ConnectionBroker"      = $null
-            "CollectionDescription" = $null
-            "CollectionName"        = $null
-            "SessionHost"           = $SessionHost
-            "Force"                 = $Force
+            ConnectionBroker      = $null
+            CollectionDescription = $null
+            CollectionName        = $null
+            SessionHost           = $SessionHost
+            Force                 = $Force
         }
     }
 
     if ($Collection.Count -gt 1)
     {
-        throw 'non-singular RDSessionCollection in result set'
+        throw 'Non-singular RDSessionCollection in result set'
     }
 
     return @{
-        "ConnectionBroker"      = $ConnectionBroker
-        "CollectionDescription" = $Collection.CollectionDescription
-        "CollectionName"        = $Collection.CollectionName
-        "SessionHost"           = [System.String[]] (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
-        "Force"                 = $Force
+        ConnectionBroker      = $ConnectionBroker
+        CollectionDescription = $Collection.CollectionDescription
+        CollectionName        = $Collection.CollectionName
+        SessionHost           = [System.String[]] (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
+        Force                 = $Force
     }
 }
-
 
 ########################################################################
 # The Set-TargetResource cmdlet.
@@ -113,7 +112,7 @@ function Set-TargetResource
 
     try
     {
-        Write-Verbose -Message "Creating a new RDSH collection."
+        Write-Verbose -Message 'Creating a new RDSH collection.'
         New-RDSessionCollection @PSBoundParameters -ErrorAction Stop
     }
     catch
@@ -123,7 +122,7 @@ function Set-TargetResource
 
     if (-not (Test-TargetResource @PSBoundParameters))
     {
-        $exceptionString = ('''Test-TargetResource'' returns false after call to ''New-RDSessionCollection''; CollectionName: {0}; ConnectionBroker {1}.' -f $CollectionName, $ConnectionBroker)
+        $exceptionString = ("'Test-TargetResource' returns false after call to 'New-RDSessionCollection'; CollectionName: {0}; ConnectionBroker {1}." -f $CollectionName, $ConnectionBroker)
         Write-Verbose -Message $exceptionString
 
         if ($exception)
@@ -137,7 +136,6 @@ function Set-TargetResource
         throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName)
     }
 }
-
 
 #######################################################################
 # The Test-TargetResource cmdlet.
@@ -161,7 +159,7 @@ function Test-TargetResource
         [bool] $Force
     )
 
-    Write-Verbose "Checking for existence of RDSH collection."
+    Write-Verbose 'Checking for existence of RDSH collection.'
     $currentStatus = Get-TargetResource @PSBoundParameters
 
     if ($null -eq $currentStatus.CollectionName)
@@ -185,6 +183,5 @@ function Test-TargetResource
 
     return $true
 }
-
 
 Export-ModuleMember -Function *-TargetResource
