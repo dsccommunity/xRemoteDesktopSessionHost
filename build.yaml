@@ -2,7 +2,7 @@
 ####################################################
 #          ModuleBuilder Configuration             #
 ####################################################
-
+BuiltModuleSubdirectory: builtModule
 CopyPaths:
   - en-US
   - DSCResources
@@ -15,11 +15,11 @@ VersionedOutputDirectory: true
 ####################################################
 
 NestedModule:
-    DscResource.Common:
-      CopyOnly: true
-      Path: ./output/RequiredModules/DscResource.Common
-      AddToManifest: false
-      Exclude: PSGetModuleInfo.xml
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Sampler Pipeline Configuration             #
@@ -34,11 +34,17 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
+
+  docs:
     - Generate_Conceptual_Help
     - Generate_Wiki_Content
+    - Generate_Wiki_Sidebar
+    - Clean_Markdown_Metadata
+    - Package_Wiki_Content
 
   pack:
     - build
+    - docs
     - package_module_nupkg
 
   hqrmtest:
@@ -48,6 +54,9 @@ BuildWorkflow:
     - Pester_Tests_Stop_On_Fail
     - Pester_if_Code_Coverage_Under_Threshold
 
+  merge:
+    - Merge_CodeCoverage_Files
+
   publish:
     - publish_module_to_gallery
     - Publish_Release_To_GitHub
@@ -56,7 +65,6 @@ BuildWorkflow:
 ####################################################
 #       PESTER  Configuration                      #
 ####################################################
-
 Pester:
   OutputFormat: NUnitXML
   ExcludeFromCodeCoverage:
@@ -66,9 +74,22 @@ Pester:
   ExcludeTag:
   Tag:
   CodeCoverageThreshold: 85
-  CodeCoverageOutputFile: JaCoCo_coverage.xml
   CodeCoverageOutputFileEncoding: ascii
 
+
+####################################################
+#           Code Coverage Configuration            #
+####################################################
+CodeCoverage:
+  # Filename of the file that will be outputted by the task Merge_CodeCoverage_Files.
+  CodeCoverageMergedOutputFile: JaCoCo_coverage.xml
+  # File pattern used to search for files under the ./output/testResults folder
+  # by task Merge_CodeCoverage_Files.
+  CodeCoverageFilePattern: Codecov*.xml
+
+####################################################
+#      Pester Configuration (DscResource.Test)     #
+####################################################
 DscTest:
   ExcludeTag:
     - "Common Tests - New Error-Level Script Analyzer Rules"
@@ -85,6 +106,8 @@ ModuleBuildTasks:
     - '*.ib.tasks'
   DscResource.DocGenerator:
     - 'Task.*'
+  DscResource.Test:
+    - 'Task.*'
 
 TaskHeader: |
   param($Path)
@@ -97,9 +120,14 @@ TaskHeader: |
   Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
   ""
 
+####################################################
+#               GitHub Configuration               #
+####################################################
 GitHubConfig:
   GitHubFilesToAdd:
     - 'CHANGELOG.md'
+  ReleaseAssets:
+    - output/WikiContent.zip
   GitHubConfigUserName: dscbot
   GitHubConfigUserEmail: dsccommunity@outlook.com
   UpdateChangelogOnPrerelease: false
@@ -116,3 +144,18 @@ DscResource.DocGenerator:
       - '_(.+?)_' # Match Italic (underscore)
       - '\*\*(.+?)\*\*' # Match bold
       - '\*(.+?)\*' # Match Italic (asterisk)
+  Publish_GitHub_Wiki_Content:
+    Debug: false
+  Generate_Markdown_For_DSC_Resources:
+    MofResourceMetadata:
+      Type: MofResource
+      Category: Resources
+    ClassResourceMetadata:
+      Type: ClassResource
+      Category: Resources
+    CompositeResourceMetadata:
+      Type: CompositeResource
+      Category: Resources
+  Generate_Wiki_Sidebar:
+    Debug: false
+    AlwaysOverwrite: true
