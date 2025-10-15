@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - xRDSessionCollection
-  - Ignore errors from New-RDSessionCollection and instead checks the collection is created; resolves [issue #105](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/105)
-  - Always filter SessionCollection result; resolves [issue #106](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/106)
+  - Ignore errors from New-RDSessionCollection and instead checks the collection is created; resolves [issue #105](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/105).
+- xRDSessionCollectionConfiguration
+  - Updating `UserGroups` parameter to allow for an array to be supplied,
+    resolves [issue #115](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/115).
+- Always filter SessionCollection result; resolves [issue #106](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/106).
 
 ### Added
 
