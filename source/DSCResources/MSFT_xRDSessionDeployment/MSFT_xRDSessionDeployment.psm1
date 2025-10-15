@@ -87,10 +87,22 @@ function Set-TargetResource
         Add-RDServer -Server $server -Role 'RDS-RD-SERVER' -ConnectionBroker $ConnectionBroker
     }
 
+    foreach ($server in ($currentStatus.SessionHost | Where-Object { $_ -notin $SessionHost }))
+    {
+        Write-Verbose "Removing server '$server' from deployment."
+        Remove-RDServer -Server $server -Role 'RDS-RD-SERVER' -ConnectionBroker $ConnectionBroker -Force
+    }
+
     foreach ($server in ($WebAccessServer | Select-Object -Skip 1 | Where-Object { $_ -notin $currentStatus.WebAccessServer }))
     {
-        Write-Verbose "Adding server '$server' to deployment."
+        Write-Verbose "Adding Web Server '$server' to deployment."
         Add-RDServer -Server $server -Role 'RDS-WEB-ACCESS' -ConnectionBroker $ConnectionBroker
+    }
+
+    foreach ($server in ($currentStatus.WebAccessServer | Where-Object { $_ -notin $WebAccessServer }))
+    {
+        Write-Verbose "Removing Web Server '$server' from deployment."
+        Remove-RDServer -Server $server -Role 'RDS-WEB-ACCESS' -ConnectionBroker $ConnectionBroker -Force
     }
 }
 
@@ -124,7 +136,5 @@ function Test-TargetResource
 
     return $result
 }
-
-Export-ModuleMember -Function *-TargetResource
 
 Export-ModuleMember -Function *-TargetResource
