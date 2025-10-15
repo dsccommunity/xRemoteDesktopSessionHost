@@ -112,41 +112,19 @@ function Test-TargetResource
     )
 
     Write-Verbose 'Checking RDSH role is deployed on this node.'
-    $currentStatus = Get-TargetResource @PSBoundParameters
 
-    if ($currentStatus.ConnectionBroker -ne $ConnectionBroker)
-    {
-        Write-Verbose -Message "Found connection broker '$($currentStatus.ConnectionBroker)', expected '$ConnectionBroker'"
-        return $false
-    }
+    $desiredState = $PSBoundParameters
+    $currentState = Get-TargetResource @PSBoundParameters
 
-    if ($WebAccessServer.Count -gt 0 -and $null -eq $currentStatus.WebAccessServer)
-    {
-        Write-Verbose -Message "Desired list of Web Access Servers is empty, while $($WebAccessServer.Count) Web Access Servers should have been configured."
-        return $false
-    }
+    $result = Test-DscParameterState `
+        -CurrentValues $currentState `
+        -DesiredValues $desiredState `
+        -SortArrayValues `
+        -Verbose:$VerbosePreference
 
-    $compare = Compare-Object -ReferenceObject $WebAccessServer -DifferenceObject $currentStatus.WebAccessServer
-    if ($null -ne $compare)
-    {
-        Write-Verbose -Message "Desired list of Web Access Servers not equal`r`n$($compare | Out-String)"
-        return $false
-    }
-
-    if ($SessionHost.Count -gt 0 -and $null -eq $currentStatus.SessionHost)
-    {
-        Write-Verbose -Message "Desired list of session hosts is empty, while $($SessionHost.Count) session hosts should have been configured."
-        return $false
-    }
-
-    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
-    if ($null -ne $compare)
-    {
-        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
-        return $false
-    }
-
-    $true
+    return $result
 }
+
+Export-ModuleMember -Function *-TargetResource
 
 Export-ModuleMember -Function *-TargetResource
