@@ -9,7 +9,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 
-Assert-Module -ModuleName 'RemoteDesktop'
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
@@ -23,21 +23,28 @@ function Get-TargetResource
     param
     (
         [Parameter()]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
 
         [Parameter(Mandatory = $true)]
-        [string] $DatabaseConnectionString,
+        [System.String]
+        $DatabaseConnectionString,
 
         [Parameter()]
-        [string] $DatabaseSecondaryConnectionString,
+        [System.String]
+        $DatabaseSecondaryConnectionString,
 
         [Parameter()]
-        [string] $DatabaseFilePath,
+        [System.String]
+        $DatabaseFilePath,
 
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $ClientAccessName
+        [System.String]
+        $ClientAccessName
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     Write-Verbose -Message ($script:localizedData.VerboseGetHAMode -f $ConnectionBroker, $ClientAccessName)
 
@@ -67,21 +74,28 @@ function Set-TargetResource
     param
     (
         [Parameter()]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
 
         [Parameter(Mandatory = $true)]
-        [string] $DatabaseConnectionString,
+        [System.String]
+        $DatabaseConnectionString,
 
         [Parameter()]
-        [string] $DatabaseSecondaryConnectionString,
+        [System.String]
+        $DatabaseSecondaryConnectionString,
 
         [Parameter()]
-        [string] $DatabaseFilePath,
+        [System.String]
+        $DatabaseFilePath,
 
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $ClientAccessName
+        [System.String]
+        $ClientAccessName
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     Write-Verbose -Message ($script:localizedData.VerboseConfigureHAMode -f $ConnectionBroker, $ClientAccessName)
 
@@ -119,20 +133,25 @@ function Test-TargetResource
     param
     (
         [Parameter()]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
 
         [Parameter(Mandatory = $true)]
-        [string] $DatabaseConnectionString,
+        [System.String]
+        $DatabaseConnectionString,
 
         [Parameter()]
-        [string] $DatabaseSecondaryConnectionString,
+        [System.String]
+        $DatabaseSecondaryConnectionString,
 
         [Parameter()]
-        [string] $DatabaseFilePath,
+        [System.String]
+        $DatabaseFilePath,
 
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $ClientAccessName
+        [System.String]
+        $ClientAccessName
     )
 
     Write-Verbose ($script:localizedData.VerboseTestHAMode -f $ConnectionBroker, $ClientAccessName)
