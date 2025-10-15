@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deployments are now tested for WebAccess and SessionHosts as well
   - Resource can extend an existing deployment with more session hosts and web access servers
   - ConnectionBroker is only remaining key since the broker can only broker one deployment
+  - Servers can be also removed from the deployment.
+  - Test function now uses `Test-DscParameterState` internally.
 - xRDServer
   - Improve error handling in Set-TargetResource function for Add-RDServer
     cmdlet, fixes [issue #111](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/111).
