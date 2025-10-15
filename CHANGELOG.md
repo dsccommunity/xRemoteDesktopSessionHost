@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed formatting in all source files, [issue #113](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/113).
 - Update repo files to latest versions in Sampler. Fixes [issue #118](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/118).
 - Enable DocGenerator and move docs to wiki. Fixes [issue #101](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/101).
+- Migrated tests to Pester 5. Fixes [issue #119](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/119).
 
 ## [2.1.0] - 2022-08-07
 
