@@ -9,8 +9,6 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 
-# Assert-Module -ModuleName 'RemoteDesktop'
-
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 #######################################################################
@@ -40,6 +38,8 @@ function Get-TargetResource
         [System.Management.Automation.Credential()]
         $Credential
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     Write-Verbose -Message (
         $script:localizedData.VerboseGetCertificate -f $Role, $ConnectionBroker
@@ -76,6 +76,8 @@ function Set-TargetResource
         [System.Management.Automation.Credential()]
         $Credential
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     $rdCertificateSplat = @{
         Role             = $Role

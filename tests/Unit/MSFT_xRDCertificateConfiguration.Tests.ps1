@@ -69,7 +69,7 @@ Describe 'MSFT_xRDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                     Thumbprint       = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
                     Role             = 'RDRedirector'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath       = 'testdrive:\RDRedirector.pfx'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
                     Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
                 }
             }
@@ -82,7 +82,7 @@ Describe 'MSFT_xRDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                 $testParams = @{
                     Role             = 'RDRedirector'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath       = 'testdrive:\RDRedirector.pfx'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
                     Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
                 }
 
@@ -93,6 +93,9 @@ Describe 'MSFT_xRDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                 $result.ImportPath | Should -Be $testParams.ImportPath
                 $result.Credential.UserName | Should -Be $testParams.Credential.UserName
             }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDCertificate -Exactly -Times 1 -Scope It
         }
     }
 
@@ -108,7 +111,7 @@ Describe 'MSFT_xRDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                 $testParams = @{
                     Role             = 'RDRedirector'
                     ConnectionBroker = 'connectionbroker.lan'
-                    ImportPath       = 'testdrive:\RDRedirector.pfx'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
                     Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
                 }
 
@@ -122,222 +125,189 @@ Describe 'MSFT_xRDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                 $result.ImportPath | Should -BeNullOrEmpty
                 $result.Credential.UserName | Should -BeNullOrEmpty
             }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDCertificate -Exactly -Times 1 -Scope It
         }
     }
 }
 
-# Describe 'Testing MSFT_xRDCertificateConfiguration' {
+Describe 'MSFT_xRDCertificateConfiguration\Test-TargetResource' -Tag 'Test' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-#     Mock -CommandName Set-RDCertificate
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Thumbprint       = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
+            }
 
-#     Context 'When a certificate is not configured' {
+            Mock -CommandName Get-PfxData -MockWith {
+                @{
+                    EndEntityCertificates = @(
+                        @{
+                            Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
+                        }
+                    )
+                }
+            }
+        }
 
-#         Mock -CommandName Get-RDCertificate -MockWith {
-#             [pscustomobject]@{
-#                 Thumbprint = $null
-#                 Role       = 'RDPublishing'
-#             }
-#         } -ParameterFilter { $Role -eq 'RDPublishing' }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         Mock -CommandName Get-PfxData -MockWith {
-#             [pscustomobject]@{
-#                 EndEntityCertificates = [pscustomobject]@{
-#                     Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
-#                 }
-#             }
-#         } -ParameterFilter { $ImportPath -eq 'testdrive:\RDPublishing.pfx' }
+                $testParams = @{
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
 
-#         $resourceNotConfiguredSplat = @{
-#             Role             = 'RDPublishing'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             ImportPath       = 'testdrive:\RDPublishing.pfx'
-#             Credential       = [pscredential]::new(
-#                 'Test',
-#                 (ConvertTo-SecureString -AsPlainText -String 'pester' -Force)
-#             )
-#         }
+                Test-TargetResource @testParams | Should -BeTrue
+            }
 
-#         It 'Get-TargetResource returns no thumbprint' {
-#             (Get-TargetResource @resourceNotConfiguredSplat).Thumbprint | Should -BeNullOrEmpty
-#         }
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-PfxData -Exactly -Times 1 -Scope It
+        }
+    }
 
-#         It 'Test-TargetResource returns false' {
-#             Test-TargetResource @resourceNotConfiguredSplat | Should -BeFalse
-#         }
+    Context 'When the system is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Thumbprint       = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
+            }
 
-#         It 'Set-TargetResource runs Set-RDCertificate' {
-#             Set-TargetResource @resourceNotConfiguredSplat
-#             Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly -ParameterFilter {
-#                 $Role -eq $resourceNotConfiguredSplat.Role -and
-#                 $ConnectionBroker -eq $resourceNotConfiguredSplat.ConnectionBroker -and
-#                 $ImportPath -eq $resourceNotConfiguredSplat.ImportPath -and
-#                 $Password -eq $resourceNotConfiguredSplat.Credential.Password -and
-#                 $Force -eq $true
-#             }
-#         }
-#     }
+            Mock -CommandName Get-PfxData -MockWith {
+                @{
+                    EndEntityCertificates = @(
+                        @{
+                            Thumbprint = '00006BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
+                        }
+                    )
+                }
+            }
+        }
 
-#     Context 'When the proper certificate is configured' {
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         Mock -CommandName Get-RDCertificate -MockWith {
-#             [pscustomobject]@{
-#                 Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
-#                 Role       = 'RDRedirector'
-#             }
-#         } -ParameterFilter { $Role -eq 'RDRedirector' }
+                $testParams = @{
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
 
-#         Mock -CommandName Get-PfxData -MockWith {
-#             [pscustomobject]@{
-#                 EndEntityCertificates = [pscustomobject]@{
-#                     Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
-#                 }
-#             }
-#         } -ParameterFilter { $ImportPath -eq 'testdrive:\RDRedirector.pfx' }
+                Test-TargetResource @testParams | Should -BeFalse
+            }
 
-#         $resourceConfiguredSplat = @{
-#             Role             = 'RDRedirector'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             ImportPath       = 'testdrive:\RDRedirector.pfx'
-#             Credential       = [pscredential]::new(
-#                 'Test',
-#                 (ConvertTo-SecureString -AsPlainText -String 'pester' -Force)
-#             )
-#         }
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-PfxData -Exactly -Times 1 -Scope It
+        }
+    }
 
-#         It 'Get-TargetResource returns the correct thumbprint' {
-#             (Get-TargetResource @resourceConfiguredSplat).Thumbprint | Should -Be '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8A'
-#         }
+    Context 'When the pfx does not exist or cannot be opened' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    Thumbprint       = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
+            }
 
-#         It 'Test-TargetResource returns true' {
-#             Test-TargetResource @resourceConfiguredSplat | Should -BeTrue
-#         }
-#     }
+            Mock -CommandName Get-PfxData -MockWith { throw }
+        }
 
-#     Context 'When a wrong certificate is configured' {
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         Mock -CommandName Get-RDCertificate -MockWith {
-#             [pscustomobject]@{
-#                 Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
-#                 Role       = 'RDGateway'
-#             }
-#         } -ParameterFilter { $Role -eq 'RDGateway' }
+                $testParams = @{
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
 
-#         Mock -CommandName Get-PfxData -MockWith {
-#             [pscustomobject]@{
-#                 EndEntityCertificates = [pscustomobject]@{
-#                     Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
-#                 }
-#             }
-#         } -ParameterFilter { $ImportPath -eq 'testdrive:\RDGateway.pfx' }
+                Test-TargetResource @testParams | Should -BeFalse
+            }
 
-#         $resourceWrongConfiguredSplat = @{
-#             Role             = 'RDGateway'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             ImportPath       = 'testdrive:\RDGateway.pfx'
-#             Credential       = [pscredential]::new(
-#                 'Test',
-#                 (ConvertTo-SecureString -AsPlainText -String 'pester' -Force)
-#             )
-#         }
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-PfxData -Exactly -Times 1 -Scope It
+        }
+    }
+}
 
-#         It 'Get-TargetResource returns the thumbprint of the currently configured certificate' {
-#             (Get-TargetResource @resourceWrongConfiguredSplat).Thumbprint | Should -Be '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
-#         }
+Describe 'MSFT_xRDCertificateConfiguration\Set-TargetResource' -Tag 'Set' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-#         It 'Test-TargetResource returns false' {
-#             Test-TargetResource @resourceWrongConfiguredSplat | Should -BeFalse
-#         }
+    Context 'When setting the resource' {
+        BeforeAll {
+            Mock -CommandName Set-RDCertificate
+        }
 
-#         It 'Set-TargetResource runs Set-RDCertificate' {
-#             Set-TargetResource @resourceWrongConfiguredSplat
-#             Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly -ParameterFilter {
-#                 $Role -eq $resourceWrongConfiguredSplat.Role -and
-#                 $ConnectionBroker -eq $resourceWrongConfiguredSplat.ConnectionBroker -and
-#                 $ImportPath -eq $resourceWrongConfiguredSplat.ImportPath -and
-#                 $Password -eq $resourceWrongConfiguredSplat.Credential.Password -and
-#                 $Force -eq $true
-#             }
-#         }
-#     }
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#     Context 'When a wrong certificate is configured and the PFX file is protected based on group membership (ProtectTo)' {
-#         Mock -CommandName Get-RDCertificate -MockWith {
-#             [pscustomobject]@{
-#                 Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
-#                 Role       = 'RDGateway'
-#             }
-#         } -ParameterFilter { $Role -eq 'RDGateway' }
+                $testParams = @{
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
 
-#         Mock -CommandName Get-PfxData -MockWith {
-#             [pscustomobject]@{
-#                 EndEntityCertificates = [pscustomobject]@{
-#                     Thumbprint = '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8B'
-#                 }
-#             }
-#         } -ParameterFilter { $ImportPath -eq 'testdrive:\RDGateway.pfx' }
+                $null = Set-TargetResource @testParams
+            }
 
-#         $resourceWrongConfiguredSplat = @{
-#             Role             = 'RDGateway'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             ImportPath       = 'testdrive:\RDGateway.pfx'
-#         }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-RDCertificate -Exactly -Times 1 -Scope It
+        }
+    }
 
-#         It 'Get-TargetResource returns the thumbprint of the currently configured certificate' {
-#             (Get-TargetResource @resourceWrongConfiguredSplat).Thumbprint | Should -Be '53086BBC44A3AB668A3B02CE0B258FEAEC1AFA8C'
-#         }
+    Context 'When setting the resource throws an error' {
+        BeforeAll {
+            Mock -CommandName Set-RDCertificate -MockWith { throw }
+            Mock -CommandName Write-Error
+        }
 
-#         It 'Test-TargetResource returns false' {
-#             Test-TargetResource @resourceWrongConfiguredSplat | Should -BeFalse
-#         }
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         It 'Set-TargetResource runs Set-RDCertificate without password' {
-#             Set-TargetResource @resourceWrongConfiguredSplat
-#             Assert-MockCalled -CommandName Set-RDCertificate -Times 1 -Exactly -ParameterFilter {
-#                 $Role -eq $resourceWrongConfiguredSplat.Role -and
-#                 $ConnectionBroker -eq $resourceWrongConfiguredSplat.ConnectionBroker -and
-#                 $ImportPath -eq $resourceWrongConfiguredSplat.ImportPath -and
-#                 $Force -eq $true
-#             }
-#         }
-#     }
+                $testParams = @{
+                    Role             = 'RDRedirector'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    ImportPath       = 'TestDrive:\RDRedirector.pfx'
+                    Credential       = [pscredential]::new('Test', (ConvertTo-SecureString -AsPlainText -String 'pester' -Force))
+                }
 
-#     Context 'When a certificate fails to test' {
-#         Mock Get-RDCertificate
-#         Mock Get-PfxData -MockWith {
-#             throw 'Cannot import PFX file'
-#         }
+                $null = Set-TargetResource @testParams
+            }
 
-#         $resourceWrongConfiguredSplat = @{
-#             Role             = 'RDGateway'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             ImportPath       = 'testdrive:\RDGateway.pfx'
-#         }
-
-#         It 'Test-TargetResource displays a warning when a certificate fails to test' {
-#             $message = Test-TargetResource @resourceWrongConfiguredSplat 3>&1
-#             $message | Should -Not -BeNullOrEmpty
-#         }
-
-#         It 'Test-TargetResource returns false' {
-#             Test-TargetResource @resourceWrongConfiguredSplat | Should -BeFalse
-#         }
-#     }
-
-#     Context 'When a certificate fails to set' {
-
-#         Mock Set-RDCertificate -MockWith {
-#             throw 'Failed to apply certificate'
-#         }
-
-#         $resourceWrongConfiguredSplat = @{
-#             Role             = 'RDGateway'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             ImportPath       = 'testdrive:\RDGateway.pfx'
-#         }
-
-#         It 'Set-TargetResource returns an error when the certificate could not be applied' {
-#             { Set-TargetResource @resourceWrongConfiguredSplat -ErrorAction Stop } |
-#                 Should -Throw 'Failed to apply certificate'
-#         }
-#     }
-# }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-RDCertificate -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Write-Error -Exactly -Times 1 -Scope It
+        }
+    }
+}
