@@ -1,9 +1,16 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module -Name RemoteDesktop
+
+Assert-Module -ModuleName 'RemoteDesktop'
+
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
 #######################################################################
@@ -31,6 +38,7 @@ function Get-TargetResource
         [ValidateLength(1, 256)]
         [string] $ClientAccessName
     )
+
     Write-Verbose -Message ($script:localizedData.VerboseGetHAMode -f $ConnectionBroker, $ClientAccessName)
 
     if ([string]::IsNullOrWhiteSpace($ConnectionBroker))
@@ -126,6 +134,7 @@ function Test-TargetResource
         [ValidateLength(1, 256)]
         [string] $ClientAccessName
     )
+
     Write-Verbose ($script:localizedData.VerboseTestHAMode -f $ConnectionBroker, $ClientAccessName)
 
     if ([string]::IsNullOrWhiteSpace($ConnectionBroker))

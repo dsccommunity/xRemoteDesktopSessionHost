@@ -1,9 +1,15 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module RemoteDesktop
+
+Assert-Module -ModuleName 'RemoteDesktop'
 
 function ValidateCustomModeParameters
 {
@@ -197,7 +203,7 @@ function Set-TargetResource
     Write-Verbose "Starting RD Gateway configuration for the RD deployment at broker '$ConnectionBroker'..."
 
     # validate parameters
-    ValidateCustomModeParameters $GatewayMode $ExternalFqdn $LogonMethod $UseCachedCredentials $BypassLocal
+    ValidateCustomModeParameters -mode $GatewayMode -ExternalFqdn $ExternalFqdn -LogonMethod $LogonMethod -UseCachedCredentials $UseCachedCredentials -BypassLocal $BypassLocal
 
     if ($GatewayServer)
     {
