@@ -42,9 +42,9 @@ function Get-TargetResource
     $deployed = Get-RDServer -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
 
     @{
-        SessionHost      = [System.String[]] ($deployed | Where-Object Roles -Contains 'RDS-RD-SERVER' | ForEach-Object Server)
+        SessionHost      = [string[]]($deployed | Where-Object Roles -Contains 'RDS-RD-SERVER' | ForEach-Object Server)
         ConnectionBroker = $deployed | Where-Object Roles -Contains 'RDS-CONNECTION-BROKER' | ForEach-Object Server
-        WebAccessServer  = $deployed | Where-Object Roles -Contains 'RDS-WEB-ACCESS' | ForEach-Object Server
+        WebAccessServer  = [string[]]($deployed | Where-Object Roles -Contains 'RDS-WEB-ACCESS' | ForEach-Object Server)
     }
 }
 
