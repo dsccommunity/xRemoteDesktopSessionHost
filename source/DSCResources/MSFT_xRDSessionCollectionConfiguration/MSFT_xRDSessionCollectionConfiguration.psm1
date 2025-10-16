@@ -58,7 +58,7 @@ function Get-TargetResource
         [Parameter()]
         [boolean] $TemporaryFoldersDeletedOnExit,
         [Parameter()]
-        [string] $UserGroup,
+        [string[]] $UserGroup,
         [Parameter()]
         [string] $DiskPath,
         [Parameter()]
@@ -168,7 +168,7 @@ function Set-TargetResource
         [Parameter()]
         [boolean] $TemporaryFoldersDeletedOnExit,
         [Parameter()]
-        [string] $UserGroup,
+        [string[]] $UserGroup,
         [Parameter()]
         [string] $DiskPath,
         [Parameter()]
@@ -331,7 +331,7 @@ function Test-TargetResource
         [Parameter()]
         [boolean] $TemporaryFoldersDeletedOnExit,
         [Parameter()]
-        [string] $UserGroup,
+        [string[]] $UserGroup,
         [Parameter()]
         [string] $DiskPath,
         [Parameter()]
