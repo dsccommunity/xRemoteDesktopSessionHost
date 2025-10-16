@@ -9,7 +9,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 
-Assert-Module -ModuleName 'RemoteDesktop'
+Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
 function ValidateCustomModeParameters
 {
