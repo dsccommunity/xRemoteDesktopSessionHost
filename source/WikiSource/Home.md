@@ -52,4 +52,4 @@ and Windows Server 2012 R2.
 
 ## Change log
 
-A full list of changes in each version can be found in the [change log](https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/master/CHANGELOG.md).
+A full list of changes in each version can be found in the [change log](https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/main/CHANGELOG.md).
