@@ -11,7 +11,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 
 Assert-Module -ModuleName 'RemoteDesktop'
 
-$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
+$localhost = [System.Net.Dns]::GetHostEntry((hostname)).HostName
 
 function ValidateCustomModeParameters
 {

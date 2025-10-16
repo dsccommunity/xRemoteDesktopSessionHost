@@ -52,7 +52,7 @@
 
 #             Mock -CommandName Get-RDSessionHost -MockWith {
 #                 [pscustomobject]@{
-#                     SessionHost    = [System.Net.Dns]::GetHostByName((hostname)).HostName
+#                     SessionHost    = [System.Net.Dns]::GetHostEntry((hostname)).HostName
 #                     CollectionName = 'TestCollection'
 #                 }
 #             }
