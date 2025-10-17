@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - xRDConnectionBrokerHAMode
   - New resource to configure HA mode on a connection broker
 
+### Removed
+
+- Removed Get-LocalizedData and use version in DscResource.Common.
+
 ### Changed
 
 - xRDSessionCollection

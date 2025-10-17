@@ -4,7 +4,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 Import-Module RemoteDesktop -Global
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xRDCertificateConfiguration'
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 #######################################################################
 # The Get-TargetResource cmdlet.

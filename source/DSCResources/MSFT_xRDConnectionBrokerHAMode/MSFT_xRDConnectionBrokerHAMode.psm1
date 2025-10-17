@@ -5,6 +5,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 }
 Import-Module -Name RemoteDesktop
 $localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 #######################################################################
 # The Get-TargetResource cmdlet.

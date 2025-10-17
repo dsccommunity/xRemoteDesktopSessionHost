@@ -98,6 +98,7 @@ DscTest:
     - output
   ExcludeModuleFile:
     - Modules/DscResource.Common
+  MainGitBranch: main
 
 ModuleBuildTasks:
   Sampler:
