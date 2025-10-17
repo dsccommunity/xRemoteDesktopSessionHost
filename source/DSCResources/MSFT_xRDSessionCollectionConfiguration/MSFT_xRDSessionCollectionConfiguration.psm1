@@ -1,17 +1,15 @@
-$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
-$rdCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'xRemoteDesktopSessionHostCommon.psm1'
-Import-Module -Name $rdCommonModulePath
-
-$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
-Import-Module -Name $dscResourceCommonModulePath
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module RemoteDesktop
+
+Assert-Module -ModuleName 'RemoteDesktop'
 
 #######################################################################
 # The Get-TargetResource cmdlet.
