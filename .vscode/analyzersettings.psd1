@@ -1,5 +1,8 @@
 @{
-    CustomRulePath      = '.\output\RequiredModules\DscResource.AnalyzerRules'
+    CustomRulePath      = @(
+        './output/RequiredModules/DscResource.AnalyzerRules'
+        './output/RequiredModules/Indented.ScriptAnalyzerRules'
+    )
     includeDefaultRules = $true
     IncludeRules        = @(
         # DSC Community style guideline rules from the module ScriptAnalyzer.
@@ -89,24 +92,27 @@
             CheckPipeForRedundantWhitespace = $true
             CheckParameter                  = $false
         }
-
         PSPlaceOpenBrace           = @{
             Enable             = $true
             OnSameLine         = $false
             NewLineAfter       = $true
             IgnoreOneLineBlock = $false
         }
-
         PSPlaceCloseBrace          = @{
             Enable             = $true
             NoEmptyLineBefore  = $true
             IgnoreOneLineBlock = $false
             NewLineAfter       = $true
         }
-
         PSAlignAssignmentStatement = @{
             Enable         = $true
             CheckHashtable = $true
+        }
+        PSUseCorrectCasing         = @{
+            Enable        = $true
+            CheckCommands = $true
+            CheckKeyword  = $true
+            CheckOperator = $true
         }
     }
 }
