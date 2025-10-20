@@ -9,8 +9,6 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 
-Assert-Module -ModuleName 'RemoteDesktop'
-
 #######################################################################
 # The Get-TargetResource cmdlet.
 #######################################################################
@@ -21,12 +19,19 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string[]] $SessionHost,
+        [System.String[]]
+        $SessionHost,
+
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter(Mandatory = $true)]
-        [string[]] $WebAccessServer
+        [System.String[]]
+        $WebAccessServer
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     Write-Verbose 'Getting list of RD Server roles.'
 
@@ -63,12 +68,19 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string[]] $SessionHost,
+        [System.String[]]
+        $SessionHost,
+
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter(Mandatory = $true)]
-        [string[]] $WebAccessServer
+        [System.String[]]
+        $WebAccessServer
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     $currentStatus = Get-TargetResource @PSBoundParameters
 
@@ -109,11 +121,16 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [string[]] $SessionHost,
+        [System.String[]]
+        $SessionHost,
+
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+        
         [Parameter(Mandatory = $true)]
-        [string[]] $WebAccessServer
+        [System.String[]]
+        $WebAccessServer
     )
 
     Write-Verbose 'Checking RDSH role is deployed on this node.'

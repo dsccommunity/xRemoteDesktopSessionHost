@@ -1,405 +1,377 @@
-# $script:DSCModuleName = 'xRemoteDesktopSessionHost'
-# $script:DSCResourceName = 'MSFT_xRDSessionDeployment'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DscResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
-# }
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
+BeforeAll {
+    $script:dscModuleName = 'xRemoteDesktopSessionHost'
+    $script:dscResourceName = 'MSFT_xRDSessionDeployment'
 
-# Invoke-TestSetup
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $script:DSCResourceName = 'MSFT_xRDSessionDeployment'
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\RemoteDesktop.stubs.psm1')
 
-#         Import-Module RemoteDesktop -Force
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
 
-#         $sessionDeploymentSplat = @{
-#             SessionHost      = 'sessionhost.lan'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             WebAccessServer  = 'webaccess.lan'
-#         }
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
 
-#         $sessionDeploymentMultiSplat = @{
-#             SessionHost      = 'sessionhost1.lan', 'sessionhost2.lan'
-#             ConnectionBroker = 'connectionbroker.lan'
-#             WebAccessServer  = 'webaccess1.lan', 'webaccess2.lan'
-#         }
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 
-#         #region Function Get-TargetResource
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
+    # Unload stub module
+    Remove-Module -Name RemoteDesktop.stubs -Force
 
-#             [array]$commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
-#             $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
+}
 
-#             $allParameters = (Get-Command Get-TargetResource).Parameters.Keys | Where-Object { $_ -notin $commonParameters } | ForEach-Object -Process {
-#                 @{
-#                     Property = $_
-#                     Value    = $sessionDeploymentSplat[$_]
-#                 }
-#             }
+Describe 'MSFT_xRDSessionDeployment\Get-TargetResource' -Tag 'Get' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-#             Context 'RDSessionDeployment is not present' {
-#                 Mock -CommandName Get-Service -ParameterFilter { $Name -eq 'RDMS' } -MockWith {
-#                     Write-Error 'MOCK Get-Service with parameter RDMS'
-#                 }
+    Context 'When the resource is not present' {
+        BeforeAll {
+            Mock -CommandName Get-Service
+            Mock -CommandName Start-Service -MockWith {
+                throw 'Cannot find any service with service name ''RDMS''.'
+            }
 
-#                 Mock -CommandName Get-RDServer
+            Mock -CommandName Get-RDServer
+        }
 
-#                 It 'Should attempt to GET the RDMS service but fail given the RDMS service is not present' {
-#                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-#                     Assert-MockCalled -CommandName Get-Service -Times 1
-#                 }
+        Context 'When the RDMS service is not present' {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 It 'Should attempt to START the RDMS service but fail given the RDMS service is not present' {
-#                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-#                     $serviceWarning | Should BeLike "Failed to start RDMS service. Error: 'Cannot find any service with service name 'RDMS'.'."
-#                 }
+                    $testParams = @{
+                        SessionHost      = 'sessionhost.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess.lan'
+                    }
 
-#                 It 'Should return $null on property <property> in Get-TargetResource ' {
-#                     param
-#                     (
-#                         $Property,
-#                         $Value
-#                     )
-#                     $get = Get-TargetResource @sessionDeploymentSplat
-#                     $get.$Property | Should Be $null
-#                 } -TestCases $allParameters
-#             }
+                    $result = Get-TargetResource @testParams -WarningVariable serviceWarning -WarningAction SilentlyContinue
 
-#             Context 'RDSessionDeployment is present' {
-#                 Mock -CommandName Get-RDServer -MockWith {
-#                     [pscustomobject]@{
-#                         Server = $sessionDeploymentSplat.SessionHost
-#                         Roles  = @(
-#                             'RDS-RD-SERVER'
-#                         )
-#                     }
-#                     [pscustomobject]@{
-#                         Server = $sessionDeploymentSplat.ConnectionBroker
-#                         Roles  = @(
-#                             'RDS-CONNECTION-BROKER'
-#                         )
-#                     }
-#                     [pscustomobject]@{
-#                         Server = $sessionDeploymentSplat.WebAccessServer
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS'
-#                         )
-#                     }
-#                 }
+                    $result.SessionHost | Should -BeNullOrEmpty
+                    $result.ConnectionBroker | Should -BeNullOrEmpty
+                    $result.WebAccessServer | Should -BeNullOrEmpty
 
-#                 Mock -CommandName Start-Service
-#                 Mock -CommandName Get-Service -MockWith {
-#                     [pscustomobject]@{
-#                         Status = 'Stopped'
-#                     }
-#                 }
+                    $serviceWarning | Should -BeLike "Failed to start RDMS service. Error: 'Cannot find any service with service name 'RDMS'.'."
+                }
 
-#                 It 'Should attempt to start the RDMS service, given the RDMS service is stopped' {
-#                     Get-TargetResource @sessionDeploymentSplat
-#                     Assert-MockCalled -CommandName Start-Service -Times 1 -Scope It
-#                 }
+                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+            }
+        }
+    }
 
-#                 Mock -CommandName Start-Service -MockWith {
-#                     throw 'Throwing from Start-Service mock'
-#                 }
+    Context 'When the resource is present' {
+        BeforeAll {
+            Mock -CommandName Get-RDServer -MockWith {
+                [PSCustomObject] @{
+                    Server = 'sessionhost.lan'
+                    Roles  = @(
+                        'RDS-RD-SERVER'
+                    )
+                }
+                [PSCustomObject] @{
+                    Server = 'connectionbroker.lan'
+                    Roles  = @(
+                        'RDS-CONNECTION-BROKER'
+                    )
+                }
+                [PSCustomObject] @{
+                    Server = 'webaccess.lan'
+                    Roles  = @(
+                        'RDS-WEB-ACCESS'
+                    )
+                }
+            }
 
-#                 It 'Should generate a warning, given RDMS service is stopped and start fails' {
-#                     Get-TargetResource @sessionDeploymentSplat -WarningVariable serviceWarning -WarningAction SilentlyContinue
-#                     $serviceWarning | Should Be "Failed to start RDMS service. Error: 'Throwing from Start-Service mock'."
-#                 }
+            Mock -CommandName Start-Service
+            Mock -CommandName Get-Service -MockWith {
+                [PSCustomObject] @{
+                    Status = 'Stopped'
+                }
+            }
+        }
 
-#                 Mock -CommandName Get-Service -MockWith {
-#                     [pscustomobject]@{
-#                         Status = 'Running'
-#                     }
-#                 }
+        Context 'When the RDMS service is stopped' {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 It 'Should not attempt to start the RDMS service, given the RDMS service is running' {
-#                     Get-TargetResource @sessionDeploymentSplat
-#                     Assert-MockCalled -CommandName Start-Service -Times 0 -Scope It
-#                 }
+                    $testParams = @{
+                        SessionHost      = 'sessionhost.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess.lan'
+                    }
 
-#                 It 'Should return property <property> with value <Value> in Get-TargetResource ' {
-#                     param
-#                     (
-#                         $Property,
-#                         $Value
-#                     )
-#                     $get = Get-TargetResource @sessionDeploymentSplat
-#                     $get.$Property | Should Be $Value
-#                 } -TestCases $allParameters
+                    $result = Get-TargetResource @testParams
 
-#                 It 'Should connect to the right connection broker' {
-#                     Assert-MockCalled -CommandName Get-RDServer -Scope Context -ParameterFilter {
-#                         $ConnectionBroker -eq $sessionDeploymentSplat['ConnectionBroker']
-#                     }
-#                 }
-#             }
-#         }
-#         #endregion
+                    $result.SessionHost | Should -Be $testParams.SessionHost
+                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                    $result.WebAccessServer | Should -Be $testParams.WebAccessServer
+                }
 
-#         #region Function Set-TargetResource
-#         Describe "$($script:DSCResourceName)\Set-TargetResource" {
+                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+            }
+        }
 
-#             Mock -CommandName New-RDSessionDeployment
-#             Mock -CommandName Add-RDServer
-#             Mock -CommandName Get-TargetResource
+        Context 'When the RDMS service fails to start' {
+            BeforeAll {
+                Mock -CommandName Start-Service -MockWith {
+                    throw 'Throwing from Start-Service mock'
+                }
+            }
 
-#             It 'should call New-RDSessionDeployment with all required parameters' {
-#                 Set-TargetResource @sessionDeploymentSplat
-#                 Assert-MockCalled -CommandName New-RDSessionDeployment -Times 1 -ParameterFilter {
-#                     $SessionHost -eq $sessionDeploymentSplat.SessionHost -and
-#                     $ConnectionBroker -eq $sessionDeploymentSplat.ConnectionBroker -and
-#                     $WebAccessServer -eq $sessionDeploymentSplat.WebAccessServer
-#                 }
-#                 Assert-MockCalled -CommandName Add-RDServer -Times 0
-#             }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             Mock -CommandName Get-TargetResource -MockWith {
-#                 [pscustomobject]@{
-#                     SessionHost      = 'OtherSessionHost.Lan'
-#                     ConnectionBroker = $sessionDeploymentSplat.ConnectionBroker
-#                     WebAccessServer  = $sessionDeploymentSplat.WebAccessServer
-#                 }
-#             }
+                    $testParams = @{
+                        SessionHost      = 'sessionhost.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess.lan'
+                    }
 
-#             It 'should call Add-RDServer with additional servers' {
-#                 Set-TargetResource @sessionDeploymentMultiSplat
-#                 Assert-MockCalled -CommandName Add-RDServer -Times 3
-#             }
-#         }
-#         #endregion
+                    $result = Get-TargetResource @testParams -WarningVariable serviceWarning -WarningAction SilentlyContinue
 
-#         #region Function Test-TargetResource
-#         Describe "$($script:DSCResourceName)\Test-TargetResource" {
+                    $result.SessionHost | Should -Be $testParams.SessionHost
+                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                    $result.WebAccessServer | Should -Be $testParams.WebAccessServer
 
-#             Mock -CommandName Get-Service -MockWith {
-#                 [pscustomobject]@{
-#                     Status = 'Running'
-#                 }
-#             }
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentSplat.SessionHost
-#                     Roles  = @(
-#                         'RDS-RD-SERVER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = 'connectionbrokernew.lan'
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentSplat.WebAccessServer
-#                     Roles  = @(
-#                         'RDS-WEB-ACCESS'
-#                     )
-#                 }
-#             }
+                    $serviceWarning | Should -BeLike "Failed to start RDMS service. Error: 'Throwing from Start-Service mock'."
+                }
 
-#             It 'Should return false, given the ConnectionBroker is not targeted in this deployment' {
-#                 Test-TargetResource @sessionDeploymentSplat | Should Be $false
-#             }
+                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+            }
+        }
 
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentSplat.SessionHost
-#                     Roles  = @(
-#                         'RDS-RD-SERVER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentSplat.ConnectionBroker
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = 'webaccessnew.lan'
-#                     Roles  = @(
-#                         'RDS-WEB-ACCESS'
-#                     )
-#                 }
-#             }
+        Context 'When the RDMS service is already running' {
+            BeforeAll {
+                Mock -CommandName Get-Service -MockWith {
+                    [PSCustomObject]@{
+                        Status = 'Running'
+                    }
+                }
+            }
 
-#             It 'Should return false, given the WebAccessServer is not targeted in this deployment' {
-#                 Test-TargetResource @sessionDeploymentSplat | Should Be $false
-#             }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 [pscustomobject]@{
-#                     Server = 'sessionhost1.lan'
-#                     Roles  = @(
-#                         'RDS-RD-SERVER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = 'sessionhost2.lan'
-#                     Roles  = @(
-#                         'RDS-RD-SERVER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = 'sessionhost3.lan'
-#                     Roles  = @(
-#                         'RDS-RD-SERVER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#                 foreach ($waserver in $sessionDeploymentMultiSplat.WebAccessServer)
-#                 {
-#                     [pscustomobject]@{
-#                         Server = $waserver
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS'
-#                         )
-#                     }
-#                 }
-#             }
+                    $testParams = @{
+                        SessionHost      = 'sessionhost.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess.lan'
+                    }
 
-#             It 'Should return false, given the list of Session Hosts is different in this deployment' {
-#                 Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
-#             }
+                    $result = Get-TargetResource @testParams
 
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#                 foreach ($waserver in $sessionDeploymentMultiSplat.WebAccessServer)
-#                 {
-#                     [pscustomobject]@{
-#                         Server = $waserver
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS'
-#                         )
-#                     }
-#                 }
-#             }
+                    $result.SessionHost | Should -Be $testParams.SessionHost
+                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                    $result.WebAccessServer | Should -Be $testParams.WebAccessServer
+                }
 
-#             It 'Should return false, given the list of Session Hosts is empty in this deployment' {
-#                 Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
-#             }
+                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Start-Service -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+}
 
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 foreach ($shserver in $sessionDeploymentMultiSplat.SessionHost)
-#                 {
-#                     [pscustomobject]@{
-#                         Server = $shserver
-#                         Roles  = @(
-#                             'RDS-RD-SERVER'
-#                         )
-#                     }
-#                 }
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#             }
+Describe 'MSFT_xRDSessionDeployment\Set-TargetResource' -Tag 'Set' {
+    Context 'When the resource is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName New-RDSessionDeployment
+            Mock -CommandName Add-RDServer
+        }
 
-#             It 'Should return false, given the list of Web Hosts is empty in this deployment' {
-#                 Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
-#             }
+        Context 'When the deployment does not exist' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource
+            }
 
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 foreach ($shserver in $sessionDeploymentMultiSplat.SessionHost)
-#                 {
-#                     [pscustomobject]@{
-#                         Server = $shserver
-#                         Roles  = @(
-#                             'RDS-RD-SERVER'
-#                         )
-#                     }
-#                 }
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentSplat.ConnectionBroker
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#                 foreach ($waserver in $sessionDeploymentMultiSplat.WebAccessServer)
-#                 {
-#                     [pscustomobject]@{
-#                         Server = $waserver
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS'
-#                         )
-#                     }
-#                 }
-#             }
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             It 'Should return true, given the SessionDeployment is completed' {
-#                 Test-TargetResource @sessionDeploymentMultiSplat | Should Be $true
-#             }
+                    $testParams = @{
+                        SessionHost      = 'sessionhost.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess.lan'
+                    }
 
-#             Mock -CommandName Get-RDServer -MockWith {
-#                 foreach ($shserver in $sessionDeploymentMultiSplat.SessionHost)
-#                 {
-#                     [pscustomobject]@{
-#                         Server = $shserver
-#                         Roles  = @(
-#                             'RDS-RD-SERVER'
-#                         )
-#                     }
-#                 }
-#                 [pscustomobject]@{
-#                     Server = $sessionDeploymentMultiSplat.ConnectionBroker
-#                     Roles  = @(
-#                         'RDS-CONNECTION-BROKER'
-#                     )
-#                 }
-#                 [pscustomobject]@{
-#                     Server = 'SomeWebAccessServer.lan'
-#                     Roles  = @(
-#                         'RDS-WEB-ACCESS'
-#                     )
-#                 }
-#             }
+                    $null = Set-TargetResource @testParams
+                }
 
-#             It 'Should return false if Web Access Server list is different' {
-#                 Test-TargetResource @sessionDeploymentMultiSplat | Should Be $false
-#             }
-#         }
-#         #endregion
-#     }
-# }
-# catch
-# {
-#     throw $_
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName New-RDSessionDeployment -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Add-RDServer -Exactly -Times 0 -Scope It
+            }
+        }
+
+        Context 'When the deployment does exist exist' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        SessionHost      = 'sessionhost.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess.lan'
+                    }
+                }
+            }
+
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        SessionHost      = 'sessionhost1.lan', 'sessionhost2.lan'
+                        ConnectionBroker = 'connectionbroker.lan'
+                        WebAccessServer  = 'webaccess1.lan', 'webaccess2.lan'
+                    }
+
+                    $null = Set-TargetResource @testParams
+                }
+
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName New-RDSessionDeployment -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Add-RDServer -Exactly -Times 3 -Scope It
+            }
+        }
+    }
+}
+
+Describe 'MSFT_xRDSessionDeployment\Test-TargetResource' -Tag 'Test' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
+
+    BeforeDiscovery {
+        $testCases = @(
+            @{
+                Property = 'ConnectionBroker'
+                Current  = 'connectionbroker.lan'
+                Desired  = 'connectionbroker2.lan'
+            },
+            @{
+                Property = 'SessionHost'
+                Current  = $null
+                Desired  = 'sessionhost1.lan', 'sessionhost3.lan'
+            },
+            @{
+                Property = 'SessionHost'
+                Current  = 'sessionhost.lan'
+                Desired  = 'sessionhost1.lan', 'sessionhost3.lan'
+            },
+            @{
+                Property = 'WebAccessServer'
+                Current  = $null
+                Desired  = 'webaccess1.lan', 'webaccess3.lan'
+            }
+            @{
+                Property = 'WebAccessServer'
+                Current  = 'webaccess.lan'
+                Desired  = 'webaccess1.lan', 'webaccess3.lan'
+            }
+        )
+    }
+
+    Context 'When the property ''<Property>'' is not correct' -ForEach $testCases {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                $obj = @{
+                    SessionHost      = 'sessionhost.lan'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    WebAccessServer  = 'webaccess.lan'
+                }
+
+                $obj[$Property] = $Current
+                return $obj
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -Parameters $_ -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    SessionHost      = 'sessionhost.lan'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    WebAccessServer  = 'webaccess.lan'
+                }
+
+                $testParams[$Property] = $Desired
+
+                Test-TargetResource @testParams | Should -BeFalse
+            }
+        }
+    }
+
+    Context 'When the system is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    SessionHost      = 'sessionhost.lan'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    WebAccessServer  = 'webaccess.lan'
+                }
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    SessionHost      = 'sessionhost.lan'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    WebAccessServer  = 'webaccess.lan'
+                }
+
+                Test-TargetResource @testParams | Should -BeTrue
+            }
+        }
+    }
+}
