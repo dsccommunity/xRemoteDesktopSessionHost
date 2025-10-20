@@ -36,7 +36,8 @@
         "keepachangelog",
         "notin",
         "pscmdlet",
-        "steppable"
+        "steppable",
+        "RDMS"
     ],
     "cSpell.ignorePaths": [
         ".git"
