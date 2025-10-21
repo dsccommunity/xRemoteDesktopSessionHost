@@ -135,9 +135,9 @@ Describe 'MSFT_xRDSessionDeployment\Get-TargetResource' -Tag 'Get' {
                     Set-StrictMode -Version 1.0
 
                     $testParams = @{
-                        SessionHost      = 'sessionhost.lan'
+                        SessionHost      = [System.String[]] 'sessionhost.lan'
                         ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = 'webaccess.lan'
+                        WebAccessServer  = [System.String[]] 'webaccess.lan'
                     }
 
                     $result = Get-TargetResource @testParams
@@ -225,6 +225,7 @@ Describe 'MSFT_xRDSessionDeployment\Set-TargetResource' -Tag 'Set' {
             Mock -CommandName Assert-Module
             Mock -CommandName New-RDSessionDeployment
             Mock -CommandName Add-RDServer
+            Mock -CommandName Remove-RDServer
         }
 
         Context 'When the deployment does not exist' {
@@ -251,43 +252,111 @@ Describe 'MSFT_xRDSessionDeployment\Set-TargetResource' -Tag 'Set' {
             }
         }
 
-        Context 'When the deployment does exist exist' {
-            BeforeAll {
-                Mock -CommandName Get-TargetResource -MockWith {
+        Context 'When the deployment does exist' {
+            BeforeDiscovery {
+                $addTestCases = @(
                     @{
-                        SessionHost      = 'sessionhost.lan'
-                        ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = 'webaccess.lan'
+                        Property     = 'SessionHost'
+                        DesiredValue = [System.String[]] ('sessionhost1.lan', 'sessionhost2.lan')
+                        CurrentValue = [System.String[]] ('sessionhost1.lan')
                     }
+                    @{
+                        Property     = 'WebAccessServer'
+                        DesiredValue = [System.String[]] ('webaccess1.lan', 'webaccess2.lan')
+                        CurrentValue = [System.String[]] ('webaccess1.lan')
+                    }
+                )
+
+                $removeTestCases = @(
+                    @{
+                        Property     = 'SessionHost'
+                        DesiredValue = [System.String[]] ('sessionhost1.lan')
+                        CurrentValue = [System.String[]] ('sessionhost1.lan', 'sessionhost2.lan')
+                    }
+                    @{
+                        Property     = 'WebAccessServer'
+                        DesiredValue = [System.String[]] ('webaccess1.lan')
+                        CurrentValue = [System.String[]] ('webaccess1.lan', 'webaccess2.lan')
+                    }
+                )
+            }
+
+            Context 'When a ''<Property>'' should be added' -ForEach $addTestCases {
+                BeforeEach {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $obj = @{
+                            SessionHost      = [System.String[]] ('sessionhost1.lan')
+                            ConnectionBroker = 'connectionbroker.lan'
+                            WebAccessServer  = [System.String[]] ('webaccess1.lan')
+                        }
+
+                        $obj[$Property] = $CurrentValue
+                        return $obj
+                    }
+                }
+
+                It 'Should call the correct mocks' {
+                    InModuleScope -Parameters $_ -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            SessionHost      = 'sessionhost1.lan'
+                            ConnectionBroker = 'connectionbroker.lan'
+                            WebAccessServer  = 'webaccess1.lan'
+                        }
+
+                        $testParams[$Property] = $DesiredValue
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-RDSessionDeployment -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Remove-RDServer -Exactly -Times 0 -Scope It
                 }
             }
 
-            It 'Should call the correct mocks' {
-                InModuleScope -ScriptBlock {
-                    Set-StrictMode -Version 1.0
+            Context 'When a ''<Property>'' should be removed' -ForEach $removeTestCases {
+                BeforeEach {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        $obj = @{
+                            SessionHost      = [System.String[]] ('sessionhost1.lan')
+                            ConnectionBroker = 'connectionbroker.lan'
+                            WebAccessServer  = [System.String[]] ('webaccess1.lan')
+                        }
 
-                    $testParams = @{
-                        SessionHost      = 'sessionhost1.lan', 'sessionhost2.lan'
-                        ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = 'webaccess1.lan', 'webaccess2.lan'
+                        $obj[$Property] = $CurrentValue
+                        return $obj
                     }
-
-                    $null = Set-TargetResource @testParams
                 }
 
-                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName New-RDSessionDeployment -Exactly -Times 0 -Scope It
-                Should -Invoke -CommandName Add-RDServer -Exactly -Times 3 -Scope It
+                It 'Should call the correct mocks' {
+                    InModuleScope -Parameters $_ -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            SessionHost      = 'sessionhost1.lan'
+                            ConnectionBroker = 'connectionbroker.lan'
+                            WebAccessServer  = 'webaccess1.lan'
+                        }
+
+                        $testParams[$Property] = $DesiredValue
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-RDSessionDeployment -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Add-RDServer -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Remove-RDServer -Exactly -Times 1 -Scope It
+                }
             }
         }
     }
 }
 
 Describe 'MSFT_xRDSessionDeployment\Test-TargetResource' -Tag 'Test' {
-    BeforeAll {
-        Mock -CommandName Assert-Module
-    }
-
     BeforeDiscovery {
         $testCases = @(
             @{
@@ -298,22 +367,22 @@ Describe 'MSFT_xRDSessionDeployment\Test-TargetResource' -Tag 'Test' {
             @{
                 Property = 'SessionHost'
                 Current  = $null
-                Desired  = 'sessionhost1.lan', 'sessionhost3.lan'
+                Desired  = [System.String[]] 'sessionhost1.lan', 'sessionhost3.lan'
             },
             @{
                 Property = 'SessionHost'
                 Current  = 'sessionhost.lan'
-                Desired  = 'sessionhost1.lan', 'sessionhost3.lan'
+                Desired  = [System.String[]] 'sessionhost1.lan', 'sessionhost3.lan'
             },
             @{
                 Property = 'WebAccessServer'
                 Current  = $null
-                Desired  = 'webaccess1.lan', 'webaccess3.lan'
+                Desired  = [System.String[]] 'webaccess1.lan', 'webaccess3.lan'
             }
             @{
                 Property = 'WebAccessServer'
                 Current  = 'webaccess.lan'
-                Desired  = 'webaccess1.lan', 'webaccess3.lan'
+                Desired  = [System.String[]] 'webaccess1.lan', 'webaccess3.lan'
             }
         )
     }
@@ -322,9 +391,9 @@ Describe 'MSFT_xRDSessionDeployment\Test-TargetResource' -Tag 'Test' {
         BeforeAll {
             Mock -CommandName Get-TargetResource -MockWith {
                 $obj = @{
-                    SessionHost      = 'sessionhost.lan'
+                    SessionHost      = [System.String[]] 'sessionhost.lan'
                     ConnectionBroker = 'connectionbroker.lan'
-                    WebAccessServer  = 'webaccess.lan'
+                    WebAccessServer  = [System.String[]]'webaccess.lan'
                 }
 
                 $obj[$Property] = $Current
@@ -353,9 +422,9 @@ Describe 'MSFT_xRDSessionDeployment\Test-TargetResource' -Tag 'Test' {
         BeforeAll {
             Mock -CommandName Get-TargetResource -MockWith {
                 @{
-                    SessionHost      = 'sessionhost.lan'
+                    SessionHost      = [System.String[]] 'sessionhost.lan'
                     ConnectionBroker = 'connectionbroker.lan'
-                    WebAccessServer  = 'webaccess.lan'
+                    WebAccessServer  = [System.String[]]'webaccess.lan'
                 }
             }
         }

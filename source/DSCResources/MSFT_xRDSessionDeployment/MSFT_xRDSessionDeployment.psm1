@@ -54,7 +54,7 @@ function Get-TargetResource
     @{
         SessionHost      = [System.String[]] ($deployed | Where-Object Roles -Contains 'RDS-RD-SERVER' | ForEach-Object Server)
         ConnectionBroker = $deployed | Where-Object Roles -Contains 'RDS-CONNECTION-BROKER' | ForEach-Object Server
-        WebAccessServer  = $deployed | Where-Object Roles -Contains 'RDS-WEB-ACCESS' | ForEach-Object Server
+        WebAccessServer  = [System.String[]] ($deployed | Where-Object Roles -Contains 'RDS-WEB-ACCESS' | ForEach-Object Server)
     }
 }
 
@@ -104,10 +104,22 @@ function Set-TargetResource
         Add-RDServer -Server $server -Role 'RDS-RD-SERVER' -ConnectionBroker $ConnectionBroker
     }
 
+    foreach ($server in ($currentStatus.SessionHost | Where-Object { $_ -notin $SessionHost }))
+    {
+        Write-Verbose "Removing server '$server' from deployment."
+        Remove-RDServer -Server $server -Role 'RDS-RD-SERVER' -ConnectionBroker $ConnectionBroker -Force
+    }
+
     foreach ($server in ($WebAccessServer | Select-Object -Skip 1 | Where-Object { $_ -notin $currentStatus.WebAccessServer }))
     {
         Write-Verbose "Adding server '$server' to deployment."
         Add-RDServer -Server $server -Role 'RDS-WEB-ACCESS' -ConnectionBroker $ConnectionBroker
+    }
+
+    foreach ($server in ($currentStatus.WebAccessServer | Where-Object { $_ -notin $WebAccessServer }))
+    {
+        Write-Verbose "Removing Web Server '$server' from deployment."
+        Remove-RDServer -Server $server -Role 'RDS-WEB-ACCESS' -ConnectionBroker $ConnectionBroker -Force
     }
 }
 
@@ -127,48 +139,22 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [System.String]
         $ConnectionBroker,
-        
+
         [Parameter(Mandatory = $true)]
         [System.String[]]
         $WebAccessServer
     )
 
     Write-Verbose 'Checking RDSH role is deployed on this node.'
-    $currentStatus = Get-TargetResource @PSBoundParameters
 
-    if ($currentStatus.ConnectionBroker -ne $ConnectionBroker)
-    {
-        Write-Verbose -Message "Found connection broker '$($currentStatus.ConnectionBroker)', expected '$ConnectionBroker'"
-        return $false
-    }
+    $desiredState = $PSBoundParameters
+    $currentState = Get-TargetResource @PSBoundParameters
 
-    if ($WebAccessServer.Count -gt 0 -and $null -eq $currentStatus.WebAccessServer)
-    {
-        Write-Verbose -Message "Desired list of Web Access Servers is empty, while $($WebAccessServer.Count) Web Access Servers should have been configured."
-        return $false
-    }
-
-    $compare = Compare-Object -ReferenceObject $WebAccessServer -DifferenceObject $currentStatus.WebAccessServer
-    if ($null -ne $compare)
-    {
-        Write-Verbose -Message "Desired list of Web Access Servers not equal`r`n$($compare | Out-String)"
-        return $false
-    }
-
-    if ($SessionHost.Count -gt 0 -and $null -eq $currentStatus.SessionHost)
-    {
-        Write-Verbose -Message "Desired list of session hosts is empty, while $($SessionHost.Count) session hosts should have been configured."
-        return $false
-    }
-
-    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
-    if ($null -ne $compare)
-    {
-        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String)"
-        return $false
-    }
-
-    $true
+    return Test-DscParameterState `
+        -CurrentValues $currentState `
+        -DesiredValues $desiredState `
+        -SortArrayValues `
+        -Verbose:$VerbosePreference
 }
 
 Export-ModuleMember -Function *-TargetResource
