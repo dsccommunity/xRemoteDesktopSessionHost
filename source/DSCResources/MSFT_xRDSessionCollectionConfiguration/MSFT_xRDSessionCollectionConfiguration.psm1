@@ -329,7 +329,7 @@ function Set-TargetResource
             {
                 if (-not(Test-Path -Path $DiskPath -ErrorAction SilentlyContinue))
                 {
-                    New-InvalidArgumentException -ArgumentName 'DiskPath' -Message ('To enable UserProfileDisk we need a valid DiskPath. Path {0} not found' -f $DiskPath)
+                    New-ArgumentException -ArgumentName 'DiskPath' -Message ('To enable UserProfileDisk we need a valid DiskPath. Path {0} not found' -f $DiskPath)
                 }
                 else
                 {
@@ -338,7 +338,7 @@ function Set-TargetResource
             }
             else
             {
-                New-InvalidArgumentException -ArgumentName 'DiskPath' -Message 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
+                New-ArgumentException -ArgumentName 'DiskPath' -Message 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
             }
 
             if ($MaxUserProfileDiskSizeGB -gt 0)
@@ -347,7 +347,7 @@ function Set-TargetResource
             }
             else
             {
-                New-InvalidArgumentException -ArgumentName 'MaxUserProfileDiskSizeGB' -Message (
+                New-ArgumentException -ArgumentName 'MaxUserProfileDiskSizeGB' -Message (
                     'To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value {0} is not valid' -f $MaxUserProfileDiskSizeGB
                 )
             }
