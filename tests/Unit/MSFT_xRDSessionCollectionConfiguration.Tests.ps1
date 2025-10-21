@@ -1,340 +1,1106 @@
-# $script:DSCModuleName = 'xRemoteDesktopSessionHost'
-# $script:DSCResourceName = 'MSFT_xRDSessionCollectionConfiguration'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
-# }
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
+BeforeAll {
+    $script:dscModuleName = 'xRemoteDesktopSessionHost'
+    $script:dscResourceName = 'MSFT_xRDSessionCollectionConfiguration'
 
-# Invoke-TestSetup
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $script:DSCResourceName = 'MSFT_xRDSessionCollectionConfiguration'
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\RemoteDesktop.stubs.psm1')
 
-#         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
-#         $collectionName = 'TestCollection'
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
 
-#         Import-Module RemoteDesktop -Force
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
 
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 
-#         #region Function Get-TargetResource
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
+    # Unload stub module
+    Remove-Module -Name RemoteDesktop.stubs -Force
 
-#             Mock -CommandName Set-RDSessionCollectionConfiguration -MockWith {
-#                 $null
-#             }
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
+}
 
-#             Mock -CommandName Get-RDSessionCollection -MockWith {
-#                 [pscustomobject]@{
-#                     CollectionName = 'TestCollection'
-#                 }
-#             }
+Describe 'MSFT_xRDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-#             Mock -CommandName Get-RDSessionHost -MockWith {
-#                 [pscustomobject]@{
-#                     SessionHost    = [System.Net.Dns]::GetHostEntry((hostname)).HostName
-#                     CollectionName = 'TestCollection'
-#                 }
-#             }
+    Context 'When the resource is present' {
+        BeforeDiscovery {
+            $userProfileProperties = @(
+                @{
+                    Property = 'DiskPath'
+                }
+                @{
+                    Property = 'EnableUserProfileDisk'
+                }
+                @{
+                    Property = 'ExcludeFilePath'
+                }
+                @{
+                    Property = 'ExcludeFolderPath'
+                }
+                @{
+                    Property = 'IncludeFilePath'
+                }
+                @{
+                    Property = 'IncludeFolderPath'
+                }
+                @{
+                    Property = 'MaxUserProfileDiskSizeGB'
+                }
+            )
+        }
 
-#             Mock -CommandName Get-RDSessionCollectionConfiguration
-#             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     CollectionName           = 'TestCollection'
-#                     IncludeFolderPath        = $null
-#                     ExcludeFolderPath        = $null
-#                     IncludeFilePath          = $null
-#                     ExcludeFilePath          = $null
-#                     DiskPath                 = 'c:\temp'
-#                     EnableUserProfileDisk    = $true
-#                     MaxUserProfileDiskSizeGB = 5
-#                 }
-#             } -ParameterFilter { $UserProfileDisk -eq $true }
+        BeforeAll {
+            Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                @{
+                    CollectionName        = 'TestCollection'
+                    CollectionDescription = 'Test Description'
+                    CustomRdpProperty     = "use redirection server name:i:1`n"
+                }
+            }
 
-#             Context 'Parameter Values,Validations and Errors' {
+            Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                @{
+                    CollectionName                 = 'TestCollection'
+                    ClientDeviceRedirectionOptions = 'None'
+                    ClientPrinterAsDefault         = 0
+                    ClientPrinterRedirected        = 0
+                    MaxRedirectedMonitors          = 16
+                    RDEasyPrintDriverEnabled       = 0
+                }
+            } -ParameterFilter { $Client -eq $true }
 
-#                 It 'Should error when CollectionName length is greater than 256' {
-#                     { Get-TargetResource -CollectionName $testInvalidCollectionName } `
-#                     | Should throw
-#                 }
-#             }
+            Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                @{
+                    CollectionName                = 'TestCollection'
+                    ActiveSessionLimitMin         = 0
+                    AutomaticReconnectionEnabled  = $true
+                    BrokenConnectionAction        = 'Disconnect'
+                    DisconnectedSessionLimitMin   = 120
+                    IdleSessionLimitMin           = 480
+                    TemporaryFoldersDeletedOnExit = $true
+                }
+            } -ParameterFilter { $Connection -eq $true }
 
-#             Context 'Get properties on Windows Server 2012 (R2)' {
-#                 Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
-#                     [version]'6.3.9600.0'
-#                 }
+            Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                @{
+                    CollectionName       = 'TestCollection'
+                    AuthenticateUsingNLA = $true
+                    EncryptionLevel      = 'High'
+                    SecurityLayer        = 'SSL'
+                }
+            } -ParameterFilter { $Security -eq $true }
 
-#                 It 'Should not call Get-RDSessionCollectionConfiguration with parameter UserProfileDisk' {
-#                     Get-TargetResource -CollectionName $collectionName
-#                     Assert-MockCalled -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $UserProfileDisk -eq $true } -Times 0 -Exactly
-#                 }
-#                 It 'Should not call Set-RDSessionCollectionConfiguration' {
-#                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -Times 0 -Exactly -Scope Context
-#                 }
-#             }
+            Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                @{
+                    CollectionName = 'TestCollection'
+                    UserGroup      = @('Domain\Group1', 'Domain\Group2')
+                }
+            } -ParameterFilter { $UserGroup -eq $true }
 
-#             Context 'Get properties on Windows Server 2016+' {
-#                 Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
-#                     [version]'10.0.14393.0'
-#                 }
+            Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
+                @{
+                    CollectionName           = 'TestCollection'
+                    IncludeFolderPath        = $null
+                    ExcludeFolderPath        = $null
+                    IncludeFilePath          = $null
+                    ExcludeFilePath          = $null
+                    DiskPath                 = 'c:\temp'
+                    EnableUserProfileDisk    = $true
+                    MaxUserProfileDiskSizeGB = 5
+                }
+            } -ParameterFilter { $UserProfileDisk -eq $true }
+        }
 
-#                 $getTargetResourceResult = Get-TargetResource -CollectionName $collectionName
-#                 It 'Should call Get-RDSessionCollectionConfiguration with parameter UserProfileDisk' {
-#                     Assert-MockCalled -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $UserProfileDisk -eq $true } -Times 1 -Exactly
-#                 }
-#                 It 'Get-TargetResource result should list UserProfileDisk property <Property>' {
-#                     param (
-#                         [string]$Property
-#                     )
-#                     $getTargetResourceResult.GetEnumerator().Name | Where-Object { $_ -eq $Property } | Should Be $Property
-#                 } -TestCases @(
-#                     @{
-#                         Property = 'DiskPath'
-#                     }
-#                     @{
-#                         Property = 'EnableUserProfileDisk'
-#                     }
-#                     @{
-#                         Property = 'ExcludeFilePath'
-#                     }
-#                     @{
-#                         Property = 'ExcludeFolderPath'
-#                     }
-#                     @{
-#                         Property = 'IncludeFilePath'
-#                     }
-#                     @{
-#                         Property = 'IncludeFolderPath'
-#                     }
-#                     @{
-#                         Property = 'MaxUserProfileDiskSizeGB'
-#                     }
-#                 )
-#                 It 'Should not call Set-RDSessionCollectionConfiguration' {
-#                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -Times 0 -Exactly -Scope Context
-#                 }
-#             }
-#         }
-#         #endregion
+        Context 'When the server is ''Windows Server 2012 (R2)''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
+                }
+            }
 
-#         #region Function Set-TargetResource
-#         Describe "$($script:DSCResourceName)\Set-TargetResource" {
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             Mock -CommandName Set-RDSessionCollectionConfiguration -MockWith {
-#                 $null
-#             }
+                    $script:result = Get-TargetResource -CollectionName 'TestCollection'
 
-#             Context 'Parameter Values,Validations and Errors' {
+                    $result.CollectionName | Should -Be 'TestCollection'
+                    $result.CollectionDescription | Should -Be 'Test Description'
+                    $result.CustomRdpProperty | Should -Be 'use redirection server name:i:1'
 
-#                 It 'Should error when CollectionName length is greater than 256' {
-#                     { Set-TargetResource -CollectionName $testInvalidCollectionName } `
-#                     | Should throw
-#                 }
-#             }
+                    $result.ClientDeviceRedirectionOptions | Should -Be 'None'
+                    $result.ClientPrinterAsDefault | Should -Be 0
+                    $result.ClientPrinterRedirected | Should -Be 0
+                    $result.MaxRedirectedMonitors | Should -Be 16
+                    $result.RDEasyPrintDriverEnabled | Should -BeFalse
 
-#             Context 'Running on set on Windows Server 2012 (R2)' {
-#                 Mock -CommandName Get-RDSessionCollection -MockWith { $true }
+                    $result.ActiveSessionLimitMin | Should -Be 0
+                    $result.AutomaticReconnectionEnabled | Should -BeTrue
+                    $result.BrokenConnectionAction | Should -Be 'Disconnect'
+                    $result.DisconnectedSessionLimitMin | Should -Be 120
+                    $result.IdleSessionLimitMin | Should -Be 480
+                    $result.TemporaryFoldersDeletedOnExit | Should -BeTrue
 
-#                 Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
-#                     [version]'6.3.9600.0'
-#                 }
+                    $result.AuthenticateUsingNLA | Should -BeTrue
+                    $result.EncryptionLevel | Should -Be 'High'
+                    $result.SecurityLayer | Should -Be 'SSL'
 
-#                 It 'Running on Windows Server 2012 (R2) with EnableUserProfile disk set to True should not call Set-RDSessionCollectionConfiguration with parameter EnableUserProfileDisk' {
-#                     Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true
-#                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Times 0 -Exactly
-#                 }
-#             }
+                    $result.UserGroup | Should -Be @('Domain\Group1', 'Domain\Group2')
+                }
 
-#             Context 'Running on set on Windows Server 2016 (or higher)' {
-#                 Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
-#                     [version]'10.0.14393.0'
-#                 }
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $Client -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $Connection -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $Security -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $UserGroup -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $UserProfileDisk -eq $true } -Exactly -Times 0 -Scope It
+            }
 
-#                 Mock -CommandName Get-RDSessionCollection -MockWith {
-#                     throw 'No session collection DoesNotExist was found.'
-#                 }
+            It 'Should not return the UserProfileDisk property ''<Property>''' -ForEach $userProfileProperties {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 It 'Trying to configure a non existing collection should throw' {
-#                     $errorMessages = try
-#                     {
-#                         Set-TargetResource -CollectionName 'DoesNotExist' -ActiveSessionLimitMin 1
-#                     }
-#                     catch
-#                     {
-#                         $_ 2>&1
-#                     }
+                    $script:result.ContainsKey($Property) | Should -BeFalse
+                }
+            }
+        }
 
-#                     $errorMessages.Exception.Message | Should Be 'Failed to lookup RD Session Collection DoesNotExist. Error: No session collection DoesNotExist was found.'
-#                 }
+        Context 'When the server is ''Windows Server 2016 or later''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
+                }
+            }
 
-#                 Mock -CommandName Get-RDSessionCollection -MockWith { $true }
-#                 It 'Running Set on W2016 with only EnableUserProfileDisk specified should throw on missing DiskPath parameter' {
-#                     $errorMessages = try
-#                     {
-#                         Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true
-#                     }
-#                     catch
-#                     {
-#                         $_ 2>&1
-#                     }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                     $errorMessages.Exception.Message | Should Be 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
-#                 }
+                    $script:result = Get-TargetResource -CollectionName 'TestCollection'
 
-#                 It 'Running Set on W2016 with EnableUserProfileDisk and Diskpath specified should throw on invalid MaxUserProfileDiskSizeGB parameter' {
-#                     $errorMessages = try
-#                     {
-#                         Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true -DiskPath TestDrive:\
-#                     }
-#                     catch
-#                     {
-#                         $_ 2>&1
-#                     }
+                    $result.CollectionName | Should -Be 'TestCollection'
+                    $result.CollectionDescription | Should -Be 'Test Description'
+                    $result.CustomRdpProperty | Should -Be 'use redirection server name:i:1'
 
-#                     $errorMessages.Exception.Message | Should Be 'To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value 0 is not valid'
-#                 }
+                    $result.ClientDeviceRedirectionOptions | Should -Be 'None'
+                    $result.ClientPrinterAsDefault | Should -Be 0
+                    $result.ClientPrinterRedirected | Should -Be 0
+                    $result.MaxRedirectedMonitors | Should -Be 16
+                    $result.RDEasyPrintDriverEnabled | Should -BeFalse
 
-#                 It 'Running Set with EnableUserProfileDisk, DiskPath and MaxUserProfileDiskSizeGB, but with an invalid DiskPath, should throw' {
-#                     $errorMessages = try
-#                     {
-#                         Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true -DiskPath TestDrive:\NonExistingPath -MaxUserProfileDiskSizeGB 5
-#                     }
-#                     catch
-#                     {
-#                         $_ 2>&1
-#                     }
+                    $result.ActiveSessionLimitMin | Should -Be 0
+                    $result.AutomaticReconnectionEnabled | Should -BeTrue
+                    $result.BrokenConnectionAction | Should -Be 'Disconnect'
+                    $result.DisconnectedSessionLimitMin | Should -Be 120
+                    $result.IdleSessionLimitMin | Should -Be 480
+                    $result.TemporaryFoldersDeletedOnExit | Should -BeTrue
 
-#                     $errorMessages.Exception.Message | Should Be 'To enable UserProfileDisk we need a valid DiskPath. Path TestDrive:\NonExistingPath not found'
-#                 }
+                    $result.AuthenticateUsingNLA | Should -BeTrue
+                    $result.EncryptionLevel | Should -Be 'High'
+                    $result.SecurityLayer | Should -Be 'SSL'
 
-#                 It 'Running Set with all valid parameters should call Set-RDSessionCollectionConfiguration with EnableUserProfileDisk' {
-#                     Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true -DiskPath TestDrive:\ -MaxUserProfileDiskSizeGB 5
-#                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Times 1 -Exactly -Scope It
-#                 }
+                    $result.UserGroup | Should -Be @('Domain\Group1', 'Domain\Group2')
+                }
 
-#                 It 'Running Set without EnableUserProfileDisk should not call Set-RDSessionCollectionConfiguration with EnableUserProfileDisk' {
-#                     Set-TargetResource -CollectionName $collectionName -ActiveSessionLimitMin 1
-#                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Times 0 -Exactly -Scope It
-#                 }
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $Client -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $Connection -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $Security -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $UserGroup -eq $true } -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollectionConfiguration -ParameterFilter { $UserProfileDisk -eq $true } -Exactly -Times 1 -Scope It
+            }
 
-#                 It 'Running Set with EnableUserProfileDisk disabled should call Set-RDSessionCollectionConfiguration with DisableUserProfileDisk' {
-#                     Set-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $false
-#                     Assert-MockCalled -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $DisableUserProfileDisk -eq $true } -Times 1 -Exactly -Scope It
-#                 }
-#             }
-#         }
-#         #endregion
+            It 'Should return the UserProfileDisk property ''<Property>''' -ForEach $userProfileProperties {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#         #region Function Test-TargetResource
-#         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-#             Mock -CommandName Set-RDSessionCollectionConfiguration -MockWith {
-#                 $null
-#             }
+                    $script:result.ContainsKey($Property) | Should -BeTrue
+                }
+            }
+        }
+    }
+}
 
-#             Mock -CommandName Get-RDSessionCollection -MockWith {
-#                 [pscustomobject]@{
-#                     CollectionName = 'TestCollection'
-#                 }
-#             }
+Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
+    BeforeAll {
+        Mock -CommandName Assert-Module
+    }
 
-#             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     CollectionName    = 'TestCollection'
-#                     CustomRdpProperty = "use redirection server name:i:1`n"
-#                 }
-#             }
+    Context 'When the session collection does not exist' {
+        BeforeAll {
+            Mock -CommandName Get-RDSessionCollection -MockWith {
+                throw 'No session collection was found.'
+            }
+        }
 
-#             Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     CollectionName           = 'TestCollection'
-#                     IncludeFolderPath        = $null
-#                     ExcludeFolderPath        = @('c:\temp\foo', 'c:\temp\bar')
-#                     IncludeFilePath          = $null
-#                     ExcludeFilePath          = $null
-#                     DiskPath                 = 'c:\temp'
-#                     EnableUserProfileDisk    = $false
-#                     MaxUserProfileDiskSizeGB = 5
-#                 }
-#             } -ParameterFilter { $UserProfileDisk -eq $true }
+        It 'Should throw an exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#             Context 'Parameter Values,Validations and Errors' {
+                $testParams = @{
+                    CollectionName = 'NonExistingCollection'
+                }
 
-#                 It 'Should error when CollectionName length is greater than 256' {
-#                     { Test-TargetResource -CollectionName $testInvalidCollectionName } `
-#                     | Should throw
-#                 }
-#             }
+                { Set-TargetResource @testParams } | Should -Throw
+            }
 
-#             Context 'Running on test on Windows Server 2012 (R2)' {
-#                 Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
-#                     [version]'6.3.9600.0'
-#                 }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+        }
+    }
 
-#                 It 'Running on Windows Server 2012 (R2) with EnableUserProfile disk set to True should ignore the EnableUserProfile property (Test returns True - In Desired State)' {
-#                     Test-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true | Should be $True
-#                 }
-#             }
+    Context 'When the session collection exists' {
+        BeforeAll {
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Set-RDSessionCollectionConfiguration
+        }
 
-#             Context 'Running on test on Windows Server 2016 (or higher)' {
-#                 Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
-#                     [version]'10.0.14393.0'
-#                 }
+        Context 'When the server is ''Windows Server 2012 (R2)''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
+                }
+            }
 
-#                 It 'Running on Windows Server 2016+ with EnableUserProfile disk set to True and current setting set to false should return Test result False - Not In Desired State' {
-#                     Test-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $true | Should be $false
-#                 }
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 It 'Running on Windows Server 2016+ with EnableUserProfile disk set to False and current setting set to false should return Test result True - In Desired State' {
-#                     Test-TargetResource -CollectionName $collectionName -EnableUserProfileDisk $false | Should be $True
-#                 }
+                    $testParams = @{
+                        CollectionName                 = 'TestCollection'
+                        CollectionDescription          = 'Test Description'
+                        CustomRdpProperty              = 'use redirection server name:i:0'
 
-#                 It 'Running on Windows Server 2016+ with CustomRdpProperties specified and existing setting matching with a trailing newline should return Test result True - In Desired State' {
-#                     Test-TargetResource -CollectionName $collectionName -CustomRdpProperty 'use redirection server name:i:1' |
-#                         Should be $true
-#                 }
+                        ClientDeviceRedirectionOptions = 'None'
+                        ClientPrinterAsDefault         = $true
+                        ClientPrinterRedirected        = $true
+                        MaxRedirectedMonitors          = 8
+                        RDEasyPrintDriverEnabled       = $true
 
-#                 It 'Running on Windows Server 2016+ with out-of-order ExcludeFolderPath values and current EnableUserProfile setting set to true should return Test result True - In Desired State' {
-#                     Mock -CommandName Get-RDSessionCollectionConfiguration -MockWith {
-#                         [pscustomobject]@{
-#                             CollectionName        = 'TestCollection'
-#                             EnableUserProfileDisk = $true
-#                             ExcludeFolderPath     = @('c:\temp\foo', 'c:\temp\bar')
-#                         }
-#                     } -ParameterFilter { $UserProfileDisk -eq $true }
+                        ActiveSessionLimitMin          = 60
+                        AutomaticReconnectionEnabled   = $false
+                        BrokenConnectionAction         = 'LogOff'
+                        DisconnectedSessionLimitMin    = 60
+                        IdleSessionLimitMin            = 300
+                        TemporaryFoldersDeletedOnExit  = $false
 
-#                     $testTargetSplat = @{
-#                         CollectionName        = $collectionName
-#                         EnableUserProfileDisk = $true
-#                         ExcludeFolderPath     = @('c:\temp\bar', 'c:\temp\foo')
-#                     }
-#                     Test-TargetResource @testTargetSplat | Should be $true
-#                 }
-#             }
-#         }
-#         #endregion
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+                        AuthenticateUsingNLA           = $false
+                        EncryptionLevel                = 'Low'
+                        SecurityLayer                  = 'RDP'
+
+                        UserGroup                      = @('Domain\Group1')
+
+                        EnableUserProfileDisk          = $true
+                        DiskPath                       = 'C:\UserProfiles'
+                        MaxUserProfileDiskSizeGB       = 5
+                    }
+
+                    $null = Set-TargetResource @testParams
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $DiskPath } -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the server is ''Windows Server 2016 or later''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
+                }
+            }
+
+            Context 'When ''UserProfileDisk'' is enabled' {
+                Context 'When ''DiskPath'' is invalid' {
+                    BeforeAll {
+                        Mock -CommandName Test-Path -MockWith {
+                            return $false
+                        }
+                    }
+
+                    It 'Should throw the correct exception' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $testParams = @{
+                                CollectionName                 = 'TestCollection'
+                                CollectionDescription          = 'Test Description'
+                                CustomRdpProperty              = 'use redirection server name:i:0'
+
+                                ClientDeviceRedirectionOptions = 'None'
+                                ClientPrinterAsDefault         = $true
+                                ClientPrinterRedirected        = $true
+                                MaxRedirectedMonitors          = 8
+                                RDEasyPrintDriverEnabled       = $true
+
+                                ActiveSessionLimitMin          = 60
+                                AutomaticReconnectionEnabled   = $false
+                                BrokenConnectionAction         = 'LogOff'
+                                DisconnectedSessionLimitMin    = 60
+                                IdleSessionLimitMin            = 300
+                                TemporaryFoldersDeletedOnExit  = $false
+
+                                AuthenticateUsingNLA           = $false
+                                EncryptionLevel                = 'Low'
+                                SecurityLayer                  = 'RDP'
+
+                                UserGroup                      = @('Domain\Group1')
+
+                                EnableUserProfileDisk          = $true
+                                DiskPath                       = 'C:\UserProfiles'
+                                MaxUserProfileDiskSizeGB       = 5
+                            }
+
+                            $errorRecord = Get-InvalidArgumentRecord -ArgumentName 'DiskPath' -Message ('To enable UserProfileDisk we need a valid DiskPath. Path {0} not found' -f $testParams.DiskPath)
+
+                            { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
+                        }
+
+                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When ''DiskPath'' is not provided' {
+                    BeforeAll {
+                        Mock -CommandName Test-Path -MockWith {
+                            return $true
+                        }
+                    }
+
+                    It 'Should throw the correct exception' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $testParams = @{
+                                CollectionName                 = 'TestCollection'
+                                CollectionDescription          = 'Test Description'
+                                CustomRdpProperty              = 'use redirection server name:i:0'
+
+                                ClientDeviceRedirectionOptions = 'None'
+                                ClientPrinterAsDefault         = $true
+                                ClientPrinterRedirected        = $true
+                                MaxRedirectedMonitors          = 8
+                                RDEasyPrintDriverEnabled       = $true
+
+                                ActiveSessionLimitMin          = 60
+                                AutomaticReconnectionEnabled   = $false
+                                BrokenConnectionAction         = 'LogOff'
+                                DisconnectedSessionLimitMin    = 60
+                                IdleSessionLimitMin            = 300
+                                TemporaryFoldersDeletedOnExit  = $false
+
+                                AuthenticateUsingNLA           = $false
+                                EncryptionLevel                = 'Low'
+                                SecurityLayer                  = 'RDP'
+
+                                UserGroup                      = @('Domain\Group1')
+
+                                EnableUserProfileDisk          = $true
+                                MaxUserProfileDiskSizeGB       = 5
+                            }
+
+                            $errorRecord = Get-InvalidArgumentRecord -ArgumentName 'DiskPath' -Message 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
+
+                            { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
+                        }
+
+                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When ''MaxUserProfileDiskSizeGB'' is invalid' {
+                    BeforeAll {
+                        Mock -CommandName Test-Path -MockWith {
+                            return $true
+                        }
+                    }
+
+                    It 'Should throw the correct exception' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $testParams = @{
+                                CollectionName                 = 'TestCollection'
+                                CollectionDescription          = 'Test Description'
+                                CustomRdpProperty              = 'use redirection server name:i:0'
+
+                                ClientDeviceRedirectionOptions = 'None'
+                                ClientPrinterAsDefault         = $true
+                                ClientPrinterRedirected        = $true
+                                MaxRedirectedMonitors          = 8
+                                RDEasyPrintDriverEnabled       = $true
+
+                                ActiveSessionLimitMin          = 60
+                                AutomaticReconnectionEnabled   = $false
+                                BrokenConnectionAction         = 'LogOff'
+                                DisconnectedSessionLimitMin    = 60
+                                IdleSessionLimitMin            = 300
+                                TemporaryFoldersDeletedOnExit  = $false
+
+                                AuthenticateUsingNLA           = $false
+                                EncryptionLevel                = 'Low'
+                                SecurityLayer                  = 'RDP'
+
+                                UserGroup                      = @('Domain\Group1')
+
+                                EnableUserProfileDisk          = $true
+                                DiskPath                       = 'C:\UserProfiles'
+                                MaxUserProfileDiskSizeGB       = 0
+                            }
+
+                            $errorRecord = Get-InvalidArgumentRecord -ArgumentName 'MaxUserProfileDiskSizeGB' -Message (
+                                'To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value {0} is not valid' -f $testParams.MaxUserProfileDiskSizeGB
+                            )
+
+                            { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
+                        }
+
+                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
+                    }
+                }
+
+                Context 'When ''EnableUserProfileDisk'' configuration is updated' {
+                    BeforeAll {
+                        Mock -CommandName Test-Path -MockWith {
+                            return $true
+                        }
+                    }
+
+                    It 'Should call the correct mocks' {
+                        InModuleScope -ScriptBlock {
+                            Set-StrictMode -Version 1.0
+
+                            $testParams = @{
+                                CollectionName                 = 'TestCollection'
+                                CollectionDescription          = 'Test Description'
+                                CustomRdpProperty              = 'use redirection server name:i:0'
+
+                                ClientDeviceRedirectionOptions = 'None'
+                                ClientPrinterAsDefault         = $true
+                                ClientPrinterRedirected        = $true
+                                MaxRedirectedMonitors          = 8
+                                RDEasyPrintDriverEnabled       = $true
+
+                                ActiveSessionLimitMin          = 60
+                                AutomaticReconnectionEnabled   = $false
+                                BrokenConnectionAction         = 'LogOff'
+                                DisconnectedSessionLimitMin    = 60
+                                IdleSessionLimitMin            = 300
+                                TemporaryFoldersDeletedOnExit  = $false
+
+                                AuthenticateUsingNLA           = $false
+                                EncryptionLevel                = 'Low'
+                                SecurityLayer                  = 'RDP'
+
+                                UserGroup                      = @('Domain\Group1')
+
+                                EnableUserProfileDisk          = $true
+                                DiskPath                       = 'C:\UserProfiles'
+                                MaxUserProfileDiskSizeGB       = 5
+                            }
+
+                            $null = Set-TargetResource @testParams
+                        }
+
+                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Exactly -Times 1 -Scope It
+                    }
+                }
+            }
+
+            Context 'When ''UserProfileDisk'' is disabled' {
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $false
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $false
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $DisableUserProfileDisk } -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $DisableUserProfileDisk -eq $true } -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+    }
+
+    # Context 'Running on set on Windows Server 2016 (or higher)' {
+    #     Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+    #         [version]'10.0.14393.0'
+    #     }
+
+    #     Mock -CommandName Get-RDSessionCollection -MockWith {
+    #         throw 'No session collection DoesNotExist was found.'
+    #     }
+
+    #     It 'Trying to configure a non existing collection should throw' {
+    #         $errorMessages = try
+    #         {
+    #             Set-TargetResource -CollectionName 'DoesNotExist' -ActiveSessionLimitMin 1
+    #         }
+    #         catch
+    #         {
+    #             $_ 2>&1
+    #         }
+
+    #         $errorMessages.Exception.Message | Should -Be 'Failed to lookup RD Session Collection DoesNotExist. Error: No session collection DoesNotExist was found.'
+    #     }
+
+    #     Mock -CommandName Get-RDSessionCollection -MockWith { $true }
+    #     It 'Running Set on W2016 with only EnableUserProfileDisk specified should throw on missing DiskPath parameter' {
+    #         $errorMessages = try
+    #         {
+    #             Set-TargetResource -CollectionName 'TestCollection' -EnableUserProfileDisk $true
+    #         }
+    #         catch
+    #         {
+    #             $_ 2>&1
+    #         }
+
+    #         $errorMessages.Exception.Message | Should -Be 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
+    #     }
+
+    #     It 'Running Set on W2016 with EnableUserProfileDisk and Diskpath specified should throw on invalid MaxUserProfileDiskSizeGB parameter' {
+    #         $errorMessages = try
+    #         {
+    #             Set-TargetResource -CollectionName 'TestCollection' -EnableUserProfileDisk $true -DiskPath TestDrive:\
+    #         }
+    #         catch
+    #         {
+    #             $_ 2>&1
+    #         }
+
+    #         $errorMessages.Exception.Message | Should -Be 'To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value 0 is not valid'
+    #     }
+
+    #     It 'Running Set with EnableUserProfileDisk, DiskPath and MaxUserProfileDiskSizeGB, but with an invalid DiskPath, should throw' {
+    #         $errorMessages = try
+    #         {
+    #             Set-TargetResource -CollectionName 'TestCollection' -EnableUserProfileDisk $true -DiskPath TestDrive:\NonExistingPath -MaxUserProfileDiskSizeGB 5
+    #         }
+    #         catch
+    #         {
+    #             $_ 2>&1
+    #         }
+
+    #         $errorMessages.Exception.Message | Should -Be 'To enable UserProfileDisk we need a valid DiskPath. Path TestDrive:\NonExistingPath not found'
+    #     }
+
+    #     It 'Running Set with all valid parameters should call Set-RDSessionCollectionConfiguration with EnableUserProfileDisk' {
+    #         Set-TargetResource -CollectionName 'TestCollection' -EnableUserProfileDisk $true -DiskPath TestDrive:\ -MaxUserProfileDiskSizeGB 5
+    #         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Times 1 -Exactly -Scope It
+    #     }
+
+    #     It 'Running Set without EnableUserProfileDisk should not call Set-RDSessionCollectionConfiguration with EnableUserProfileDisk' {
+    #         Set-TargetResource -CollectionName 'TestCollection' -ActiveSessionLimitMin 1
+    #         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Times 0 -Exactly -Scope It
+    #     }
+
+    #     It 'Running Set with EnableUserProfileDisk disabled should call Set-RDSessionCollectionConfiguration with DisableUserProfileDisk' {
+    #         Set-TargetResource -CollectionName 'TestCollection' -EnableUserProfileDisk $false
+    #         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $DisableUserProfileDisk -eq $true } -Times 1 -Exactly -Scope It
+    #     }
+    # }
+}
+
+Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test' {
+    Context 'When the resource is not in the desired state' {
+        Context 'When the server is ''Windows Server 2012 (R2)''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
+                }
+
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        CollectionName                 = 'TestCollection'
+                        CollectionDescription          = 'Test Description'
+                        CustomRdpProperty              = 'use redirection server name:i:0'
+
+                        ClientDeviceRedirectionOptions = 'None'
+                        ClientPrinterAsDefault         = $true
+                        ClientPrinterRedirected        = $true
+                        MaxRedirectedMonitors          = 8
+                        RDEasyPrintDriverEnabled       = $true
+
+                        ActiveSessionLimitMin          = 60
+                        AutomaticReconnectionEnabled   = $false
+                        BrokenConnectionAction         = 'LogOff'
+                        DisconnectedSessionLimitMin    = 60
+                        IdleSessionLimitMin            = 300
+                        TemporaryFoldersDeletedOnExit  = $false
+
+                        AuthenticateUsingNLA           = $false
+                        EncryptionLevel                = 'Low'
+                        SecurityLayer                  = 'RDP'
+
+                        UserGroup                      = @('Domain\Group1')
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        CollectionName                 = 'TestCollection'
+                        CollectionDescription          = 'Test Description'
+                        CustomRdpProperty              = 'use redirection server name:i:0'
+
+                        ClientDeviceRedirectionOptions = 'None'
+                        ClientPrinterAsDefault         = $true
+                        ClientPrinterRedirected        = $true
+                        MaxRedirectedMonitors          = 8
+                        RDEasyPrintDriverEnabled       = $true
+
+                        ActiveSessionLimitMin          = 60
+                        AutomaticReconnectionEnabled   = $false
+                        BrokenConnectionAction         = 'LogOff'
+                        DisconnectedSessionLimitMin    = 60
+                        IdleSessionLimitMin            = 300
+                        TemporaryFoldersDeletedOnExit  = $false
+
+                        AuthenticateUsingNLA           = $true
+                        EncryptionLevel                = 'Low'
+                        SecurityLayer                  = 'RDP'
+
+                        UserGroup                      = @('Domain\Group1')
+
+                        EnableUserProfileDisk          = $true
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the server is ''Windows Server 2016 or later''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
+                }
+
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        CollectionName                 = 'TestCollection'
+                        CollectionDescription          = 'Test Description'
+                        CustomRdpProperty              = 'use redirection server name:i:0'
+
+                        ClientDeviceRedirectionOptions = 'None'
+                        ClientPrinterAsDefault         = $true
+                        ClientPrinterRedirected        = $true
+                        MaxRedirectedMonitors          = 8
+                        RDEasyPrintDriverEnabled       = $true
+
+                        ActiveSessionLimitMin          = 60
+                        AutomaticReconnectionEnabled   = $false
+                        BrokenConnectionAction         = 'LogOff'
+                        DisconnectedSessionLimitMin    = 60
+                        IdleSessionLimitMin            = 300
+                        TemporaryFoldersDeletedOnExit  = $false
+
+                        AuthenticateUsingNLA           = $false
+                        EncryptionLevel                = 'Low'
+                        SecurityLayer                  = 'RDP'
+
+                        UserGroup                      = @('Domain\Group1')
+
+                        EnableUserProfileDisk          = $true
+                        DiskPath                       = 'C:\UserProfiles'
+                        MaxUserProfileDiskSizeGB       = 5
+                    }
+                }
+            }
+
+            Context 'When user profile is enabled' {
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $true
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $true
+                        }
+
+                        Test-TargetResource @testParams | Should -BeFalse
+                    }
+
+                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When user profile is disabled' {
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $true
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $false
+                        }
+
+                        Test-TargetResource @testParams | Should -BeFalse
+                    }
+
+                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+    }
+
+    Context 'When the resource is in the desired state' {
+        Context 'When the server is ''Windows Server 2012 (R2)''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'6.3.9600.0'
+                }
+
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        CollectionName                 = 'TestCollection'
+                        CollectionDescription          = 'Test Description'
+                        CustomRdpProperty              = 'use redirection server name:i:0'
+
+                        ClientDeviceRedirectionOptions = 'None'
+                        ClientPrinterAsDefault         = $true
+                        ClientPrinterRedirected        = $true
+                        MaxRedirectedMonitors          = 8
+                        RDEasyPrintDriverEnabled       = $true
+
+                        ActiveSessionLimitMin          = 60
+                        AutomaticReconnectionEnabled   = $false
+                        BrokenConnectionAction         = 'LogOff'
+                        DisconnectedSessionLimitMin    = 60
+                        IdleSessionLimitMin            = 300
+                        TemporaryFoldersDeletedOnExit  = $false
+
+                        AuthenticateUsingNLA           = $false
+                        EncryptionLevel                = 'Low'
+                        SecurityLayer                  = 'RDP'
+
+                        UserGroup                      = @('Domain\Group1')
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        CollectionName                 = 'TestCollection'
+                        CollectionDescription          = 'Test Description'
+                        CustomRdpProperty              = 'use redirection server name:i:0'
+
+                        ClientDeviceRedirectionOptions = 'None'
+                        ClientPrinterAsDefault         = $true
+                        ClientPrinterRedirected        = $true
+                        MaxRedirectedMonitors          = 8
+                        RDEasyPrintDriverEnabled       = $true
+
+                        ActiveSessionLimitMin          = 60
+                        AutomaticReconnectionEnabled   = $false
+                        BrokenConnectionAction         = 'LogOff'
+                        DisconnectedSessionLimitMin    = 60
+                        IdleSessionLimitMin            = 300
+                        TemporaryFoldersDeletedOnExit  = $false
+
+                        AuthenticateUsingNLA           = $false
+                        EncryptionLevel                = 'Low'
+                        SecurityLayer                  = 'RDP'
+
+                        UserGroup                      = @('Domain\Group1')
+
+                        EnableUserProfileDisk          = $true
+                    }
+
+                    Test-TargetResource @testParams | Should -BeTrue
+                }
+
+                Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When the server is ''Windows Server 2016 or later''' {
+            BeforeAll {
+                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                    [version]'10.0.14393.0'
+                }
+            }
+
+            Context 'When user profile is enabled' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $false
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $true
+                            DiskPath                       = 'C:\UserProfiles'
+                            MaxUserProfileDiskSizeGB       = 5
+                        }
+                    }
+                }
+
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $false
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $true
+                        }
+
+                        Test-TargetResource @testParams | Should -BeTrue
+                    }
+
+                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When user profile is disabled' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $false
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $false
+                        }
+                    }
+                }
+
+                It 'Should return the correct result' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName                 = 'TestCollection'
+                            CollectionDescription          = 'Test Description'
+                            CustomRdpProperty              = 'use redirection server name:i:0'
+
+                            ClientDeviceRedirectionOptions = 'None'
+                            ClientPrinterAsDefault         = $true
+                            ClientPrinterRedirected        = $true
+                            MaxRedirectedMonitors          = 8
+                            RDEasyPrintDriverEnabled       = $true
+
+                            ActiveSessionLimitMin          = 60
+                            AutomaticReconnectionEnabled   = $false
+                            BrokenConnectionAction         = 'LogOff'
+                            DisconnectedSessionLimitMin    = 60
+                            IdleSessionLimitMin            = 300
+                            TemporaryFoldersDeletedOnExit  = $false
+
+                            AuthenticateUsingNLA           = $false
+                            EncryptionLevel                = 'Low'
+                            SecurityLayer                  = 'RDP'
+
+                            UserGroup                      = @('Domain\Group1')
+
+                            EnableUserProfileDisk          = $false
+                        }
+
+                        Test-TargetResource @testParams | Should -BeTrue
+                    }
+
+                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+    }
+}
