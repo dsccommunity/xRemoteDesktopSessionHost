@@ -1,6 +1,6 @@
 @{
     # Script module or binary module file associated with this manifest.
-    RootModule    = 'xRemoteDesktopSessionHost.psm1'
+    RootModule           = 'xRemoteDesktopSessionHost.psm1'
 
     # Version number of this module. This is controlled by gitversion.
     moduleVersion        = '0.0.1'
@@ -21,7 +21,7 @@
     Description          = 'Module with DSC Resources for Remote Desktop Session Host'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion = '5.0'
+    PowerShellVersion    = '5.0'
 
     # Minimum version of the common language runtime (CLR) required by this module
     CLRVersion           = '4.0'
@@ -47,7 +47,7 @@
             IconUri      = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
 
             # A URL to the license for this module.
-            LicenseUri   = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/master/LICENSE'
+            LicenseUri   = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/main/LICENSE'
 
             # Set to a prerelease string value if the release should be a prerelease.
             Prerelease   = ''

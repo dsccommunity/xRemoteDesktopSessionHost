@@ -8,13 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - xRDSessionCollection
-  - Ignore errors from New-RDSessionCollection and instead checks the collection is created; resolves [issue #105](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/105)
-  - Always filter SessionCollection result; resolves [issue #106](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/106)
+  - Ignore errors from New-RDSessionCollection and instead checks the collection is created; resolves [issue #105](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/105).
+- xRDSessionCollectionConfiguration
+  - Updating `UserGroups` parameter to allow for an array to be supplied,
+    resolves [issue #115](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/115).
+- Always filter SessionCollection result; resolves [issue #106](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/106).
 
 ### Added
 
 - xRDConnectionBrokerHAMode
   - New resource to configure HA mode on a connection broker
+
+### Removed
+
+- Removed Get-LocalizedData and use version in DscResource.Common.
 
 ### Changed
 
@@ -34,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed formatting in all source files, [issue #113](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/113).
 - Update repo files to latest versions in Sampler. Fixes [issue #118](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/118).
 - Enable DocGenerator and move docs to wiki. Fixes [issue #101](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/101).
+- Renamed `master` branch to `main`. Fixes [issue #116](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/116).
 
 ## [2.1.0] - 2022-08-07
 

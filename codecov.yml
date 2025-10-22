@@ -1,9 +1,9 @@
 codecov:
   require_ci_to_pass: no
-  branch: master
+  branch: main
 
 comment:
-  layout: "reach, diff, flags, files"
+  layout: 'reach, diff, flags, files'
   behavior: default
 
 coverage:
@@ -21,4 +21,4 @@ coverage:
         threshold: 5
 
 fixes:
-  - '^\d+\.\d+\.\d+::source'  # move path "X.Y.Z" => "source"
+  - '^\d+\.\d+\.\d+::source' # move path "X.Y.Z" => "source"
