@@ -9,8 +9,6 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 
-Assert-Module -ModuleName 'RemoteDesktop'
-
 #######################################################################
 # The Get-TargetResource cmdlet.
 #######################################################################
@@ -22,17 +20,30 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter(Mandatory = $true)]
-        [string[]] $SessionHost,
+        [System.String[]]
+        $SessionHost,
+
         [Parameter()]
-        [string] $CollectionDescription,
+        [System.String]
+        $CollectionDescription,
+
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter()]
-        [bool] $Force
+        [System.Boolean]
+        $Force
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
     Write-Verbose -Message 'Getting information about RDSH collection.'
+
     $params = @{
         ConnectionBroker = $ConnectionBroker
         CollectionName   = $CollectionName
@@ -46,23 +57,23 @@ function Get-TargetResource
     if ($Collection.Count -eq 0)
     {
         return @{
+            CollectionName        = $null
             ConnectionBroker      = $null
             CollectionDescription = $null
-            CollectionName        = $null
-            SessionHost           = $SessionHost
+            SessionHost           = [System.String[]] $SessionHost
             Force                 = $Force
         }
     }
 
     if ($Collection.Count -gt 1)
     {
-        throw 'Non-singular RDSessionCollection in result set'
+        New-InvalidResultException -Message 'Non-singular RDSessionCollection in result set'
     }
 
     return @{
+        CollectionName        = $Collection.CollectionName
         ConnectionBroker      = $ConnectionBroker
         CollectionDescription = $Collection.CollectionDescription
-        CollectionName        = $Collection.CollectionName
         SessionHost           = [System.String[]] (Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue).SessionHost
         Force                 = $Force
     }
@@ -78,18 +89,30 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter(Mandatory = $true)]
-        [string[]] $SessionHost,
+        [System.String[]]
+        $SessionHost,
+
         [Parameter()]
-        [string] $CollectionDescription,
+        [System.String]
+        $CollectionDescription,
+
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter()]
-        [bool] $Force
+        [System.Boolean]
+        $Force
     )
 
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
     $currentStatus = Get-TargetResource @PSBoundParameters
+
     if ($null -ne $currentStatus.CollectionName -and $Force)
     {
         Write-Verbose -Message "Session collection $CollectionName already exists. Updating Session Hosts."
@@ -139,7 +162,8 @@ function Set-TargetResource
         {
             $exception = [System.Management.Automation.RuntimeException]::new($exceptionString)
         }
-        throw [System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName)
+
+        $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new($exception, 'Failure to coerce resource into the desired state', [System.Management.Automation.ErrorCategory]::InvalidResult, $CollectionName))
     }
 }
 
@@ -154,40 +178,36 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter(Mandatory = $true)]
-        [string[]] $SessionHost,
+        [System.String[]]
+        $SessionHost,
+
         [Parameter()]
-        [string] $CollectionDescription,
+        [System.String]
+        $CollectionDescription,
+
         [Parameter(Mandatory = $true)]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter()]
-        [bool] $Force
+        [System.Boolean]
+        $Force
     )
 
     Write-Verbose 'Checking for existence of RDSH collection.'
-    $currentStatus = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $currentStatus.CollectionName)
-    {
-        Write-Verbose -Message "No collection $CollectionName found"
-        return $false
-    }
+    $desiredState = $PSBoundParameters
+    $currentState = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $currentStatus.SessionHost)
-    {
-        Write-Verbose -Message "No session host(s) found in collection $CollectionName"
-        return (-not $Force)
-    }
-
-    $compare = Compare-Object -ReferenceObject $SessionHost -DifferenceObject $currentStatus.SessionHost
-    if ($null -ne $compare -and $Force)
-    {
-        Write-Verbose -Message "Desired list of session hosts not equal`r`n$($compare | Out-String) and Force is true"
-        return $false
-    }
-
-    return $true
+    return Test-DscParameterState `
+        -CurrentValues $currentState `
+        -DesiredValues $desiredState `
+        -SortArrayValues `
+        -Verbose:$VerbosePreference
 }
 
 Export-ModuleMember -Function *-TargetResource
