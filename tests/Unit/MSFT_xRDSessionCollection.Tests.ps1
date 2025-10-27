@@ -56,51 +56,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# $testcollectionNameMulti = 'TestCollectionMulti'
-
-# $testCollection = @(
-#     @{
-#         Name        = 'TestCollection1'
-#         Description = 'Test Collection 1'
-#     }
-#     @{
-#         Name        = 'TestCollection2'
-#         Description = 'Test Collection 2'
-#     }
-# )
-
-# $testSessionHost = 'localhost'
-# $testSessionHostMulti = 'rdsh1', 'rdsh2', 'rdsh3'
-# $testConnectionBroker = 'localhost.fqdn'
-
-# $validTargetResourceCall = @{
-#     CollectionName   = $testCollection[0].Name
-#     SessionHost      = $testSessionHost
-#     ConnectionBroker = $testConnectionBroker
-# }
-
-# $nonExistentTargetResourceCall1 = @{
-#     CollectionName   = 'TestCollection4'
-#     SessionHost      = $testSessionHost
-#     ConnectionBroker = $testConnectionBroker
-# }
-
-# $nonExistentTargetResourceCall2 = @{
-#     CollectionName   = 'TestCollection5'
-#     SessionHost      = $testSessionHost
-#     ConnectionBroker = $testConnectionBroker
-# }
-# $validMultiTargetResourceCall = @{
-#     CollectionName   = $testcollectionNameMulti
-#     SessionHost      = $testSessionHostMulti
-#     ConnectionBroker = $testConnectionBroker
-# }
-# $invalidMultiTargetResourceCall = @{
-#     CollectionName   = $testcollectionNameMulti
-#     SessionHost      = $testSessionHostMulti | Select-Object -Skip 1
-#     ConnectionBroker = $testConnectionBroker
-# }
-
 Describe 'MSFT_xRDSessionCollection\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
@@ -270,43 +225,93 @@ Describe 'MSFT_xRDSessionCollection\Set-TargetResource' -Tag 'Set' {
 
     Context 'When the resource is present' {
         BeforeAll {
-            Mock -CommandName Get-TargetResource -MockWith {
-                return @{
-                    CollectionName        = 'TestCollection1'
-                    SessionHost           = [System.String[]] @('rdsh1', 'rdsh2')
-                    CollectionDescription = 'Test Collection 1'
-                    ConnectionBroker      = 'localhost.fqdn'
-                    Force                 = $false
-                }
-            }
-
             Mock -CommandName Add-RDSessionHost
             Mock -CommandName Remove-RDSessionHost
         }
 
         Context 'When a session host should be added' {
-            It 'Should call the correct mocks' {
-                InModuleScope -ScriptBlock {
-                    Set-StrictMode -Version 1.0
-
-                    $testParams = @{
-                        CollectionName        = 'TestCollection1'
-                        SessionHost           = @('rdsh1', 'rdsh2', 'rdsh3')
-                        CollectionDescription = 'Test Collection 1'
-                        ConnectionBroker      = 'localhost.fqdn'
-                        Force                 = $true
+            Context 'When the session host is not ''$null''' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            CollectionName        = 'TestCollection1'
+                            SessionHost           = [System.String[]] @('rdsh1', 'rdsh2')
+                            CollectionDescription = 'Test Collection 1'
+                            ConnectionBroker      = 'localhost.fqdn'
+                            Force                 = $false
+                        }
                     }
-
-                    $null = Set-TargetResource @testParams
                 }
 
-                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Add-RDSessionHost -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Remove-RDSessionHost -Exactly -Times 0 -Scope It
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName        = 'TestCollection1'
+                            SessionHost           = @('rdsh1', 'rdsh2', 'rdsh3')
+                            CollectionDescription = 'Test Collection 1'
+                            ConnectionBroker      = 'localhost.fqdn'
+                            Force                 = $true
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Add-RDSessionHost -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Remove-RDSessionHost -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When the session host is ''$null''' {
+                BeforeAll {
+                    Mock -CommandName Get-TargetResource -MockWith {
+                        return @{
+                            CollectionName        = 'TestCollection1'
+                            SessionHost           = $null
+                            CollectionDescription = 'Test Collection 1'
+                            ConnectionBroker      = 'localhost.fqdn'
+                            Force                 = $false
+                        }
+                    }
+                }
+
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName        = 'TestCollection1'
+                            SessionHost           = @('rdsh1', 'rdsh2', 'rdsh3')
+                            CollectionDescription = 'Test Collection 1'
+                            ConnectionBroker      = 'localhost.fqdn'
+                            Force                 = $true
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Add-RDSessionHost -Exactly -Times 3 -Scope It
+                    Should -Invoke -CommandName Remove-RDSessionHost -Exactly -Times 0 -Scope It
+                }
             }
         }
 
         Context 'When a session host should be removed' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    return @{
+                        CollectionName        = 'TestCollection1'
+                        SessionHost           = [System.String[]] @('rdsh1', 'rdsh2')
+                        CollectionDescription = 'Test Collection 1'
+                        ConnectionBroker      = 'localhost.fqdn'
+                        Force                 = $false
+                    }
+                }
+            }
+
             It 'Should return the correct mocks' {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
@@ -340,16 +345,75 @@ Describe 'MSFT_xRDSessionCollection\Set-TargetResource' -Tag 'Set' {
                     Force                 = $false
                 }
             }
-
-            Mock -CommandName New-RDSessionCollection
         }
 
         Context 'When creating the session collection succeeds' {
             BeforeAll {
-                Mock -CommandName Test-TargetResource -MockWith { return $true }
+                Mock -CommandName New-RDSessionCollection
             }
 
-            It 'Should call the correct mocks' {
+            Context 'When the resource is in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Test-TargetResource -MockWith { return $true }
+                }
+
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName        = 'TestCollection1'
+                            SessionHost           = @('rdsh1', 'rdsh2')
+                            CollectionDescription = 'Test Collection 1'
+                            ConnectionBroker      = 'localhost.fqdn'
+                            Force                 = $false
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-RDSessionCollection -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Test-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+
+            Context 'When the resource is not in the desired state' {
+                BeforeAll {
+                    Mock -CommandName Test-TargetResource -MockWith { return $false }
+                }
+
+                It 'Should throw the correct exception' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            CollectionName        = 'TestCollection1'
+                            SessionHost           = @('rdsh1', 'rdsh2')
+                            CollectionDescription = 'Test Collection 1'
+                            ConnectionBroker      = 'localhost.fqdn'
+                            Force                 = $false
+                        }
+
+                        $errorString = ("'Test-TargetResource' returns false after call to 'New-RDSessionCollection'; CollectionName: {0}; ConnectionBroker {1}." -f $testParams.CollectionName, $testParams.ConnectionBroker)
+
+                        { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorString
+                    }
+
+                    Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-RDSessionCollection -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Test-TargetResource -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+
+        Context 'When creating the session collection fails' {
+            BeforeAll {
+                Mock -CommandName New-RDSessionCollection -MockWith { throw 'Mock error' }
+                Mock -CommandName Test-TargetResource -MockWith { return $false }
+            }
+
+            It 'Should throw the correct exception' {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
@@ -361,107 +425,17 @@ Describe 'MSFT_xRDSessionCollection\Set-TargetResource' -Tag 'Set' {
                         Force                 = $false
                     }
 
-                    Set-TargetResource @testParams
+                    $errorString = ("'Test-TargetResource' returns false after call to 'New-RDSessionCollection'; CollectionName: {0}; ConnectionBroker {1}." -f $testParams.CollectionName, $testParams.ConnectionBroker)
+
+                    { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorString
                 }
 
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName New-RDSessionCollection -Exactly -Times 1 -Scope It # TODO: this is not passing locally
+                Should -Invoke -CommandName New-RDSessionCollection -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Test-TargetResource -Exactly -Times 1 -Scope It
             }
         }
     }
-
-    # Mock -CommandName Get-RDSessionCollection
-    # Mock -CommandName New-RDSessionCollection
-    # Mock -CommandName Compare-Object
-    # Mock -CommandName Get-RDSessionHost {
-    #     return @{
-    #         CollectionName = $testCollection[0].Name
-    #         SessionHost    = $testSessionHost
-    #     }
-    #     return @{
-    #         CollectionName = $testCollectionNameMulti
-    #         SessionHost    = $testSessionHostMulti
-    #     }
-    # }
-
-    # Context 'Validate Set-TargetResource actions' {
-    #     It 'Given the configuration is applied, New-RDSessionCollection is called' {
-    #         Mock -CommandName Test-TargetResource -MockWith { return $true }
-    #         Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost -Verbose
-    #         Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-    #     }
-    # }
-    # Context 'New-RDSessionCollection returns an exception, but creates the desired RDSessionCollection' {
-    #     Mock -CommandName Test-TargetResource -MockWith { return $true }
-    #     Mock -CommandName Compare-Object
-    #     Mock -CommandName New-RDSessionCollection -MockWith {
-    #         throw [Microsoft.PowerShell.Commands.WriteErrorException] 'The property EncryptionLevel is configured by using Group Policy settings. Use the Group Policy Management Console to configure this property.'
-    #     }
-
-    #     It 'does not return an exception' {
-    #         { Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost } | Should -Not -Throw
-    #     }
-
-    #     It 'calls New-RDSessionCollection' {
-    #         Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-    #     }
-    # }
-
-    # Context 'Get-RDSessionCollection returns an exception, without creating the desired RDSessionCollection' {
-    #     Mock -CommandName New-RDSessionCollection -MockWith {
-    #         throw [Microsoft.PowerShell.Commands.WriteErrorException] "A Remote Desktop Services deployment does not exist on $testConnectionBroker. This operation can be performed after creating a deployment. For information about creating a deployment, run `"Get-Help New-RDVirtualDesktopDeployment`" or `"Get-Help New-RDSessionDeployment`""
-    #     }
-
-    #     Mock -CommandName Get-RDSessionCollection -MockWith {
-    #         $null
-    #     }
-
-    #     It 'returns an exception' {
-    #         { Set-TargetResource -CollectionName $testCollection[0].Name -ConnectionBroker $testConnectionBroker -SessionHost $testSessionHost } | Should -Throw
-    #     }
-
-    #     It 'calls New-RDSessionCollection and Get-RDSessionCollection' {
-    #         Assert-MockCalled -CommandName New-RDSessionCollection -Times 1 -Scope Context
-    #         Assert-MockCalled -CommandName Get-RDSessionCollection -Times 1 -Scope Describe
-    #     }
-    # }
-
-    # Context 'Session Collection exists, but list of session hosts is different' {
-    #     Mock -CommandName Get-TargetResource -MockWith {
-    #         @{
-    #             'ConnectionBroker'      = 'CB'
-    #             'CollectionDescription' = 'Description'
-    #             'CollectionName'        = 'ExistingCollection'
-    #             'SessionHost'           = 'SurplusHost'
-    #         }
-    #     }
-    #     Mock -CommandName Compare-Object -MockWith {
-    #         'SurplusHost' | Add-Member -NotePropertyName SideIndicator -NotePropertyValue '<=' -PassThru
-    #         'MissingHost' | Add-Member -NotePropertyName SideIndicator -NotePropertyValue '=>' -PassThru
-    #     }
-    #     Mock -CommandName Add-RDSessionHost
-    #     Mock -CommandName Remove-RDSessionHost
-
-    #     It 'calls Add and Remove-RDSessionHost' {
-    #         Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost' -Force $true
-    #         Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope Context
-    #         Assert-MockCalled -CommandName Remove-RDSessionHost -Times 1 -Scope Context
-    #     }
-
-    #     Mock -CommandName Get-TargetResource -MockWith {
-    #         @{
-    #             'ConnectionBroker'      = 'CB'
-    #             'CollectionDescription' = 'Description'
-    #             'CollectionName'        = 'ExistingCollection'
-    #             'SessionHost'           = $null
-    #         }
-    #     }
-    #     It 'calls Add-RDSessionHost if no session hosts exist' {
-    #         Set-TargetResource -CollectionName 'ExistingCollection' -ConnectionBroker 'CB' -SessionHost 'MissingHost' -Force $true
-    #         Assert-MockCalled -CommandName Add-RDSessionHost -Times 1 -Scope Context
-    #     }
-    # }
 }
 
 Describe 'MSFT_xRDSessionCollection\Test-TargetResource' -Tag 'Test' {

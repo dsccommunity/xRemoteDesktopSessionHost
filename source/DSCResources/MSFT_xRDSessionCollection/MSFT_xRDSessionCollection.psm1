@@ -115,6 +115,7 @@ function Set-TargetResource
 
     if ($null -ne $currentStatus.CollectionName -and $Force)
     {
+        $missing, $surplus = @()
         Write-Verbose -Message "Session collection $CollectionName already exists. Updating Session Hosts."
         if ($null -ne $currentStatus.SessionHost)
         {
@@ -139,10 +140,19 @@ function Set-TargetResource
         return
     }
 
+    $newCollectionParams = @{
+        CollectionName        = $CollectionName
+        CollectionDescription = $CollectionDescription
+        ConnectionBroker      = $ConnectionBroker
+        SessionHost           = $SessionHost
+    }
+
+    $exception = $null
+
     try
     {
         Write-Verbose -Message 'Creating a new RDSH collection.'
-        New-RDSessionCollection @PSBoundParameters -ErrorAction Stop
+        New-RDSessionCollection @newCollectionParams -ErrorAction Stop
     }
     catch
     {
