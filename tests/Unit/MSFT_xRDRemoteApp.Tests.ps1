@@ -1,287 +1,619 @@
-# $script:DSCModuleName = 'xRemoteDesktopSessionHost'
-# $script:DSCResourceName = 'MSFT_xRDRemoteApp'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-# #region HEADER
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
+BeforeAll {
+    $script:dscModuleName = 'xRemoteDesktopSessionHost'
+    $script:dscResourceName = 'MSFT_xRDRemoteApp'
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\RemoteDesktop.stubs.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
+
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name RemoteDesktop.stubs -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
+}
+
+# $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
+# $testInvalidCollectionSplat = @{
+#     CollectionName = $testInvalidCollectionName
+#     DisplayName    = 'name'
+#     FilePath       = 'path'
+#     Alias          = 'alias'
 # }
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+# $sourceRemoteAppValues = @{
+# CollectionName      = 'TestCollection'
+# DisplayName         = 'MyCalc (1.0.0)'
+# FilePath            = 'c:\windows\system32\calc.exe'
+# Alias               = 'Test-MyCalc-(1.0.0)'
+# Ensure              = 'Present'
+# FileVirtualPath     = 'c:\windows\system32\calc.exe'
+# FolderName          = 'Test'
+# CommandLineSetting  = 'DoNotAllow'
+# RequiredCommandLine = 'my-cmd'
+# IconIndex           = 0
+# IconPath            = 'c:\windows\system32\calc.exe'
+# UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+# ShowInWebAccess     = $true
 # }
 
-# Invoke-TestSetup
+# $xRDRemoteAppSplat = $sourceRemoteAppValues.Clone()
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $script:DSCResourceName = 'MSFT_xRDRemoteApp'
+# $getRDRemoteApp = $xRDRemoteAppSplat.Clone()
+# $null = $getRDRemoteApp.Remove('Ensure')
 
-#         $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
-#         $testInvalidCollectionSplat = @{
-#             CollectionName = $testInvalidCollectionName
-#             DisplayName    = 'name'
-#             FilePath       = 'path'
-#             Alias          = 'alias'
-#         }
+Describe 'MSFT_xRDRemoteApp\Get-TargetResource' -Tag 'Get' {
+    Context 'When the resource exists' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-RDRemoteApp -MockWith {
+                @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
+                    ShowInWebAccess     = $true
+                }
+            }
+        }
 
-#         $sourceRemoteAppValues = @{
-#             CollectionName      = 'TestCollection'
-#             DisplayName         = 'MyCalc (1.0.0)'
-#             FilePath            = 'c:\windows\system32\calc.exe'
-#             Alias               = 'Test-MyCalc-(1.0.0)'
-#             Ensure              = 'Present'
-#             FileVirtualPath     = 'c:\windows\system32\calc.exe'
-#             FolderName          = 'Test'
-#             CommandLineSetting  = 'DoNotAllow'
-#             RequiredCommandLine = 'my-cmd'
-#             IconIndex           = 0
-#             IconPath            = 'c:\windows\system32\calc.exe'
-#             UserGroups          = 'DOMAIN\MyAppGroup_DLG'
-#             ShowInWebAccess     = $true
-#         }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         $xRDRemoteAppSplat = $sourceRemoteAppValues.Clone()
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#         $getRDRemoteApp = $xRDRemoteAppSplat.Clone()
-#         $null = $getRDRemoteApp.Remove('Ensure')
+                $result = Get-TargetResource @testParams
 
-#         Import-Module RemoteDesktop -Force
+                $result.CollectionName | Should -Be $testParams.CollectionName
+                $result.DisplayName | Should -Be $testParams.DisplayName
+                $result.FilePath | Should -Be $testParams.FilePath
+                $result.Alias | Should -Be $testParams.Alias
+                $result.Ensure | Should -Be 'Present'
+                $result.FileVirtualPath | Should -Be $testParams.FileVirtualPath
+                $result.FolderName | Should -Be $testParams.FolderName
+                $result.CommandLineSetting | Should -Be $testParams.CommandLineSetting
+                $result.RequiredCommandLine | Should -Be $testParams.RequiredCommandLine
+                $result.IconIndex | Should -Be $testParams.IconIndex
+                $result.IconPath | Should -Be $testParams.IconPath
+                $result.UserGroups | Should -Be $testParams.UserGroups
+                $result.ShowInWebAccess | Should -Be $testParams.ShowInWebAccess
+            }
 
-#         #region Function Get-TargetResource
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
+        }
+    }
 
-#                 It 'Should error when CollectionName length is greater than 256' {
-#                     { Get-TargetResource @testInvalidCollectionSplat } | Should Throw
-#                 }
+    Context 'When the resource does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-RDRemoteApp
+        }
 
-#                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
-#                 It 'Should only accept valid values for CommandLineSetting' {
-#                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
-#                 }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 $xRDRemoteAppSplat.CommandLineSetting = $sourceRemoteAppValues.CommandLineSetting
-#             }
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#             Context 'When Get-TargetResource is called' {
+                $result = Get-TargetResource @testParams
 
-#                 Mock -CommandName Get-RDRemoteApp
-#                 Mock -CommandName Get-RDSessionCollection
+                $result.CollectionName | Should -Be $testParams.CollectionName
+                $result.DisplayName | Should -BeNullOrEmpty
+                $result.FilePath | Should -BeNullOrEmpty
+                $result.Alias | Should -Be $testParams.Alias
+                $result.Ensure | Should -Be 'Absent'
+                $result.FileVirtualPath | Should -BeNullOrEmpty
+                $result.FolderName | Should -BeNullOrEmpty
+                $result.CommandLineSetting | Should -BeNullOrEmpty
+                $result.RequiredCommandLine | Should -BeNullOrEmpty
+                $result.IconIndex | Should -BeNullOrEmpty
+                $result.IconPath | Should -BeNullOrEmpty
+                $result.UserGroups | Should -BeNullOrEmpty
+                $result.ShowInWebAccess | Should -BeNullOrEmpty
+            }
 
-#                 It 'Should return Ensure Absent, given the RemoteApp is not created yet' {
-#                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Absent'
-#                 }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
+        }
+    }
 
-#                 Mock -CommandName Get-RDRemoteApp -MockWith {
-#                     $getRDRemoteApp
-#                 }
+    Context 'When the collection does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection -MockWith {
+                throw 'Mock Error'
+            }
 
-#                 It 'Should return Ensure Present, given the RemoteApp is created' {
-#                     (Get-TargetResource @xRDRemoteAppSplat).Ensure | Should Be 'Present'
-#                 }
+            Mock -CommandName Get-RDRemoteApp
+        }
 
-#                 $userGroups = @('DOMAIN\RemoteApp_UserGroup1', 'DOMAIN\RemoteApp_UserGroup2')
-#                 $xRDRemoteAppSplat.UserGroups = $userGroups
-#                 It 'Should not generate an error, given that an array of UserGroups was specified' {
-#                     { Get-TargetResource @xRDRemoteAppSplat } | Should -Not -Throw
-#                 }
-#                 $xRDRemoteAppSplat.UserGroups = $sourceRemoteAppValues.UserGroups
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 [System.Array] $commonParameters = [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
-#                 $commonParameters += [System.Management.Automation.PSCmdlet]::CommonParameters
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#                 $allParameters = (Get-Command Get-TargetResource).Parameters.Keys |
-#                     Where-Object -FilterScript { $_ -notin $commonParameters } |
-#                     ForEach-Object -Process {
-#                         @{
-#                             Property = $_
-#                             Value    = $xRDRemoteAppSplat[$_]
-#                         }
-#                     }
+                { Get-TargetResource @testParams } | Should -Throw -ExpectedMessage "Failed to lookup RD Session Collection $($testParams.CollectionName). Error: Mock Error"
+            }
 
-#                 $getTargetResourceResult = Get-TargetResource @xRDRemoteAppSplat
-#                 It 'Should return property <Property> with value <Value> in Get-TargetResource' {
-#                     param(
-#                         $Property,
-#                         $Value
-#                     )
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+        }
+    }
+}
 
-#                     $getTargetResourceResult.$Property | Should Be $Value
-#                 } -TestCases $allParameters
+Describe 'MSFT_xRDRemoteApp\Set-TargetResource' -Tag 'Set' {
+    Context 'When the resource should be created' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-RDRemoteApp
+            Mock -CommandName New-RDRemoteApp
+            Mock -CommandName Remove-RDRemoteApp
+            Mock -CommandName Set-RDRemoteApp
+        }
 
-#                 Mock -CommandName Get-RDSessionCollection -MockWith {
-#                     Write-Error 'Collection not found!'
-#                 }
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
-#                     { Get-TargetResource @xRDRemoteAppSplat -ErrorAction Stop } |
-#                         Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
-#                 }
-#             }
-#         }
-#         #endregion
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#         #region Function Set-TargetResource
-#         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
+                $null = Set-TargetResource @testParams
+            }
 
-#                 It 'Should error when CollectionName length is greater than 256' {
-#                     { Set-TargetResource @testInvalidCollectionSplat } | Should Throw
-#                 }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Remove-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Set-RDRemoteApp -Exactly -Times 0 -Scope It
+        }
+    }
 
-#                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
-#                 It 'Should only accept valid values for CommandLineSetting' {
-#                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
-#                 }
+    Context 'When the resource should be removed' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-RDRemoteApp -MockWith {
+                @{
+                    Name = 'SomeValue'
+                }
+            }
 
-#                 $xRDRemoteAppSplat.CommandLineSetting = $sourceRemoteAppValues.CommandLineSetting
-#             }
+            Mock -CommandName New-RDRemoteApp
+            Mock -CommandName Remove-RDRemoteApp
+            Mock -CommandName Set-RDRemoteApp
+        }
 
-#             Context 'When Set-TargetResource actions are performed' {
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 Mock -CommandName Get-RDSessionCollection
-#                 Mock -CommandName Get-RDRemoteApp
-#                 Mock -CommandName New-RDRemoteApp
-#                 Mock -CommandName Remove-RDRemoteApp
-#                 Mock -CommandName Set-RDRemoteApp
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Ensure              = 'Absent'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#                 It 'Should call New-RDRemoteApp, given that the RemoteApp does not exist yet and Ensure is set to Present' {
-#                     Set-TargetResource @xRDRemoteAppSplat
-#                     Assert-MockCalled -CommandName New-RDRemoteApp -Times 1 -Scope It
-#                 }
+                $null = Set-TargetResource @testParams
+            }
 
-#                 Mock -CommandName Get-RDRemoteApp -MockWith { $getRDRemoteApp }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Remove-RDRemoteApp -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-RDRemoteApp -Exactly -Times 0 -Scope It
+        }
+    }
 
-#                 It 'Should call Set-RDRemoteApp, given that the RemoteApp does exist and Ensure is set to Present' {
-#                     Set-TargetResource @xRDRemoteAppSplat
-#                     Assert-MockCalled -CommandName Set-RDRemoteApp -Times 1 -Scope It
-#                 }
+    Context 'When the resource should be updated' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-RDRemoteApp -MockWith {
+                @{
+                    Name = 'SomeValue'
+                }
+            }
 
-#                 $userGroups = @('DOMAIN\RemoteApp_UserGroup1', 'DOMAIN\RemoteApp_UserGroup2')
-#                 $xRDRemoteAppSplat.UserGroups = $userGroups
-#                 It 'Should not generate an error, given that an array of UserGroups was specified' {
-#                     { Set-TargetResource @xRDRemoteAppSplat } | Should -Not -Throw
-#                 }
-#                 $xRDRemoteAppSplat.UserGroups = $sourceRemoteAppValues.UserGroups
+            Mock -CommandName New-RDRemoteApp
+            Mock -CommandName Remove-RDRemoteApp
+            Mock -CommandName Set-RDRemoteApp
+        }
 
-#                 $xRDRemoteAppSplat.Ensure = 'Absent'
-#                 It 'Should call Remove-RDRemoteApp, given that the RemoteApp exists and Ensure is set to Absent' {
-#                     Set-TargetResource @xRDRemoteAppSplat
-#                     Assert-MockCalled -CommandName Remove-RDRemoteApp -Times 1 -Scope It
-#                 }
-#                 $xRDRemoteAppSplat.Ensure = $sourceRemoteAppValues.Ensure
+        It 'Should call the correct mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 Mock -CommandName Get-RDSessionCollection -MockWith {
-#                     Write-Error 'Collection not found!'
-#                 }
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#                 It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
-#                     { Set-TargetResource @xRDRemoteAppSplat -ErrorAction Stop } |
-#                         Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
-#                 }
-#             }
-#         }
-#         #endregion
+                $null = Set-TargetResource @testParams
+            }
 
-#         #region Function Test-TargetResource
-#         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Remove-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Set-RDRemoteApp -Exactly -Times 1 -Scope It
+        }
+    }
 
-#                 It 'Should error when CollectionName length is greater than 256' {
-#                     { Test-TargetResource @testInvalidCollectionSplat } | Should Throw
-#                 }
+    Context 'When the collection does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection -MockWith {
+                throw 'Mock Error'
+            }
 
-#                 $xRDRemoteAppSplat.CommandLineSetting = 'Invalid'
-#                 It 'Should only accept valid values for CommandLineSetting' {
-#                     { Get-TargetResource @xRDRemoteAppSplat } | Should Throw
-#                 }
+            Mock -CommandName Get-RDRemoteApp
+            Mock -CommandName New-RDRemoteApp
+            Mock -CommandName Remove-RDRemoteApp
+            Mock -CommandName Set-RDRemoteApp
+        }
 
-#                 $xRDRemoteAppSplat.CommandLineSetting = $sourceRemoteAppValues.CommandLineSetting
-#             }
+        It 'Should generate an error' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#             Context 'Test output validation' {
-#                 Mock -CommandName Get-RDSessionCollection
-#                 Mock -CommandName Get-RDRemoteApp
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#                 It 'Should return false, given that the RemoteApp does not exist yet and Ensure is set to Present' {
-#                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
-#                 }
+                { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Mock Error'
+            }
 
-#                 Mock -CommandName Get-RDRemoteApp -MockWith {
-#                     $getRDRemoteApp
-#                 }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Remove-RDRemoteApp -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Set-RDRemoteApp -Exactly -Times 0 -Scope It
+        }
+    }
+}
 
-#                 It 'Should return true, given that the RemoteApp does exist and Ensure is set to Present' {
-#                     Test-TargetResource @xRDRemoteAppSplat | Should Be $true
-#                 }
+Describe 'MSFT_xRDRemoteApp\Test-TargetResource' -Tag 'Test' {
+    Context 'When the resource is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
+                    ShowInWebAccess     = $true
+                }
+            }
+        }
 
-#                 $xRDRemoteAppSplat.Ensure = 'Absent'
-#                 It 'Should return false, given that the RemoteApp exists and Ensure is set to Absent' {
-#                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
-#                 }
-#                 $xRDRemoteAppSplat.Ensure = $sourceRemoteAppValues.Ensure
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 $userGroups = @('DOMAIN\RemoteApp_UserGroup1', 'DOMAIN\RemoteApp_UserGroup2')
-#                 $xRDRemoteAppSplat.UserGroups = $userGroups
-#                 It 'Should not generate an error, given that an array of UserGroups was specified' {
-#                     { Test-TargetResource @xRDRemoteAppSplat } | Should -Not -Throw
-#                 }
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
 
-#                 It 'Should return false, due to a mismatch in UserGroups' {
-#                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
-#                 }
+                Test-TargetResource @testParams | Should -BeTrue
+            }
 
-#                 $getRDRemoteApp.UserGroups = $userGroups
-#                 Mock -CommandName Get-RDRemoteApp -MockWith {
-#                     $getRDRemoteApp
-#                 }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+        }
+    }
 
-#                 It 'Should return true, given that the comparison of UserGroups arrays succeeds' {
-#                     Test-TargetResource @xRDRemoteAppSplat | Should Be $true
-#                 }
-#                 $xRDRemoteAppSplat.UserGroups = $sourceRemoteAppValues.UserGroups
-#                 $getRDRemoteApp.UserGroups = $sourceRemoteAppValues.UserGroups
+    Context 'When the resource is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    CollectionName      = 'TestCollection'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
+                    ShowInWebAccess     = $true
+                }
+            }
+        }
 
-#                 $getRDRemoteApp.CommandLineSetting = 'Allow'
-#                 Mock -CommandName Get-RDRemoteApp -MockWith {
-#                     $getRDRemoteApp
-#                 }
+        BeforeDiscovery {
+            $testCases = @(
+                @{
+                    Parameter = 'DisplayName'
+                    Value     = 'MyCalc (1.1.0)'
+                }
+                @{
+                    Parameter = 'FilePath'
+                    Value     = 'c:\windows\system32\calc.ex'
+                }
+                @{
+                    Parameter = 'FileVirtualPath'
+                    Value     = 'c:\windows\system32\calc.ex'
+                }
+                @{
+                    Parameter = 'FolderName'
+                    Value     = 'Test_Different'
+                }
+                @{
+                    Parameter = 'CommandLineSetting'
+                    Value     = 'Allow'
+                }
+                @{
+                    Parameter = 'RequiredCommandLine'
+                    Value     = 'my-cmd-other'
+                }
+                @{
+                    Parameter = 'IconIndex'
+                    Value     = 1
+                }
+                @{
+                    Parameter = 'IconPath'
+                    Value     = 'c:\windows\system32\calc.ex'
+                }
+                @{
+                    Parameter = 'UserGroups'
+                    Value     = @('DOMAIN\MyAppGroup_DLG', 'DOMAIN\AnotherGroup_DLG')
+                }
+                @{
+                    Parameter = 'ShowInWebAccess'
+                    Value     = $false
+                }
+            )
+        }
 
-#                 It 'Should return false, given that the RemoteApp exists and Ensure is set to Present and a single setting is misconfigured' {
-#                     Test-TargetResource @xRDRemoteAppSplat | Should Be $false
-#                 }
+        Context 'When the Parameter <Parameter> is different' -ForEach $testCases {
+            It 'Should return the correct result' {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 Mock -CommandName Get-RDSessionCollection -MockWith {
-#                     Write-Error 'Collection not found!'
-#                 }
+                    $testParams = @{
+                        CollectionName      = 'TestCollection'
+                        Alias               = 'Test-MyCalc-(1.0.0)'
+                        DisplayName         = 'MyCalc (1.0.0)'
+                        FilePath            = 'c:\windows\system32\calc.exe'
+                        Ensure              = 'Present'
+                        FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                        FolderName          = 'Test'
+                        CommandLineSetting  = 'DoNotAllow'
+                        RequiredCommandLine = 'my-cmd'
+                        IconIndex           = 0
+                        IconPath            = 'c:\windows\system32\calc.exe'
+                        UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                        ShowInWebAccess     = $true
+                    }
 
-#                 It 'Should generate an error, given that the CollectionName is not found in the SessionDeployment' {
-#                     { Test-TargetResource @xRDRemoteAppSplat -ErrorAction Stop } |
-#                         Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Collection not found!'
-#                 }
-#             }
-#         }
-#         #endregion
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+                    $testParams[$Parameter] = $Value
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+
+    Context 'When the collection does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDSessionCollection -MockWith {
+                throw 'Mock Error'
+            }
+
+            Mock -CommandName Get-TargetResource
+        }
+
+        It 'Should generate an error' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    CollectionName      = 'TestCollection'
+                    Alias               = 'Test-MyCalc-(1.0.0)'
+                    DisplayName         = 'MyCalc (1.0.0)'
+                    FilePath            = 'c:\windows\system32\calc.exe'
+                    Ensure              = 'Present'
+                    FileVirtualPath     = 'c:\windows\system32\calc.exe'
+                    FolderName          = 'Test'
+                    CommandLineSetting  = 'DoNotAllow'
+                    RequiredCommandLine = 'my-cmd'
+                    IconIndex           = 0
+                    IconPath            = 'c:\windows\system32\calc.exe'
+                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    ShowInWebAccess     = $true
+                }
+
+                { Test-TargetResource @testParams } | Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Mock Error'
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
+        }
+    }
+}
