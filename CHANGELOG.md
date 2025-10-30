@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Use `Test-DscParameterState` where possible.
   - Update formatting.
   - Use fully qualified types.
-  - Add changes from [PR #124](https://github.com/dsccommunity/xRemoteDesktopSessionHost/pulls/124)
+  - Add changes from [PR #124](https://github.com/dsccommunity/xRemoteDesktopSessionHost/pull/124)
 
 ## [2.1.0] - 2022-08-07
 
