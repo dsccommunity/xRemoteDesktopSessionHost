@@ -1,454 +1,562 @@
-# $script:dscModuleName = 'xRemoteDesktopSessionHost'
-# $script:dscResourceName = 'MSFT_xRDGatewayConfiguration'
-
-# #region HEADER
-
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
-
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
-# }
-
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
-
-# Invoke-TestSetup
-
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $script:dscResourceName = 'MSFT_xRDGatewayConfiguration'
-
-#         Import-Module RemoteDesktop -Force
-
-#         #region Function Get-TargetResource
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     ConnectionBroker = 'testbroker.fqdn'
-#                     Gatewaymode      = 'DoNotUse'
-#                 }
-#             }
-
-#             It 'Given Gatway Configuration is DoNotUse Get-TargetResource returns GatewayMode DoNotUse' {
-#                 (Get-TargetResource -ConnectionBroker testbroker.fqdn).GatewayMode | Should Be 'DoNotUse'
-#             }
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     Gatewaymode          = 'Custom'
-#                     GatewayExternalFqdn  = 'testgateway.external.fqdn'
-#                     BypassLocal          = $true
-#                     ConnectionBroker     = 'testbroker.fqdn'
-#                     LogonMethod          = 'Password'
-#                     UseCachedCredentials = $true
-#                 }
-#             }
-
-#             $getResult = Get-TargetResource -ConnectionBroker testbroker.fqdn
-#             It 'Given a configured gateway, Get-TargetResource outputs property <property>' {
-#                 param(
-#                     [string]$Property
-#                 )
-
-#                 $getResult.$property | Should Not BeNullOrEmpty
-#             } -TestCases @(
-#                 @{
-#                     Property = 'GatewayExternalFqdn'
-#                 }
-#                 @{
-#                     Property = 'BypassLocal'
-#                 }
-#                 @{
-#                     Property = 'LogonMethod'
-#                 }
-#                 @{
-#                     Property = 'UseCachedCredentials'
-#                 }
-#             )
-#         }
-
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     ConnectionBroker = 'testbroker.fqdn'
-#                     Gatewaymode      = 'DoNotUse'
-#                 }
-#             }
-
-#             $testSplat = @{
-#                 ConnectionBroker     = 'testbroker.fqdn'
-#                 GatewayMode          = 'DoNotUse'
-#                 ExternalFqdn         = 'testgateway.external.fqdn'
-#                 BypassLocal          = $true
-#                 LogonMethod          = 'Password'
-#                 UseCachedCredentials = $true
-#             }
-
-#             It 'Given configured GateWayMode DoNotUse and desired GateWayMode DoNotUse test returns true' {
-#                 Test-TargetResource @testSplat | Should be $true
-#             }
-
-#             $testSplat.GatewayMode = 'Custom'
-#             It 'Given configured GateWayMode DoNotUse and desired GateWayMode Custom test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     Gatewaymode          = 'Custom'
-#                     GatewayExternalFqdn  = 'testgateway.external.fqdn'
-#                     BypassLocal          = $true
-#                     ConnectionBroker     = 'testbroker.fqdn'
-#                     LogonMethod          = 'Password'
-#                     UseCachedCredentials = $true
-#                 }
-#             }
-
-#             $testSplat.LogonMethod = 'AllowUserToSelectDuringConnection'
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired LogonMethod AllowUserToSelectDuringConnection and current LogonMethod Password, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.LogonMethod = 'Password'
-#             $testSplat.ExternalFqdn = 'testgateway.new.external.fqdn'
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with different GatewayExternalFqdn, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.ExternalFqdn = 'testgateway.external.fqdn'
-#             $testSplat.BypassLocal = $false
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired BypassLocal false and current BypassLocal true, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.BypassLocal = $true
-#             $testSplat.UseCachedCredentials = $false
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired UseCachedCredentials false and current UseCachedCredentials true, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.UseCachedCredentials = $true
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with all properties validated, test returns true' {
-#                 Test-TargetResource @testSplat | Should be $true
-#             }
-#         }
-#         #endregion
-
-
-#         #region Function Set-TargetResource
-#         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
-
-#                 It 'Should error when if GatewayMode is Custom and a parameter is missing.' {
-#                     { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -GatewayMode 'Custom' -ErrorAction Stop } |
-#                         Should -Throw
-#                 }
-#             }
-
-#             $setSplat = @{
-#                 ConnectionBroker     = 'testbroker.fqdn'
-#                 GatewayServer        = 'my.gateway.fqdn'
-#                 GatewayMode          = 'Custom'
-#                 ExternalFqdn         = 'testgateway.external.fqdn'
-#                 BypassLocal          = $true
-#                 LogonMethod          = 'Password'
-#                 UseCachedCredentials = $true
-#             }
-
-#             Context 'Configuration changes performed by Set' {
-
-#                 Mock -CommandName Get-RDServer -MockWith {
-#                     [pscustomobject]@{
-#                         Server = 'my.gateway.fqdn'
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS',
-#                             'RDS-GATEWAY'
-#                         )
-#                     }
-#                 }
-#                 Mock -CommandName Add-RDServer
-#                 Mock -CommandName Set-RdDeploymentGatewayConfiguration
-
-#                 It 'Given the role RDS-GATEWAY is already installed, Add-RDServer is not called' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Add-RDServer -Times 0 -Scope It
-#                 }
-
-#                 Mock -CommandName Get-RDServer -MockWith {
-#                     [pscustomobject]@{
-#                         Server = 'testbroker.fqdn'
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS'
-#                         )
-#                     }
-#                 }
-#                 It 'Given the role RDS-GATEWAY is missing, Add-RDServer is called' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Add-RDServer -Times 1 -Scope It
-#                 }
-
-#                 It 'Given GateWayMode Custom, Set-RdDeploymentGatewayConfiguration is called with all required parameters' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Set-RdDeploymentGatewayConfiguration -Times 1 -Scope It -ParameterFilter {
-#                         $ConnectionBroker -eq 'testbroker.fqdn' -and
-#                         $GatewayMode -eq 'Custom' -and
-#                         $GatewayExternalFqdn -eq 'testgateway.external.fqdn' -and
-#                         $LogonMethod -eq 'Password' -and
-#                         $UseCachedCredentials -eq $true -and
-#                         $BypassLocal -eq $true -and
-#                         $Force -eq $true
-#                     }
-#                 }
-
-#                 $setSplat.GatewayMode = 'DoNotUse'
-#                 It 'Given GateWayMode DoNotUse, Set-RdDeploymentGatewayConfiguration is called with only ConnectionBroker, Gatewaymode and Force parameters' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Set-RdDeploymentGatewayConfiguration -Times 1 -Scope It -ParameterFilter {
-#                         $ConnectionBroker -eq 'testbroker.fqdn' -and
-#                         $GatewayMode -eq 'DoNotUse' -and
-#                         $Force -eq $true
-#                     }
-#                 }
-#             }
-#         }
-#         #endregion
-
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
-
-# #endregion HEADER
-
-
-# try
-# {
-#     Invoke-TestSetup
-
-#     InModuleScope $script:DSCResourceName {
-#         $script:DSCResourceName = 'MSFT_xRDGatewayConfiguration'
-
-#         Import-Module RemoteDesktop -Force
-
-#         #region Function Get-TargetResource
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     ConnectionBroker = 'testbroker.fqdn'
-#                     Gatewaymode      = 'DoNotUse'
-#                 }
-#             }
-
-#             It 'Given Gatway Configuration is DoNotUse Get-TargetResource returns GatewayMode DoNotUse' {
-#                 (Get-TargetResource -ConnectionBroker testbroker.fqdn).GatewayMode | Should Be 'DoNotUse'
-#             }
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     Gatewaymode          = 'Custom'
-#                     GatewayExternalFqdn  = 'testgateway.external.fqdn'
-#                     BypassLocal          = $true
-#                     ConnectionBroker     = 'testbroker.fqdn'
-#                     LogonMethod          = 'Password'
-#                     UseCachedCredentials = $true
-#                 }
-#             }
-
-#             $getResult = Get-TargetResource -ConnectionBroker testbroker.fqdn
-#             It 'Given a configured gateway, Get-TargetResource outputs property <property>' {
-#                 param(
-#                     [string]$Property
-#                 )
-
-#                 $getResult.$property | Should Not BeNullOrEmpty
-#             } -TestCases @(
-#                 @{
-#                     Property = 'GatewayExternalFqdn'
-#                 }
-#                 @{
-#                     Property = 'BypassLocal'
-#                 }
-#                 @{
-#                     Property = 'LogonMethod'
-#                 }
-#                 @{
-#                     Property = 'UseCachedCredentials'
-#                 }
-#             )
-#         }
-
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     ConnectionBroker = 'testbroker.fqdn'
-#                     Gatewaymode      = 'DoNotUse'
-#                 }
-#             }
-
-#             $testSplat = @{
-#                 ConnectionBroker     = 'testbroker.fqdn'
-#                 GatewayMode          = 'DoNotUse'
-#                 ExternalFqdn         = 'testgateway.external.fqdn'
-#                 BypassLocal          = $true
-#                 LogonMethod          = 'Password'
-#                 UseCachedCredentials = $true
-#             }
-
-#             It 'Given configured GateWayMode DoNotUse and desired GateWayMode DoNotUse test returns true' {
-#                 Test-TargetResource @testSplat | Should be $true
-#             }
-
-#             $testSplat.GatewayMode = 'Custom'
-#             It 'Given configured GateWayMode DoNotUse and desired GateWayMode Custom test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
-#                 [pscustomobject]@{
-#                     Gatewaymode          = 'Custom'
-#                     GatewayExternalFqdn  = 'testgateway.external.fqdn'
-#                     BypassLocal          = $true
-#                     ConnectionBroker     = 'testbroker.fqdn'
-#                     LogonMethod          = 'Password'
-#                     UseCachedCredentials = $true
-#                 }
-#             }
-
-#             $testSplat.LogonMethod = 'AllowUserToSelectDuringConnection'
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired LogonMethod AllowUserToSelectDuringConnection and current LogonMethod Password, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.LogonMethod = 'Password'
-#             $testSplat.ExternalFqdn = 'testgateway.new.external.fqdn'
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with different GatewayExternalFqdn, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.ExternalFqdn = 'testgateway.external.fqdn'
-#             $testSplat.BypassLocal = $false
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired BypassLocal false and current BypassLocal true, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.BypassLocal = $true
-#             $testSplat.UseCachedCredentials = $false
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with desired UseCachedCredentials false and current UseCachedCredentials true, test returns false' {
-#                 Test-TargetResource @testSplat | Should be $false
-#             }
-
-#             $testSplat.UseCachedCredentials = $true
-#             It 'Given configured GateWayMode Custom and desired GateWayMode Custom, with all properties validated, test returns true' {
-#                 Test-TargetResource @testSplat | Should be $true
-#             }
-#         }
-#         #endregion
-
-
-#         #region Function Set-TargetResource
-#         Describe "$($script:DSCResourceName)\Set-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
-
-#                 It 'Should error when if GatewayMode is Custom and a parameter is missing.' {
-#                     { Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -GatewayMode 'Custom' -ErrorAction Stop } |
-#                         Should -Throw
-#                 }
-#             }
-
-#             $setSplat = @{
-#                 ConnectionBroker     = 'testbroker.fqdn'
-#                 GatewayServer        = 'my.gateway.fqdn'
-#                 GatewayMode          = 'Custom'
-#                 ExternalFqdn         = 'testgateway.external.fqdn'
-#                 BypassLocal          = $true
-#                 LogonMethod          = 'Password'
-#                 UseCachedCredentials = $true
-#             }
-
-#             Context 'Configuration changes performed by Set' {
-
-#                 Mock -CommandName Get-RDServer -MockWith {
-#                     [pscustomobject]@{
-#                         Server = 'my.gateway.fqdn'
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS',
-#                             'RDS-GATEWAY'
-#                         )
-#                     }
-#                 }
-#                 Mock -CommandName Add-RDServer
-#                 Mock -CommandName Set-RdDeploymentGatewayConfiguration
-
-#                 It 'Given the role RDS-GATEWAY is already installed, Add-RDServer is not called' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Add-RDServer -Times 0 -Scope It
-#                 }
-
-#                 Mock -CommandName Get-RDServer -MockWith {
-#                     [pscustomobject]@{
-#                         Server = 'testbroker.fqdn'
-#                         Roles  = @(
-#                             'RDS-WEB-ACCESS'
-#                         )
-#                     }
-#                 }
-#                 It 'Given the role RDS-GATEWAY is missing, Add-RDServer is called' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Add-RDServer -Times 1 -Scope It
-#                 }
-
-#                 It 'Given GateWayMode Custom, Set-RdDeploymentGatewayConfiguration is called with all required parameters' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Set-RdDeploymentGatewayConfiguration -Times 1 -Scope It -ParameterFilter {
-#                         $ConnectionBroker -eq 'testbroker.fqdn' -and
-#                         $GatewayMode -eq 'Custom' -and
-#                         $GatewayExternalFqdn -eq 'testgateway.external.fqdn' -and
-#                         $LogonMethod -eq 'Password' -and
-#                         $UseCachedCredentials -eq $true -and
-#                         $BypassLocal -eq $true -and
-#                         $Force -eq $true
-#                     }
-#                 }
-
-#                 $setSplat.GatewayMode = 'DoNotUse'
-#                 It 'Given GateWayMode DoNotUse, Set-RdDeploymentGatewayConfiguration is called with only ConnectionBroker, Gatewaymode and Force parameters' {
-#                     Set-TargetResource @setSplat
-#                     Assert-MockCalled -CommandName Set-RdDeploymentGatewayConfiguration -Times 1 -Scope It -ParameterFilter {
-#                         $ConnectionBroker -eq 'testbroker.fqdn' -and
-#                         $GatewayMode -eq 'DoNotUse' -and
-#                         $Force -eq $true
-#                     }
-#                 }
-#             }
-#         }
-#         #endregion
-
-#     }
-# }
-# finally
-# {
-#     #region FOOTER
-#     Invoke-TestCleanup
-#     #endregion
-# }
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
+
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'xRemoteDesktopSessionHost'
+    $script:dscResourceName = 'MSFT_xRDGatewayConfiguration'
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\RemoteDesktop.stubs.psm1')
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
+
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload stub module
+    Remove-Module -Name RemoteDesktop.stubs -Force
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
+}
+
+Describe 'MSFT_xRDGatewayConfiguration\Get-TargetResource' -Tag 'Get' {
+    Context 'When the resource exists' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+        }
+
+        Context 'When ''GatewayMode'' is not Custom' {
+            BeforeAll {
+                Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
+                    @{
+                        GatewayMode = [Microsoft.RemoteDesktopServices.Management.GatewayUsage]::Automatic
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'testbroker.lan'
+                    }
+
+                    $result = Get-TargetResource @testParams
+
+                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                    $result.GatewayMode | Should -Be 'Automatic'
+                }
+            }
+        }
+
+        Context 'When ''GatewayMode'' is Custom' {
+            BeforeAll {
+                Mock -CommandName Get-RDDeploymentGatewayConfiguration -MockWith {
+                    @{
+                        GatewayMode          = [Microsoft.RemoteDesktopServices.Management.GatewayUsage]::Custom
+                        GatewayExternalFqdn  = 'gateway.external.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'testbroker.lan'
+                    }
+
+                    $result = Get-TargetResource @testParams
+
+                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                    $result.GatewayMode | Should -Be 'Custom'
+                    $result.GatewayExternalFqdn | Should -Be 'gateway.external.fqdn'
+                    $result.LogonMethod | Should -Be 'Password'
+                    $result.UseCachedCredentials | Should -BeTrue
+                    $result.BypassLocal | Should -BeFalse
+                }
+            }
+        }
+    }
+
+    Context 'When the resource does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDDeploymentGatewayConfiguration
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ConnectionBroker = 'testbroker.lan'
+                }
+
+                $result = Get-TargetResource @testParams
+
+                $result.ConnectionBroker | Should -BeNullOrEmpty
+                $result.GatewayMode | Should -BeNullOrEmpty
+                $result.GatewayExternalFqdn | Should -BeNullOrEmpty
+                $result.LogonMethod | Should -BeNullOrEmpty
+                $result.UseCachedCredentials | Should -BeNullOrEmpty
+                $result.BypassLocal | Should -BeNullOrEmpty
+            }
+        }
+    }
+}
+
+Describe 'MSFT_xRDGatewayConfiguration\Set-TargetResource' -Tag 'Set' {
+    Context 'When ''GatewayMode'' is not Custom' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-BoundParameter -RemoveParameterType @('RequiredBehavior')
+            Mock -CommandName Set-RDDeploymentGatewayConfiguration
+            Mock -CommandName Get-RDServer
+            Mock -CommandName Add-RDServer
+        }
+
+        Context 'When there are no Gateway Servers to check' {
+            Context 'When there are no RDServers to add' {
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            ConnectionBroker = 'testbroker.lan'
+                            GatewayMode      = 'DoNotUse'
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                        $null -eq $GatewayExternalFqdn
+                    }
+                    Should -Invoke -CommandName Get-RDServer -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Add-RDServer -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When there are RDServers to add' {
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            ConnectionBroker = 'testbroker.lan'
+                            GatewayMode      = 'DoNotUse'
+                            GatewayServer    = 'rdgateway.lan'
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                        $null -eq $GatewayExternalFqdn
+                    }
+                    Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+
+        Context 'When there are Gateway Servers to check' {
+            BeforeAll {
+                Mock -CommandName Get-RDServer -MockWith {
+                    @(
+                        [PSCustomObject] @{
+                            Server = 'rdgateway1.lan'
+                            Roles  = 'RDS-Gateway'
+                        }
+                        [PSCustomObject] @{
+                            Server = 'rdlic.lan'
+                            Roles  = 'RDS-Licensing'
+                        }
+                        [PSCustomObject] @{
+                            Server = 'rdweb.lan'
+                            Roles  = 'RDS-Web-Access'
+                        }
+                    )
+                }
+            }
+
+            Context 'When there are no RDServers to add' {
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            ConnectionBroker     = 'testbroker.lan'
+                            GatewayMode          = 'DoNotUse'
+                            GatewayServer        = 'rdgateway1.lan'
+                            ExternalFqdn         = 'some.fqdn'
+                            LogonMethod          = 'Password'
+                            UseCachedCredentials = $true
+                            BypassLocal          = $false
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                        $null -eq $GatewayExternalFqdn
+                    }
+                    Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Add-RDServer -Exactly -Times 0 -Scope It
+                }
+            }
+
+            Context 'When there are RDServers to add' {
+                BeforeAll {
+                    Mock -CommandName Get-RDServer -MockWith {
+                        @(
+                            [PSCustomObject] @{
+                                Server = 'rdgateway2.lan'
+                                Roles  = 'RDS-Gateway'
+                            }
+                            [PSCustomObject] @{
+                                Server = 'rdlic.lan'
+                                Roles  = 'RDS-Licensing'
+                            }
+                            [PSCustomObject] @{
+                                Server = 'rdweb.lan'
+                                Roles  = 'RDS-Web-Access'
+                            }
+                        )
+                    }
+                }
+
+                It 'Should call the correct mocks' {
+                    InModuleScope -ScriptBlock {
+                        Set-StrictMode -Version 1.0
+
+                        $testParams = @{
+                            ConnectionBroker = 'testbroker.lan'
+                            GatewayMode      = 'DoNotUse'
+                            GatewayServer    = 'rdgateway1.lan'
+                        }
+
+                        $null = Set-TargetResource @testParams
+                    }
+
+                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 0 -Scope It
+                    Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                        $null -eq $GatewayExternalFqdn
+                    }
+                    Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+    }
+
+    Context 'When ''GatewayMode'' is Custom' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-BoundParameter -RemoveParameterType @('RequiredBehavior')
+            Mock -CommandName Set-RDDeploymentGatewayConfiguration
+            Mock -CommandName Get-RDServer
+            Mock -CommandName Add-RDServer
+        }
+
+        Context 'When parameters are missing' {
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'testbroker.lan'
+                        GatewayMode      = 'Custom'
+                    }
+
+                    { Set-TargetResource @testParams } | Should -Throw
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Add-RDServer -Exactly -Times 0 -Scope It
+            }
+        }
+
+        Context 'When there are no RDServers to add' {
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker     = 'testbroker.lan'
+                        GatewayMode          = 'Custom'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+
+                    $null = Set-TargetResource @testParams
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                    $null -ne $GatewayExternalFqdn
+                }
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 0 -Scope It
+                Should -Invoke -CommandName Add-RDServer -Exactly -Times 0 -Scope It
+            }
+        }
+
+        Context 'When there are RDServers to add' {
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker     = 'testbroker.lan'
+                        GatewayMode          = 'Custom'
+                        GatewayServer        = 'rdgateway.lan'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+
+                    $null = Set-TargetResource @testParams
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                    $null -ne $GatewayExternalFqdn
+                }
+                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
+            }
+        }
+    }
+}
+
+Describe 'MSFT_xRDLicenseConfiguration\Test-TargetResource' -Tag 'Test' {
+    Context 'When the resource is in the desired state' {
+        Context 'When ''GatewayMode'' is not Custom' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        GatewayMode      = 'Automatic'
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        GatewayMode      = 'Automatic'
+                    }
+
+                    Test-TargetResource @testParams | Should -BeTrue
+                }
+            }
+        }
+
+        Context 'When ''GatewayMode'' is not Custom but unsupported parameters are supplied' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        GatewayMode      = 'Automatic'
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker     = 'connectionbroker.lan'
+                        GatewayMode          = 'Automatic'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+
+                    Test-TargetResource @testParams | Should -BeTrue
+                }
+            }
+        }
+
+        Context 'When ''GatewayMode'' is Custom' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        ConnectionBroker     = 'connectionbroker.lan'
+                        GatewayMode          = 'Custom'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker     = 'connectionbroker.lan'
+                        GatewayMode          = 'Custom'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+
+                    Test-TargetResource @testParams | Should -BeTrue
+                }
+            }
+        }
+    }
+
+    Context 'When the resource is not in the desired state' {
+        Context 'When ''GatewayMode'' is not Custom' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        GatewayMode      = 'Automatic'
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        GatewayMode      = 'DoNotUse'
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
+
+        Context 'When ''GatewayMode'' is not Custom but unsupported parameters are supplied' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        GatewayMode      = 'Automatic'
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker     = 'connectionbroker.lan'
+                        GatewayMode          = 'DoNotUse'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
+
+        Context 'When ''GatewayMode'' is Custom' {
+            BeforeAll {
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        ConnectionBroker     = 'connectionbroker.lan'
+                        GatewayMode          = 'Custom'
+                        ExternalFqdn         = 'some.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $true
+                        BypassLocal          = $false
+                    }
+                }
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker     = 'connectionbroker.lan'
+                        GatewayMode          = 'Custom'
+                        ExternalFqdn         = 'someother.fqdn'
+                        LogonMethod          = 'Password'
+                        UseCachedCredentials = $false
+                        BypassLocal          = $false
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
+    }
+}
