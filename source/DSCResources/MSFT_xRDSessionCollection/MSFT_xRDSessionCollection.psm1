@@ -210,14 +210,15 @@ function Test-TargetResource
 
     Write-Verbose 'Checking for existence of RDSH collection.'
 
-    $desiredState = $PSBoundParameters
-    $currentState = Get-TargetResource @PSBoundParameters
+    $testDscParameterStateSplat = @{
+        CurrentValues       = Get-TargetResource @PSBoundParameters
+        DesiredValues       = $PSBoundParameters
+        TurnOffTypeChecking = $false
+        SortArrayValues     = $true
+        Verbose             = $VerbosePreference
+    }
 
-    return Test-DscParameterState `
-        -CurrentValues $currentState `
-        -DesiredValues $desiredState `
-        -SortArrayValues `
-        -Verbose:$VerbosePreference
+    return Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource

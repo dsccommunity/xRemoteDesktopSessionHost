@@ -286,18 +286,15 @@ function Test-TargetResource
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
-    $getTargetResourceResult = Get-TargetResource @PSBoundParameters
-
     $testDscParameterStateSplat = @{
-        CurrentValues       = $getTargetResourceResult
+        CurrentValues       = Get-TargetResource @PSBoundParameters
         DesiredValues       = $PSBoundParameters
         TurnOffTypeChecking = $false
         SortArrayValues     = $true
-        ExcludeProperties   = [System.Management.Automation.PSCmdlet]::CommonParameters
         Verbose             = $VerbosePreference
     }
 
-    Test-DscParameterState @testDscParameterStateSplat
+    return Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource

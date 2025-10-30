@@ -161,7 +161,7 @@ Describe 'MSFT_xRDRemoteApp\Get-TargetResource' -Tag 'Get' {
                 $result.FolderName | Should -BeNullOrEmpty
                 $result.CommandLineSetting | Should -BeNullOrEmpty
                 $result.RequiredCommandLine | Should -BeNullOrEmpty
-                $result.IconIndex | Should -BeNullOrEmpty
+                $result.IconIndex | Should -Be 0
                 $result.IconPath | Should -BeNullOrEmpty
                 $result.UserGroups | Should -BeNullOrEmpty
                 $result.ShowInWebAccess | Should -BeNullOrEmpty
@@ -439,7 +439,7 @@ Describe 'MSFT_xRDRemoteApp\Test-TargetResource' -Tag 'Test' {
                     ShowInWebAccess     = $true
                 }
 
-                Test-TargetResource @testParams -Verbose | Should -BeTrue
+                Test-TargetResource @testParams | Should -BeTrue
             }
 
             Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
