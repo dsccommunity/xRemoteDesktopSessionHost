@@ -405,7 +405,7 @@ Describe 'MSFT_xRDServer\Set-TargetResource' -Tag 'Set' {
                             GatewayExternalFqdn = 'gateway.external.fqdn'
                         }
 
-                        $null = Set-TargetResource @testParams
+                        { Set-TargetResource @testParams } | Should -Throw
                     }
 
                     Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
