@@ -1,110 +1,221 @@
-# $script:DSCModuleName = 'xRemoteDesktopSessionHost'
-# $script:DSCResourceName = 'MSFT_xRDLicenseConfiguration'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
-# }
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
+BeforeAll {
+    $script:dscModuleName = 'xRemoteDesktopSessionHost'
+    $script:dscResourceName = 'MSFT_xRDLicenseConfiguration'
 
-# Invoke-TestSetup
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $script:DSCResourceName = 'MSFT_xRDLicenseConfiguration'
+    # Load stub cmdlets and classes.
+    Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'Stubs\RemoteDesktop.stubs.psm1')
 
-#         Import-Module RemoteDesktop -Force
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
 
-#         #region Function Get-TargetResource
-#         Describe "$($script:DSCResourceName)\Get-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
-#                 Mock Get-RDLicenseConfiguration -MockWith { return $null }
-#                 It 'Should error if unable to get RD License config.' {
-#                     { Get-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'NotConfigured' } | Should throw
-#                 }
-#             }
-#         }
-#         #endregion
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
 
-#         #region Function Test-TargetResource
-#         Describe "$($script:DSCResourceName)\Test-TargetResource" {
-#             Context 'Parameter Values,Validations and Errors' {
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 
-#                 Mock -CommandName Get-TargetResource -MockWith {
-#                     return @{
-#                         'ConnectionBroker' = 'connectionbroker.lan'
-#                         'LicenseServer'    = @('One', 'Two')
-#                         'LicenseMode'      = 'PerUser'
-#                     }
-#                 } -ModuleName MSFT_xRDLicenseConfiguration
+    # Unload stub module
+    Remove-Module -Name RemoteDesktop.stubs -Force
 
-#                 It "Should return false if there's a change in license servers." {
-#                     Test-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'PerUser' -LicenseServer 'One' | Should Be $false
-#                 }
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
+}
 
-#                 Mock Get-TargetResource -MockWith {
-#                     return @{
-#                         'ConnectionBroker' = 'connectionbroker.lan'
-#                         'LicenseServer'    = @('One', 'Two')
-#                         'LicenseMode'      = 'PerUser'
-#                     }
-#                 }
+Describe 'MSFT_xRDLicenseConfiguration\Get-TargetResource' -Tag 'Get' {
+    Context 'When the resource exists' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDLicenseConfiguration -MockWith {
+                [PSCustomObject] @{
+                    LicenseServer = [System.String[]] @('LicenseServer1', 'LicenseServer2')
+                    Mode          = [Microsoft.RemoteDesktopServices.Management.LicensingMode]::PerUser
+                }
+            }
+        }
 
-#                 It "Should return false if there's a change in license mode." {
-#                     Test-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'PerDevice' -LicenseServer @('One', 'Two') | Should Be $false
-#                 }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 It 'Should return true if there are no changes in license mode.' {
-#                     Test-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode 'PerUser' -LicenseServer @('One', 'Two') | Should Be $true
-#                 }
-#             }
-#         }
-#         #endregion
+                $testParams = @{
+                    ConnectionBroker = 'connectionbroker.lan'
+                    LicenseServer    = @('LicenseServer1', 'LicenseServer2')
+                    LicenseMode      = 'PerUser'
+                }
 
-#         #region Function Set-TargetResource
-#         Describe "$($script:DSCResourceName)\Set-TargetResource" {
+                $result = Get-TargetResource @testParams
 
-#             Context 'Configuration changes performed by Set' {
+                $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                $result.LicenseServer | Should -Be $testParams.LicenseServer
+                $result.LicenseMode | Should -Be $testParams.LicenseMode
+            }
 
-#                 Mock -CommandName Set-RDLicenseConfiguration
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDLicenseConfiguration -Exactly -Times 1 -Scope It
+        }
+    }
 
-#                 It 'Given license servers, Set-RDLicenseConfiguration is called with LicenseServer parameter' {
-#                     Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode PerDevice -LicenseServer 'LicenseServer1'
-#                     Assert-MockCalled -CommandName Set-RDLicenseConfiguration -Times 1 -ParameterFilter {
-#                         $LicenseServer -eq 'LicenseServer1'
-#                     }
-#                 }
+    Context 'When the resource does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-RDLicenseConfiguration
+        }
 
-#                 It 'Given no license servers, Set-RDLicenseConfiguration is called without LicenseServer parameter' {
-#                     Set-TargetResource -ConnectionBroker 'connectionbroker.lan' -LicenseMode PerDevice
-#                     Assert-MockCalled -CommandName Set-RDLicenseConfiguration -Times 1 -ParameterFilter {
-#                         $LicenseServer -eq $null
-#                     } -Scope It
-#                 }
-#             }
-#         }
-#         #endregion
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ConnectionBroker = 'connectionbroker.lan'
+                    LicenseServer    = @('LicenseServer1', 'LicenseServer2')
+                    LicenseMode      = 'PerUser'
+                }
+
+                $result = Get-TargetResource @testParams
+
+                $result.ConnectionBroker | Should -BeNullOrEmpty
+                $result.LicenseServer | Should -BeNullOrEmpty
+                $result.LicenseMode | Should -BeNullOrEmpty
+            }
+        }
+    }
+}
+
+Describe 'MSFT_xRDLicenseConfiguration\Test-TargetResource' -Tag 'Test' {
+    Context 'When the resource is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    ConnectionBroker = 'connectionbroker.lan'
+                    LicenseServer    = [System.String[]] @('LicenseServer1', 'LicenseServer2')
+                    LicenseMode      = 'PerUser'
+                }
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ConnectionBroker = 'connectionbroker.lan'
+                    LicenseServer    = @('LicenseServer1', 'LicenseServer2')
+                    LicenseMode      = 'PerUser'
+                }
+
+                Test-TargetResource @testParams | Should -BeTrue
+            }
+        }
+    }
+
+    Context 'When the resource is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Get-TargetResource -MockWith {
+                @{
+                    ConnectionBroker = 'connectionbroker.lan'
+                    LicenseServer    = [System.String[]] @('LicenseServer1')
+                    LicenseMode      = 'PerDevice'
+                }
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ConnectionBroker = 'connectionbroker.lan'
+                    LicenseServer    = @('LicenseServer1', 'LicenseServer2')
+                    LicenseMode      = 'PerUser'
+                }
+
+                Test-TargetResource @testParams | Should -BeFalse
+            }
+        }
+    }
+}
+
+Describe 'MSFT_xRDLicenseConfiguration\Set-TargetResource' -Tag 'Set' {
+    Context 'When the resource is updated' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Set-RDLicenseConfiguration
+        }
+
+        Context 'When parameter ''LicenseServer'' is specified' {
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        LicenseServer    = @('LicenseServer1', 'LicenseServer2')
+                        LicenseMode      = 'PerUser'
+                    }
+
+                    Set-TargetResource @testParams
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-RDLicenseConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                    $null -ne $LicenseServer
+                }
+            }
+        }
+
+        Context 'When parameter ''LicenseServer'' is not specified' {
+            It 'Should call the correct mocks' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ConnectionBroker = 'connectionbroker.lan'
+                        LicenseMode      = 'PerUser'
+                    }
+
+                    Set-TargetResource @testParams
+                }
+
+                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-RDLicenseConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
+                    $null -eq $LicenseServer
+                }
+            }
+        }
+    }
+}
