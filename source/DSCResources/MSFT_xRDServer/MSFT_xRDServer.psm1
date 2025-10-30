@@ -219,10 +219,10 @@ function Test-TargetResource
         $GatewayExternalFqdn # only for RDS-Gateway
     )
 
-    $target = Get-TargetResource @PSBoundParameters
+    Write-Verbose 'Checking for existence of RDS Server.'
 
     $testDscParameterStateSplat = @{
-        CurrentValues       = $target
+        CurrentValues       = Get-TargetResource @PSBoundParameters
         DesiredValues       = $PSBoundParameters
         TurnOffTypeChecking = $false
         SortArrayValues     = $true
