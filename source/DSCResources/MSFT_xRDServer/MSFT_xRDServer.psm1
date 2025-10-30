@@ -177,7 +177,7 @@ function Set-TargetResource
             Write-Verbose "'Add-RDServer' threw $($rdsErrors.Count) errors."
             foreach ($rdsError in $rdsErrors)
             {
-                Write-Error -ErrorRecord $rdsError
+                New-InvalidOperationException -Message 'Add-RDServer errored' -ErrorRecord $rdsError
             }
             return
         }
