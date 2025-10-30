@@ -33,11 +33,9 @@ function Get-TargetResource
         $LicenseMode
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
-
-
-
     Write-Verbose "Getting RD License server configuration from broker '$ConnectionBroker'..."
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     $config = Get-RDLicenseConfiguration -ConnectionBroker $ConnectionBroker -ea SilentlyContinue
 
@@ -84,9 +82,10 @@ function Set-TargetResource
         $LicenseMode
     )
 
+    Write-Verbose 'Starting RD License server configuration...'
+    
     Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
-    Write-Verbose 'Starting RD License server configuration...'
     Write-Verbose ">> RD Connection Broker:  $($ConnectionBroker.ToLower())"
 
     $setLicenseConfigParams = @{

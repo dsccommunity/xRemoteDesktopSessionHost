@@ -40,9 +40,9 @@ function Get-TargetResource
         $Force
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
-
     Write-Verbose -Message 'Getting information about RDSH collection.'
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     $params = @{
         ConnectionBroker = $ConnectionBroker

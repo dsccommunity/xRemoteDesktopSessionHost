@@ -31,9 +31,9 @@ function Get-TargetResource
         $WebAccessServer
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
-
     Write-Verbose 'Getting list of RD Server roles.'
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     # Start service RDMS is needed because otherwise a reboot loop could happen due to
     # the RDMS Service being on Delay-Start by default, and DSC kicks in too quickly after a reboot.

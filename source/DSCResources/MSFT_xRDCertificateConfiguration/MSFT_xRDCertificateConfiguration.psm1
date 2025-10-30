@@ -39,11 +39,11 @@ function Get-TargetResource
         $Credential
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
-
     Write-Verbose -Message (
         $script:localizedData.VerboseGetCertificate -f $Role, $ConnectionBroker
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     Get-RDCertificate -Role $Role -ConnectionBroker $ConnectionBroker
 }
