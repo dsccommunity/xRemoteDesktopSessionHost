@@ -56,35 +56,6 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-# $testInvalidCollectionName = 'InvalidCollectionNameLongerThan256-12345678910111213141516171819202122232425262728142124124124awffjwifhw28qfhw27[q9aqfj2wai9fua29fua2fna29fja2fj29f2u192u4-[12fj2390fau2-9fu-9fu1-2ur1-2u149u2mfaweifjwifjw19wu-u2394u12-f2u1223fu-1f1239fy193413403mgjefas902311'
-# $testInvalidCollectionSplat = @{
-#     CollectionName = $testInvalidCollectionName
-#     DisplayName    = 'name'
-#     FilePath       = 'path'
-#     Alias          = 'alias'
-# }
-
-# $sourceRemoteAppValues = @{
-# CollectionName      = 'TestCollection'
-# DisplayName         = 'MyCalc (1.0.0)'
-# FilePath            = 'c:\windows\system32\calc.exe'
-# Alias               = 'Test-MyCalc-(1.0.0)'
-# Ensure              = 'Present'
-# FileVirtualPath     = 'c:\windows\system32\calc.exe'
-# FolderName          = 'Test'
-# CommandLineSetting  = 'DoNotAllow'
-# RequiredCommandLine = 'my-cmd'
-# IconIndex           = 0
-# IconPath            = 'c:\windows\system32\calc.exe'
-# UserGroups          = 'DOMAIN\MyAppGroup_DLG'
-# ShowInWebAccess     = $true
-# }
-
-# $xRDRemoteAppSplat = $sourceRemoteAppValues.Clone()
-
-# $getRDRemoteApp = $xRDRemoteAppSplat.Clone()
-# $null = $getRDRemoteApp.Remove('Ensure')
-
 Describe 'MSFT_xRDRemoteApp\Get-TargetResource' -Tag 'Get' {
     Context 'When the resource exists' {
         BeforeAll {
@@ -101,9 +72,9 @@ Describe 'MSFT_xRDRemoteApp\Get-TargetResource' -Tag 'Get' {
                     FolderName          = 'Test'
                     CommandLineSetting  = 'DoNotAllow'
                     RequiredCommandLine = 'my-cmd'
-                    IconIndex           = 0
+                    IconIndex           = [System.UInt32] 0
                     IconPath            = 'c:\windows\system32\calc.exe'
-                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
+                    UserGroups          = [System.String[]] @('DOMAIN\MyAppGroup_DLG')
                     ShowInWebAccess     = $true
                 }
             }
@@ -140,7 +111,7 @@ Describe 'MSFT_xRDRemoteApp\Get-TargetResource' -Tag 'Get' {
                 $result.FolderName | Should -Be $testParams.FolderName
                 $result.CommandLineSetting | Should -Be $testParams.CommandLineSetting
                 $result.RequiredCommandLine | Should -Be $testParams.RequiredCommandLine
-                $result.IconIndex | Should -Be $testParams.IconIndex
+                $result.IconIndex | Should -Be 0
                 $result.IconPath | Should -Be $testParams.IconPath
                 $result.UserGroups | Should -Be $testParams.UserGroups
                 $result.ShowInWebAccess | Should -Be $testParams.ShowInWebAccess
@@ -440,9 +411,9 @@ Describe 'MSFT_xRDRemoteApp\Test-TargetResource' -Tag 'Test' {
                     FolderName          = 'Test'
                     CommandLineSetting  = 'DoNotAllow'
                     RequiredCommandLine = 'my-cmd'
-                    IconIndex           = 0
+                    IconIndex           = [System.UInt32] 0
                     IconPath            = 'c:\windows\system32\calc.exe'
-                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
+                    UserGroups          = [System.String[]] @('DOMAIN\MyAppGroup_DLG')
                     ShowInWebAccess     = $true
                 }
             }
@@ -464,11 +435,11 @@ Describe 'MSFT_xRDRemoteApp\Test-TargetResource' -Tag 'Test' {
                     RequiredCommandLine = 'my-cmd'
                     IconIndex           = 0
                     IconPath            = 'c:\windows\system32\calc.exe'
-                    UserGroups          = 'DOMAIN\MyAppGroup_DLG'
+                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
                     ShowInWebAccess     = $true
                 }
 
-                Test-TargetResource @testParams | Should -BeTrue
+                Test-TargetResource @testParams -Verbose | Should -BeTrue
             }
 
             Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
@@ -492,9 +463,9 @@ Describe 'MSFT_xRDRemoteApp\Test-TargetResource' -Tag 'Test' {
                     FolderName          = 'Test'
                     CommandLineSetting  = 'DoNotAllow'
                     RequiredCommandLine = 'my-cmd'
-                    IconIndex           = 0
+                    IconIndex           = [System.UInt32] 0
                     IconPath            = 'c:\windows\system32\calc.exe'
-                    UserGroups          = @('DOMAIN\MyAppGroup_DLG')
+                    UserGroups          = [System.String[]] @('DOMAIN\MyAppGroup_DLG')
                     ShowInWebAccess     = $true
                 }
             }

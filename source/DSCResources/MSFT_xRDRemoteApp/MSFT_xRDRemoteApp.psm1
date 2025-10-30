@@ -97,9 +97,9 @@ function Get-TargetResource
         FolderName          = $remoteApp.FolderName
         CommandLineSetting  = $remoteApp.CommandLineSetting
         RequiredCommandLine = $remoteApp.RequiredCommandLine
-        IconIndex           = $remoteApp.IconIndex
+        IconIndex           = [System.UInt32] $remoteApp.IconIndex
         IconPath            = $remoteApp.IconPath
-        UserGroups          = $remoteApp.UserGroups
+        UserGroups          = [System.String[]] $remoteApp.UserGroups
         ShowInWebAccess     = $remoteApp.ShowInWebAccess
     }
 
@@ -291,9 +291,10 @@ function Test-TargetResource
     $testDscParameterStateSplat = @{
         CurrentValues       = $getTargetResourceResult
         DesiredValues       = $PSBoundParameters
-        TurnOffTypeChecking = $true
+        TurnOffTypeChecking = $false
         SortArrayValues     = $true
         ExcludeProperties   = [System.Management.Automation.PSCmdlet]::CommonParameters
+        Verbose             = $VerbosePreference
     }
 
     Test-DscParameterState @testDscParameterStateSplat
