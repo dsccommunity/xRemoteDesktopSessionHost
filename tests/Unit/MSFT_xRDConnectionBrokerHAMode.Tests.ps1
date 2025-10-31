@@ -208,7 +208,7 @@ Describe 'MSFT_xRDConnectionBrokerHAMode\Test-TargetResource' -Tag 'Test' {
         }
     }
 
-    Context 'When the resource is in the desired state' {
+    Context 'When the resource is not in the desired state' {
         BeforeAll {
             Mock -CommandName Get-TargetResource -MockWith {
                 @{
