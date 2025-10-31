@@ -11,9 +11,9 @@
         Indicates whether the OS version is supported.
 
     .EXAMPLE
-       Test-xRemoteDesktopSessionHostOsRequirement
+        Test-xRemoteDesktopSessionHostOsRequirement
 
-       Returns $true if the OS is Windows Server 2012 or later, otherwise $false.
+        Returns $true if the OS is Windows Server 2012 or later, otherwise $false.
 #>
 
 function Test-xRemoteDesktopSessionHostOsRequirement
