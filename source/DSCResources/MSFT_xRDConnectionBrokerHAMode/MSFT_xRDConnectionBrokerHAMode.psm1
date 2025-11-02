@@ -11,7 +11,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
-$localhost = [System.Net.Dns]::GetHostEntry(($env:COMPUTERNAME)).HostName
+$localhost = Get-ComputerName -FullyQualifiedDomainName
 
 #######################################################################
 # The Get-TargetResource cmdlet.

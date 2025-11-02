@@ -9,7 +9,7 @@ if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
     throw 'The minimum OS requirement was not met.'
 }
 
-$localhost = [System.Net.Dns]::GetHostEntry(($env:COMPUTERNAME)).HostName
+$localhost = Get-ComputerName -FullyQualifiedDomainName
 
 #######################################################################
 # The Get-TargetResource cmdlet.
