@@ -83,7 +83,7 @@ function Set-TargetResource
     )
 
     Write-Verbose 'Starting RD License server configuration...'
-    
+
     Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     Write-Verbose ">> RD Connection Broker:  $($ConnectionBroker.ToLower())"

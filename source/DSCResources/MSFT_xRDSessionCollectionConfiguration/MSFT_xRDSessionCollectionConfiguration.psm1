@@ -291,7 +291,7 @@ function Set-TargetResource
         [System.String[]]
         $ExcludeFilePath
     )
-    
+
     Write-Verbose 'Setting DSC collection properties'
 
     Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
