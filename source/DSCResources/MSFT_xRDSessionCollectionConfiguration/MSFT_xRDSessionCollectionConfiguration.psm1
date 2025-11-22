@@ -1,17 +1,13 @@
-$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
-$rdCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'xRemoteDesktopSessionHostCommon.psm1'
-Import-Module -Name $rdCommonModulePath
-
-$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
-Import-Module -Name $dscResourceCommonModulePath
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module RemoteDesktop
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -24,58 +20,112 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter()]
-        [uint32] $ActiveSessionLimitMin,
+        [System.UInt32]
+        $ActiveSessionLimitMin,
+
         [Parameter()]
-        [boolean] $AuthenticateUsingNLA,
+        [System.Boolean]
+        $AuthenticateUsingNLA,
+
         [Parameter()]
-        [boolean] $AutomaticReconnectionEnabled,
+        [System.Boolean]
+        $AutomaticReconnectionEnabled,
+
         [Parameter()]
-        [string] $BrokenConnectionAction,
+        [System.String]
+        $BrokenConnectionAction,
+
         [Parameter()]
-        [string] $ClientDeviceRedirectionOptions,
+        [System.String]
+        $ClientDeviceRedirectionOptions,
+
         [Parameter()]
-        [boolean] $ClientPrinterAsDefault,
+        [System.Boolean]
+        $ClientPrinterAsDefault,
+
         [Parameter()]
-        [boolean] $ClientPrinterRedirected,
+        [System.Boolean]
+        $ClientPrinterRedirected,
+
         [Parameter()]
-        [string] $CollectionDescription,
+        [System.String]
+        $CollectionDescription,
+
         [Parameter()]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter()]
-        [string] $CustomRdpProperty,
+        [System.String]
+        $CustomRdpProperty,
+
         [Parameter()]
-        [uint32] $DisconnectedSessionLimitMin,
+        [System.UInt32]
+        $DisconnectedSessionLimitMin,
+
         [Parameter()]
-        [string] $EncryptionLevel,
+        [System.String]
+        $EncryptionLevel,
+
         [Parameter()]
-        [uint32] $IdleSessionLimitMin,
+        [System.UInt32]
+        $IdleSessionLimitMin,
+
         [Parameter()]
-        [uint32] $MaxRedirectedMonitors,
+        [System.UInt32]
+        $MaxRedirectedMonitors,
+
         [Parameter()]
-        [boolean] $RDEasyPrintDriverEnabled,
+        [System.Boolean]
+        $RDEasyPrintDriverEnabled,
+
         [Parameter()]
-        [string] $SecurityLayer,
+        [System.String]
+        $SecurityLayer,
+
         [Parameter()]
-        [boolean] $TemporaryFoldersDeletedOnExit,
+        [System.Boolean]
+        $TemporaryFoldersDeletedOnExit,
+
         [Parameter()]
-        [string[]] $UserGroup,
+        [System.String[]]
+        $UserGroup,
+
         [Parameter()]
-        [string] $DiskPath,
+        [System.String]
+        $DiskPath,
+
         [Parameter()]
-        [bool] $EnableUserProfileDisk,
+        [System.Boolean]
+        $EnableUserProfileDisk,
+
         [Parameter()]
-        [uint32] $MaxUserProfileDiskSizeGB,
+        [System.UInt32]
+        $MaxUserProfileDiskSizeGB,
+
         [Parameter()]
-        [string[]] $IncludeFolderPath,
+        [System.String[]]
+        $IncludeFolderPath,
+
         [Parameter()]
-        [string[]] $ExcludeFolderPath,
+        [System.String[]]
+        $ExcludeFolderPath,
+
         [Parameter()]
-        [string[]] $IncludeFilePath,
+        [System.String[]]
+        $IncludeFilePath,
+
         [Parameter()]
-        [string[]] $ExcludeFilePath
+        [System.String[]]
+        $ExcludeFilePath
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
     Write-Verbose "Getting currently configured RDSH Collection properties for collection $CollectionName"
 
     $collectionGeneral = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName
@@ -86,23 +136,27 @@ function Get-TargetResource
 
     $result = @{
         CollectionName                 = $collectionGeneral.CollectionName
-        ActiveSessionLimitMin          = $collectionConnection.ActiveSessionLimitMin
-        AuthenticateUsingNLA           = $collectionSecurity.AuthenticateUsingNLA
-        AutomaticReconnectionEnabled   = $collectionConnection.AutomaticReconnectionEnabled
-        BrokenConnectionAction         = $collectionConnection.BrokenConnectionAction
+        CollectionDescription          = $collectionGeneral.CollectionDescription
+        # For whatever reason this value gets returned with a trailing carriage return
+        CustomRdpProperty              = ([System.String]$collectionGeneral.CustomRdpProperty).Trim()
+
         ClientDeviceRedirectionOptions = $collectionClient.ClientDeviceRedirectionOptions
         ClientPrinterAsDefault         = $collectionClient.ClientPrinterAsDefault
         ClientPrinterRedirected        = $collectionClient.ClientPrinterRedirected
-        CollectionDescription          = $collectionGeneral.CollectionDescription
-        # For whatever reason this value gets returned with a trailing carriage return
-        CustomRdpProperty              = ([string]$collectionGeneral.CustomRdpProperty).Trim()
-        DisconnectedSessionLimitMin    = $collectionConnection.DisconnectedSessionLimitMin
-        EncryptionLevel                = $collectionSecurity.EncryptionLevel
-        IdleSessionLimitMin            = $collectionConnection.IdleSessionLimitMin
         MaxRedirectedMonitors          = $collectionClient.MaxRedirectedMonitors
         RDEasyPrintDriverEnabled       = $collectionClient.RDEasyPrintDriverEnabled
-        SecurityLayer                  = $collectionSecurity.SecurityLayer
+
+        ActiveSessionLimitMin          = $collectionConnection.ActiveSessionLimitMin
+        AutomaticReconnectionEnabled   = $collectionConnection.AutomaticReconnectionEnabled
+        BrokenConnectionAction         = $collectionConnection.BrokenConnectionAction
+        DisconnectedSessionLimitMin    = $collectionConnection.DisconnectedSessionLimitMin
+        IdleSessionLimitMin            = $collectionConnection.IdleSessionLimitMin
         TemporaryFoldersDeletedOnExit  = $collectionConnection.TemporaryFoldersDeletedOnExit
+
+        AuthenticateUsingNLA           = $collectionSecurity.AuthenticateUsingNLA
+        EncryptionLevel                = $collectionSecurity.EncryptionLevel
+        SecurityLayer                  = $collectionSecurity.SecurityLayer
+
         UserGroup                      = $collectionUserGroup.UserGroup
     }
 
@@ -134,59 +188,113 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter()]
-        [uint32] $ActiveSessionLimitMin,
+        [System.UInt32]
+        $ActiveSessionLimitMin,
+
         [Parameter()]
-        [boolean] $AuthenticateUsingNLA,
+        [System.Boolean]
+        $AuthenticateUsingNLA,
+
         [Parameter()]
-        [boolean] $AutomaticReconnectionEnabled,
+        [System.Boolean]
+        $AutomaticReconnectionEnabled,
+
         [Parameter()]
-        [string] $BrokenConnectionAction,
+        [System.String]
+        $BrokenConnectionAction,
+
         [Parameter()]
-        [string] $ClientDeviceRedirectionOptions,
+        [System.String]
+        $ClientDeviceRedirectionOptions,
+
         [Parameter()]
-        [boolean] $ClientPrinterAsDefault,
+        [System.Boolean]
+        $ClientPrinterAsDefault,
+
         [Parameter()]
-        [boolean] $ClientPrinterRedirected,
+        [System.Boolean]
+        $ClientPrinterRedirected,
+
         [Parameter()]
-        [string] $CollectionDescription,
+        [System.String]
+        $CollectionDescription,
+
         [Parameter()]
-        [string] $ConnectionBroker,
+        [System.String]
+        $ConnectionBroker,
+
         [Parameter()]
-        [string] $CustomRdpProperty,
+        [System.String]
+        $CustomRdpProperty,
+
         [Parameter()]
-        [uint32] $DisconnectedSessionLimitMin,
+        [System.UInt32]
+        $DisconnectedSessionLimitMin,
+
         [Parameter()]
-        [string] $EncryptionLevel,
+        [System.String]
+        $EncryptionLevel,
+
         [Parameter()]
-        [uint32] $IdleSessionLimitMin,
+        [System.UInt32]
+        $IdleSessionLimitMin,
+
         [Parameter()]
-        [uint32] $MaxRedirectedMonitors,
+        [System.UInt32]
+        $MaxRedirectedMonitors,
+
         [Parameter()]
-        [boolean] $RDEasyPrintDriverEnabled,
+        [System.Boolean]
+        $RDEasyPrintDriverEnabled,
+
         [Parameter()]
-        [string] $SecurityLayer,
+        [System.String]
+        $SecurityLayer,
+
         [Parameter()]
-        [boolean] $TemporaryFoldersDeletedOnExit,
+        [System.Boolean]
+        $TemporaryFoldersDeletedOnExit,
+
         [Parameter()]
-        [string[]] $UserGroup,
+        [System.String[]]
+        $UserGroup,
+
         [Parameter()]
-        [string] $DiskPath,
+        [System.String]
+        $DiskPath,
+
         [Parameter()]
-        [bool] $EnableUserProfileDisk,
+        [System.Boolean]
+        $EnableUserProfileDisk,
+
         [Parameter()]
-        [uint32] $MaxUserProfileDiskSizeGB,
+        [System.UInt32]
+        $MaxUserProfileDiskSizeGB,
+
         [Parameter()]
-        [string[]] $IncludeFolderPath,
+        [System.String[]]
+        $IncludeFolderPath,
+
         [Parameter()]
-        [string[]] $ExcludeFolderPath,
+        [System.String[]]
+        $ExcludeFolderPath,
+
         [Parameter()]
-        [string[]] $IncludeFilePath,
+        [System.String[]]
+        $IncludeFilePath,
+
         [Parameter()]
-        [string[]] $ExcludeFilePath
+        [System.String[]]
+        $ExcludeFilePath
     )
+
     Write-Verbose 'Setting DSC collection properties'
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     try
     {
@@ -219,10 +327,9 @@ function Set-TargetResource
 
             if ($DiskPath)
             {
-                $validateDiskPath = Test-Path -Path $DiskPath -ErrorAction SilentlyContinue
-                if (-not($validateDiskPath))
+                if (-not(Test-Path -Path $DiskPath -ErrorAction SilentlyContinue))
                 {
-                    throw "To enable UserProfileDisk we need a valid DiskPath. Path $DiskPath not found"
+                    New-ArgumentException -ArgumentName 'DiskPath' -Message ('To enable UserProfileDisk we need a valid DiskPath. Path {0} not found' -f $DiskPath)
                 }
                 else
                 {
@@ -231,7 +338,7 @@ function Set-TargetResource
             }
             else
             {
-                throw 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
+                New-ArgumentException -ArgumentName 'DiskPath' -Message 'No value found for parameter DiskPath. This is a mandatory parameter if EnableUserProfileDisk is set to True'
             }
 
             if ($MaxUserProfileDiskSizeGB -gt 0)
@@ -240,7 +347,9 @@ function Set-TargetResource
             }
             else
             {
-                throw "To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value $MaxUserProfileDiskSizeGB is not valid"
+                New-ArgumentException -ArgumentName 'MaxUserProfileDiskSizeGB' -Message (
+                    'To enable UserProfileDisk we need a setting for MaxUserProfileDiskSizeGB that is greater than 0. Current value {0} is not valid' -f $MaxUserProfileDiskSizeGB
+                )
             }
 
             $enableUserProfileDiskSplat = @{
@@ -297,60 +406,109 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
-        [Parameter()]
-        [uint32] $ActiveSessionLimitMin,
-        [Parameter()]
-        [boolean] $AuthenticateUsingNLA,
-        [Parameter()]
-        [boolean] $AutomaticReconnectionEnabled,
-        [Parameter()]
-        [string] $BrokenConnectionAction,
-        [Parameter()]
-        [string] $ClientDeviceRedirectionOptions,
-        [Parameter()]
-        [boolean] $ClientPrinterAsDefault,
-        [Parameter()]
-        [boolean] $ClientPrinterRedirected,
-        [Parameter()]
-        [string] $CollectionDescription,
-        [Parameter()]
-        [string] $ConnectionBroker,
-        [Parameter()]
-        [string] $CustomRdpProperty,
-        [Parameter()]
-        [uint32] $DisconnectedSessionLimitMin,
-        [Parameter()]
-        [string] $EncryptionLevel,
-        [Parameter()]
-        [uint32] $IdleSessionLimitMin,
-        [Parameter()]
-        [uint32] $MaxRedirectedMonitors,
-        [Parameter()]
-        [boolean] $RDEasyPrintDriverEnabled,
-        [Parameter()]
-        [string] $SecurityLayer,
-        [Parameter()]
-        [boolean] $TemporaryFoldersDeletedOnExit,
-        [Parameter()]
-        [string[]] $UserGroup,
-        [Parameter()]
-        [string] $DiskPath,
-        [Parameter()]
-        [bool] $EnableUserProfileDisk,
-        [Parameter()]
-        [uint32] $MaxUserProfileDiskSizeGB,
-        [Parameter()]
-        [string[]] $IncludeFolderPath,
-        [Parameter()]
-        [string[]] $ExcludeFolderPath,
-        [Parameter()]
-        [string[]] $IncludeFilePath,
-        [Parameter()]
-        [string[]] $ExcludeFilePath
-    )
+        [System.String]
+        $CollectionName,
 
-    $verbose = $PSBoundParameters.Verbose -eq $true
+        [Parameter()]
+        [System.UInt32]
+        $ActiveSessionLimitMin,
+
+        [Parameter()]
+        [System.Boolean]
+        $AuthenticateUsingNLA,
+
+        [Parameter()]
+        [System.Boolean]
+        $AutomaticReconnectionEnabled,
+
+        [Parameter()]
+        [System.String]
+        $BrokenConnectionAction,
+
+        [Parameter()]
+        [System.String]
+        $ClientDeviceRedirectionOptions,
+
+        [Parameter()]
+        [System.Boolean]
+        $ClientPrinterAsDefault,
+
+        [Parameter()]
+        [System.Boolean]
+        $ClientPrinterRedirected,
+
+        [Parameter()]
+        [System.String]
+        $CollectionDescription,
+
+        [Parameter()]
+        [System.String]
+        $ConnectionBroker,
+
+        [Parameter()]
+        [System.String]
+        $CustomRdpProperty,
+
+        [Parameter()]
+        [System.UInt32]
+        $DisconnectedSessionLimitMin,
+
+        [Parameter()]
+        [System.String]
+        $EncryptionLevel,
+
+        [Parameter()]
+        [System.UInt32]
+        $IdleSessionLimitMin,
+
+        [Parameter()]
+        [System.UInt32]
+        $MaxRedirectedMonitors,
+
+        [Parameter()]
+        [System.Boolean]
+        $RDEasyPrintDriverEnabled,
+
+        [Parameter()]
+        [System.String]
+        $SecurityLayer,
+
+        [Parameter()]
+        [System.Boolean]
+        $TemporaryFoldersDeletedOnExit,
+
+        [Parameter()]
+        [System.String[]]
+        $UserGroup,
+
+        [Parameter()]
+        [System.String]
+        $DiskPath,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableUserProfileDisk,
+
+        [Parameter()]
+        [System.UInt32]
+        $MaxUserProfileDiskSizeGB,
+
+        [Parameter()]
+        [System.String[]]
+        $IncludeFolderPath,
+
+        [Parameter()]
+        [System.String[]]
+        $ExcludeFolderPath,
+
+        [Parameter()]
+        [System.String[]]
+        $IncludeFilePath,
+
+        [Parameter()]
+        [System.String[]]
+        $ExcludeFilePath
+    )
 
     Write-Verbose 'Testing DSC collection properties'
 
@@ -363,8 +521,8 @@ function Test-TargetResource
         Write-Verbose 'Running on W2012R2 or lower, removing properties that are not compatible'
 
         $null = $PSBoundParameters.Remove('CollectionName')
-        $null = $PSBoundParameters.Remove('DiskPath')
         $null = $PSBoundParameters.Remove('EnableUserProfileDisk')
+        $null = $PSBoundParameters.Remove('DiskPath')
         $null = $PSBoundParameters.Remove('ExcludeFilePath')
         $null = $PSBoundParameters.Remove('ExcludeFolderPath')
         $null = $PSBoundParameters.Remove('IncludeFilePath')
@@ -389,7 +547,7 @@ function Test-TargetResource
         DesiredValues       = $PSBoundParameters
         TurnOffTypeChecking = $true
         SortArrayValues     = $true
-        Verbose             = $verbose
+        Verbose             = $VerbosePreference
     }
 
     Test-DscParameterState @testDscParameterStateSplat

@@ -1,9 +1,14 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module RemoteDesktop -Global
+
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 #######################################################################
@@ -38,6 +43,8 @@ function Get-TargetResource
         $script:localizedData.VerboseGetCertificate -f $Role, $ConnectionBroker
     )
 
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
     Get-RDCertificate -Role $Role -ConnectionBroker $ConnectionBroker
 }
 
@@ -69,6 +76,8 @@ function Set-TargetResource
         [System.Management.Automation.Credential()]
         $Credential
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     $rdCertificateSplat = @{
         Role             = $Role

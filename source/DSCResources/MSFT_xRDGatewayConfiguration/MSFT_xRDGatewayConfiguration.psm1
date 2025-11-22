@@ -1,74 +1,12 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
-}
-Import-Module RemoteDesktop
-
-function ValidateCustomModeParameters
-{
-    param
-    (
-        [Parameter()]
-        [ValidateSet('DoNotUse', 'Custom', 'Automatic')]
-        [string]
-        $mode,
-
-        [Parameter()]
-        [string]
-        $ExternalFqdn,
-
-        [Parameter()]
-        [string]
-        $LogonMethod,
-
-        [Parameter()]
-        [bool]
-        $UseCachedCredentials,
-
-        [Parameter()]
-        [bool]
-        $BypassLocal
-    )
-
-    Write-Verbose 'validating parameters...'
-
-    $customModeParams = @{
-        ExternalFqdn         = $ExternalFqdn
-        LogonMethod          = $LogonMethod
-        UseCachedCredentials = $UseCachedCredentials
-        BypassLocal          = $BypassLocal
-    }
-
-    if ($mode -eq 'Custom')
-    {
-        # ensure all 4 parameters were passed in, otherwise Set-RdDeploymentGatewayConfiguration will fail
-
-        $nulls = $customModeParams.GetEnumerator() | Where-Object { $null -eq $_.Value }
-
-        if ($nulls.Count -gt 0)
-        {
-            $nulls | ForEach-Object { Write-Verbose ">> '$($_.Key)' parameter is empty" }
-
-            Write-Warning "[PARAMETER VALIDATION FAILURE] i'm gonna throw, right now..."
-
-            throw ("Requested gateway mode is 'Custom', you must pass in the following parameters: $($nulls.Key -join ', ').")
-        }
-    }
-    else
-    {
-        # give warning about incorrect usage of the resource (do not fail)
-
-        $parametersWithValues = $customModeParams.GetEnumerator() | Where-Object { $_.Value }
-
-        if ($parametersWithValues.Count -gt 0)
-        {
-            $parametersWithValues | ForEach-Object { Write-Verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
-
-            Write-Warning ("[WARNING]: Requested gateway mode is '$mode', the following parameters can only be used with Gateway mode 'Custom': " +
-                "$($parametersWithValues.Key -join ', '). These parameters will be ignored in the call to Set-RdDeploymentGatewayConfiguration to avoid error!")
-        }
-    }
 }
 
 #######################################################################
@@ -82,40 +20,42 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ConnectionBroker,
 
         [Parameter()]
-        [string]
+        [System.String]
         $GatewayServer,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ExternalFqdn,
 
         [Parameter()]
         [ValidateSet('DoNotUse', 'Custom', 'Automatic')]
-        [string]
+        [System.String]
         $GatewayMode,
 
         [Parameter()]
         [ValidateSet('Password', 'Smartcard', 'AllowUserToSelectDuringConnection')]
-        [string]
+        [System.String]
         $LogonMethod,
 
         [Parameter()]
-        [bool]
+        [System.Boolean]
         $UseCachedCredentials,
 
         [Parameter()]
-        [bool]
+        [System.Boolean]
         $BypassLocal
     )
 
-    $result = $null
-
     Write-Verbose "Getting RD Gateway configuration from broker '$ConnectionBroker'..."
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
+    $result = $null
 
     $config = Get-RDDeploymentGatewayConfiguration -ConnectionBroker $ConnectionBroker -ea SilentlyContinue
 
@@ -125,16 +65,13 @@ function Get-TargetResource
 
         Write-Verbose ">> RD Gateway mode:       $($config.GatewayMode)"
 
-        $result =
-        @{
+        $result = @{
             ConnectionBroker = $ConnectionBroker
-            GatewayMode      = $config.Gatewaymode.ToString()   # Microsoft.RemoteDesktopServices.Management.GatewayUsage  .ToString()
+            GatewayMode      = $config.GatewayMode.ToString()   # Microsoft.RemoteDesktopServices.Management.GatewayUsage  .ToString()
         }
 
         if ($config.GatewayMode -eq 'Custom')
         {
-            # assert-expression ($config -is [Microsoft.RemoteDesktopServices.Management.CustomGatewaySettings])
-
             $result.GatewayExternalFqdn = $config.GatewayExternalFqdn
             $result.LogonMethod = $config.LogonMethod
             $result.UseCachedCredentials = $config.UseCachedCredentials
@@ -164,40 +101,60 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ConnectionBroker,
 
         [Parameter()]
-        [string]
+        [System.String]
         $GatewayServer,
 
         [Parameter()]
         [ValidateSet('DoNotUse', 'Custom', 'Automatic')]
-        [string]
+        [System.String]
         $GatewayMode,
 
         [Parameter()]
-        [string]
+        [System.String]
         $ExternalFqdn,
 
         [Parameter()]
         [ValidateSet('Password', 'Smartcard', 'AllowUserToSelectDuringConnection')]
-        [string]
+        [System.String]
         $LogonMethod,
 
         [Parameter()]
-        [bool]
+        [System.Boolean]
         $UseCachedCredentials,
 
         [Parameter()]
-        [bool]
+        [System.Boolean]
         $BypassLocal
     )
 
     Write-Verbose "Starting RD Gateway configuration for the RD deployment at broker '$ConnectionBroker'..."
 
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
+    $customModeParams = @(
+        'ExternalFqdn',
+        'LogonMethod',
+        'UseCachedCredentials',
+        'BypassLocal'
+    )
+
     # validate parameters
-    ValidateCustomModeParameters $GatewayMode $ExternalFqdn $LogonMethod $UseCachedCredentials $BypassLocal
+    if ($GatewayMode -eq 'Custom')
+    {
+        Assert-BoundParameter -BoundParameterList $PSBoundParameters -RequiredParameter $customModeParams
+    }
+    elseif ($PSBoundParameters.Keys.Where({ $_ -in $customModeParams }))
+    {
+        Write-Warning ('[WARNING]: Requested gateway mode is ''{0}'', the following parameters can only be used with Gateway mode ''Custom'': ''{1}''. These parameters will be ignored in the call to Set-RdDeploymentGatewayConfiguration to avoid error!' -f @(
+                $GatewayMode,
+                ($customModeParams -join ', ')
+            )
+        )
+    }
 
     if ($GatewayServer)
     {
@@ -234,16 +191,21 @@ function Set-TargetResource
         {
             Write-Verbose "Adding RD Gateway server '$GatewayServer' to the deployment..."
 
-            Add-RDServer -server $GatewayServer -role RDS-Gateway -gatewayexternalfqdn $ExternalFqdn -connectionbroker $connectionBroker
+            Add-RDServer -Server $GatewayServer -Role RDS-Gateway -GatewayExternalFqdn $ExternalFqdn -ConnectionBroker $connectionBroker
 
             Write-Verbose 'Add-RDServer done.'
         }
     }
 
-
-    Write-Verbose 'Calling Set-RdDeploymentGatewayConfiguration cmdlet...'
+    Write-Verbose 'Calling Set-RDDeploymentGatewayConfiguration cmdlet...'
 
     Write-Verbose ">> requested GatewayMode:  $GatewayMode"
+
+    $setRdDeploymentGatewayConfigurationParams = @{
+        ConnectionBroker = $ConnectionBroker
+        GatewayMode      = $GatewayMode
+        Force            = $true
+    }
 
     if ($GatewayMode -eq 'Custom')
     {
@@ -252,24 +214,16 @@ function Set-TargetResource
         Write-Verbose ">> UseCachedCredentials:  $UseCachedCredentials"
         Write-Verbose ">> BypassLocal:           $BypassLocal"
 
-        $setRdDeploymentGatewayConfigurationParams = @{
-            ConnectionBroker     = $ConnectionBroker
-            GatewayMode          = $GatewayMode
-            GatewayExternalFqdn  = $ExternalFqdn
-            LogonMethod          = $LogonMethod
-            UseCachedCredentials = $UseCachedCredentials
-            BypassLocal          = $BypassLocal
-            Force                = $true
-            ErrorAction          = 'Stop'
-        }
-        Set-RDDeploymentGatewayConfiguration @setRdDeploymentGatewayConfigurationParams
-    }
-    else # 'DoNotUse' or 'Automatic'
-    {
-        Set-RdDeploymentGatewayConfiguration -ConnectionBroker $ConnectionBroker -GatewayMode $GatewayMode -force
+        $setRdDeploymentGatewayConfigurationParams.GatewayExternalFqdn = $ExternalFqdn
+        $setRdDeploymentGatewayConfigurationParams.LogonMethod = $LogonMethod
+        $setRdDeploymentGatewayConfigurationParams.UseCachedCredentials = $UseCachedCredentials
+        $setRdDeploymentGatewayConfigurationParams.BypassLocal = $BypassLocal
+        $setRdDeploymentGatewayConfigurationParams.ErrorAction = 'Stop'
     }
 
-    Write-Verbose 'Set-RdDeploymentGatewayConfiguration done.'
+    Set-RDDeploymentGatewayConfiguration @setRdDeploymentGatewayConfigurationParams
+
+    Write-Verbose 'Set-RDDeploymentGatewayConfiguration done.'
 }
 
 #######################################################################
@@ -283,63 +237,61 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ConnectionBroker,
 
         [Parameter()]
-        [string]
+        [System.String]
         $GatewayServer,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ExternalFqdn,
 
         [Parameter()]
         [ValidateSet('DoNotUse', 'Custom', 'Automatic')]
-        [string]
+        [System.String]
         $GatewayMode,
 
         [Parameter()]
         [ValidateSet('Password', 'Smartcard', 'AllowUserToSelectDuringConnection')]
-        [string]
+        [System.String]
         $LogonMethod,
 
         [Parameter()]
-        [bool]
+        [System.Boolean]
         $UseCachedCredentials,
 
         [Parameter()]
-        [bool]
+        [System.Boolean]
         $BypassLocal
     )
 
-    $config = Get-TargetResource @PSBoundParameters
+    Write-Verbose 'Testing RD Gateway usage name'
 
-    if ($config)
-    {
-        Write-Verbose 'Verifying RD Gateway usage name...'
+    $excludeProperties = @()
 
-        if ($config.GatewayMode -eq 'Custom' -and $config.GatewayMode -ieq $GatewayMode)
-        {
-            $result = $config.BypassLocal -eq $BypassLocal -and
-            $config.UseCachedCredentials -eq $UseCachedCredentials -and
-            $config.LogonMethod -eq $LogonMethod -and
-            $config.GatewayExternalFqdn -eq $ExternalFqdn
-        }
-        else
-        {
-            $result = ($config.GatewayMode -ieq $GatewayMode)
-        }
-    }
-    else
+    if ($GatewayMode -ne 'Custom')
     {
-        Write-Verbose 'Failed to retrieve RD Gateway configuration.'
-        $result = $false
+        $excludeProperties = @(
+            'ExternalFqdn',
+            'LogonMethod',
+            'UseCachedCredentials',
+            'BypassLocal'
+        )
     }
 
-    Write-Verbose "Test-TargetResource returning:  $result"
-    return $result
+    $testDscParameterStateSplat = @{
+        CurrentValues       = Get-TargetResource @PSBoundParameters
+        DesiredValues       = $PSBoundParameters
+        TurnOffTypeChecking = $false
+        SortArrayValues     = $true
+        ExcludeProperties   = $excludeProperties
+        Verbose             = $VerbosePreference
+    }
+
+    return Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource

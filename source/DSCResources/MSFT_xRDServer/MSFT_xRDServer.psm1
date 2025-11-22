@@ -1,61 +1,15 @@
-Import-Module -Name "$PSScriptRoot\..\..\Modules\xRemoteDesktopSessionHostCommon.psm1"
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module RemoteDesktop
-$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
 
-function ValidateCustomModeParameters
-{
-    param
-    (
-        [Parameter()]
-        [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
-        [string]
-        $Role,
-
-        [Parameter()]
-        [string]
-        $GatewayExternalFqdn
-    )
-
-    Write-Verbose 'validating parameters...'
-
-    $customParams = @{
-        GatewayExternalFqdn = $GatewayExternalFqdn
-    }
-
-    if ($Role -eq 'RDS-Gateway')
-    {
-        # ensure GatewayExternalFqdn was passed in, otherwise 'Add-RDServer' will fail
-        $emptyBoundParameters = $null
-        $emptyBoundParameters = $customParams.GetEnumerator() | Where-Object { $_.Value -eq [string]::Empty }
-
-        if ($emptyBoundParameters)
-        {
-            $emptyBoundParameters | ForEach-Object { Write-Verbose ">> '$($_.Key)' parameter is empty" }
-
-            Write-Warning "[PARAMETER VALIDATION FAILURE] I'm gonna throw, right now..."
-
-            throw ("Requested server role 'RDS-Gateway', you must pass in the 'GatewayExternalFqdn' parameter.")
-        }
-    }
-    else
-    {
-        # give warning about incorrect usage of the resource (do not fail)
-
-        $parametersWithValues = $customParams.getenumerator() | Where-Object { $_.value }
-
-        if ($parametersWithValues.count -gt 0)
-        {
-            $parametersWithValues | ForEach-Object { Write-Verbose ">> '$($_.Key)' was specified, the value is: '$($_.Value)'" }
-
-            Write-Warning ("[WARNING]: Requested server role is '$Role', the following parameter can only be used with server role 'RDS-Gateway': " +
-                "$($parametersWithValues.Key -join ', '). The parameter will be ignored in the call to Add-RDServer to avoid error!")
-        }
-    }
-}
+$localhost = Get-ComputerName -FullyQualifiedDomainName
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -68,25 +22,32 @@ function Get-TargetResource
     (
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ConnectionBroker,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $Server,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
-        [string]
+        [System.String]
         $Role,
 
         [Parameter()]
-        [string]
+        [System.String]
         $GatewayExternalFqdn # only for RDS-Gateway
     )
 
-    $result = $null
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
+    $result = @{
+        ConnectionBroker    = $null
+        Server              = $null
+        Role                = $null
+        GatewayExternalFqdn = $null
+    }
 
     if (-not $ConnectionBroker)
     {
@@ -136,7 +97,7 @@ function Get-TargetResource
         # or, possibly, Remote Desktop Deployment doesn't exist/Remote Desktop Management Service not running
     }
 
-    $result
+    return $result
 }
 
 ########################################################################
@@ -149,23 +110,34 @@ function Set-TargetResource
     (
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ConnectionBroker,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $Server,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
-        [string]
+        [System.String]
         $Role,
 
         [Parameter()]
-        [string]
+        [System.String]
         $GatewayExternalFqdn # only for RDS-Gateway
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+
+    if ($Role -eq 'RDS-Gateway')
+    {
+        Assert-BoundParameter -BoundParameterList $PSBoundParameters -RequiredParameter @('GatewayExternalFqdn')
+    }
+    elseif ($PSBoundParameters.ContainsKey('GatewayExternalFqdn'))
+    {
+        Write-Warning ('[WARNING]: Requested server role is ''{0}'', the following parameter can only be used with server role ''RDS-Gateway'': ''GatewayExternalFqdn''. The parameter will be ignored in the call to Add-RDServer to avoid error!' -f $Role)
+    }
 
     if (-not $ConnectionBroker)
     {
@@ -173,9 +145,6 @@ function Set-TargetResource
     }
 
     Write-Verbose "Adding server '$($Server.ToLower())' as $Role to the deployment on '$($ConnectionBroker.ToLower())'..."
-
-    # validate parameters
-    ValidateCustomModeParameters -Role $Role -GatewayExternalFqdn $GatewayExternalFqdn
 
     if ($Role -eq 'RDS-Gateway')
     {
@@ -208,7 +177,7 @@ function Set-TargetResource
             Write-Verbose "'Add-RDServer' threw $($rdsErrors.Count) errors."
             foreach ($rdsError in $rdsErrors)
             {
-                Write-Error -ErrorRecord $rdsError
+                New-InvalidOperationException -Message 'Add-RDServer errored' -ErrorRecord $rdsError
             }
             return
         }
@@ -217,6 +186,7 @@ function Set-TargetResource
     {
         Add-RDServer @PSBoundParameters
     }
+
     Write-Verbose 'Add-RDServer done.'
 }
 
@@ -231,30 +201,35 @@ function Test-TargetResource
     (
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $ConnectionBroker,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [System.String]
         $Server,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('RDS-Connection-Broker', 'RDS-Virtualization', 'RDS-RD-Server', 'RDS-Web-Access', 'RDS-Gateway', 'RDS-Licensing')]
-        [string]
+        [System.String]
         $Role,
 
         [Parameter()]
-        [string]
+        [System.String]
         $GatewayExternalFqdn # only for RDS-Gateway
     )
 
-    $target = Get-TargetResource @PSBoundParameters
+    Write-Verbose 'Checking for existence of RDS Server.'
 
-    $result = $null -ne $target
+    $testDscParameterStateSplat = @{
+        CurrentValues       = Get-TargetResource @PSBoundParameters
+        DesiredValues       = $PSBoundParameters
+        TurnOffTypeChecking = $false
+        SortArrayValues     = $true
+        Verbose             = $VerbosePreference
+    }
 
-    Write-Verbose "Test-TargetResource returning:  $result"
-    return $result
+    return Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource

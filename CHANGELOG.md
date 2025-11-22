@@ -40,6 +40,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update repo files to latest versions in Sampler. Fixes [issue #118](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/118).
 - Enable DocGenerator and move docs to wiki. Fixes [issue #101](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/101).
 - Renamed `master` branch to `main`. Fixes [issue #116](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/116).
+- Migrated tests to Pester 5. Fixes [issue #119](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/119).
+- Enable ModuleFast.
+- Use pwsh for unit tests.
+- Rename nested module to xRemoteDesktopSessionHost.Common.
+- Make xRemoteDesktopSessionHost.Common a buildable module.
+- DSCResources
+  - Use `Test-DscParameterState` where possible.
+  - Update formatting.
+  - Use fully qualified types.
+  - Add changes from [PR #124](https://github.com/dsccommunity/xRemoteDesktopSessionHost/pull/124)
 
 ## [2.1.0] - 2022-08-07
 

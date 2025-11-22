@@ -1,17 +1,13 @@
-$resourceModulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
-$modulesFolderPath = Join-Path -Path $resourceModulePath -ChildPath 'Modules'
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
-$rdCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'xRemoteDesktopSessionHostCommon.psm1'
-Import-Module -Name $rdCommonModulePath
-
-$dscResourceCommonModulePath = Join-Path -Path $modulesFolderPath -ChildPath 'DscResource.Common'
-Import-Module -Name $dscResourceCommonModulePath
+# Import the Common Modules
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
 if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
-Import-Module RemoteDesktop
 
 #######################################################################
 # The Get-TargetResource cmdlet.
@@ -24,34 +20,61 @@ function Get-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter(Mandatory = $true)]
-        [string] $DisplayName,
+        [System.String]
+        $DisplayName,
+
         [Parameter(Mandatory = $true)]
-        [string] $FilePath,
+        [System.String]
+        $FilePath,
+
         [Parameter(Mandatory = $true)]
-        [string] $Alias,
+        [System.String]
+        $Alias,
+
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]$Ensure = 'Present',
+        [System.String]
+        $Ensure = 'Present',
+
         [Parameter()]
-        [string] $FileVirtualPath,
+        [System.String]
+        $FileVirtualPath,
+
         [Parameter()]
-        [string] $FolderName,
+        [System.String]
+        $FolderName,
+
         [Parameter()]
         [ValidateSet('Allow', 'DoNotAllow', 'Require')]
-        [string] $CommandLineSetting,
+        [System.String]
+        $CommandLineSetting,
+
         [Parameter()]
-        [string] $RequiredCommandLine,
+        [System.String]
+        $RequiredCommandLine,
+
         [Parameter()]
-        [uint32] $IconIndex,
+        [System.UInt32]
+        $IconIndex,
+
         [Parameter()]
-        [string] $IconPath,
+        [System.String]
+        $IconPath,
+
         [Parameter()]
-        [string[]] $UserGroups,
+        [System.String[]]
+        $UserGroups,
+
         [Parameter()]
-        [boolean] $ShowInWebAccess
+        [System.Boolean]
+        $ShowInWebAccess
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     try
     {
@@ -66,17 +89,17 @@ function Get-TargetResource
     $remoteApp = Get-RDRemoteApp -CollectionName $CollectionName -Alias $Alias -ErrorAction SilentlyContinue
 
     $return = @{
-        CollectionName      = $remoteApp.CollectionName
+        CollectionName      = $CollectionName
         DisplayName         = $remoteApp.DisplayName
         FilePath            = $remoteApp.FilePath
-        Alias               = $remoteApp.Alias
+        Alias               = $Alias
         FileVirtualPath     = $remoteApp.FileVirtualPath
         FolderName          = $remoteApp.FolderName
         CommandLineSetting  = $remoteApp.CommandLineSetting
         RequiredCommandLine = $remoteApp.RequiredCommandLine
-        IconIndex           = $remoteApp.IconIndex
+        IconIndex           = [System.UInt32] $remoteApp.IconIndex
         IconPath            = $remoteApp.IconPath
-        UserGroups          = $remoteApp.UserGroups
+        UserGroups          = [System.String[]] $remoteApp.UserGroups
         ShowInWebAccess     = $remoteApp.ShowInWebAccess
     }
 
@@ -102,34 +125,62 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter(Mandatory = $true)]
-        [string] $DisplayName,
+        [System.String]
+        $DisplayName,
+
         [Parameter(Mandatory = $true)]
-        [string] $FilePath,
+        [System.String]
+        $FilePath,
+
         [Parameter(Mandatory = $true)]
-        [string] $Alias,
+        [System.String]
+        $Alias,
+
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]$Ensure = 'Present',
+        [System.String]
+        $Ensure = 'Present',
+
         [Parameter()]
-        [string] $FileVirtualPath,
+        [System.String]
+        $FileVirtualPath,
+
         [Parameter()]
-        [string] $FolderName,
+        [System.String]
+        $FolderName,
+
         [Parameter()]
         [ValidateSet('Allow', 'DoNotAllow', 'Require')]
-        [string] $CommandLineSetting,
+        [System.String]
+        $CommandLineSetting,
+
         [Parameter()]
-        [string] $RequiredCommandLine,
+        [System.String]
+        $RequiredCommandLine,
+
         [Parameter()]
-        [uint32] $IconIndex,
+        [System.UInt32]
+        $IconIndex,
+
         [Parameter()]
-        [string] $IconPath,
+        [System.String]
+        $IconPath,
+
         [Parameter()]
-        [string[]] $UserGroups,
+        [System.String[]]
+        $UserGroups,
+
         [Parameter()]
-        [boolean] $ShowInWebAccess
+        [System.Boolean]
+        $ShowInWebAccess
+
     )
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     try
     {
@@ -168,36 +219,63 @@ function Test-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateLength(1, 256)]
-        [string] $CollectionName,
+        [System.String]
+        $CollectionName,
+
         [Parameter(Mandatory = $true)]
-        [string] $DisplayName,
+        [System.String]
+        $DisplayName,
+
         [Parameter(Mandatory = $true)]
-        [string] $FilePath,
+        [System.String]
+        $FilePath,
+
         [Parameter(Mandatory = $true)]
-        [string] $Alias,
+        [System.String]
+        $Alias,
+
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]$Ensure = 'Present',
+        [System.String]
+        $Ensure = 'Present',
+
         [Parameter()]
-        [string] $FileVirtualPath,
+        [System.String]
+        $FileVirtualPath,
+
         [Parameter()]
-        [string] $FolderName,
+        [System.String]
+        $FolderName,
+
         [Parameter()]
         [ValidateSet('Allow', 'DoNotAllow', 'Require')]
-        [string] $CommandLineSetting,
+        [System.String]
+        $CommandLineSetting,
+
         [Parameter()]
-        [string] $RequiredCommandLine,
+        [System.String]
+        $RequiredCommandLine,
+
         [Parameter()]
-        [uint32] $IconIndex,
+        [System.UInt32]
+        $IconIndex,
+
         [Parameter()]
-        [string] $IconPath,
+        [System.String]
+        $IconPath,
+
         [Parameter()]
-        [string[]] $UserGroups,
+        [System.String[]]
+        $UserGroups,
+
         [Parameter()]
-        [boolean] $ShowInWebAccess
+        [System.Boolean]
+        $ShowInWebAccess
     )
 
     Write-Verbose 'Testing if RemoteApp is published.'
+
+    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
 
     try
     {
@@ -208,19 +286,15 @@ function Test-TargetResource
         throw "Failed to lookup RD Session Collection $CollectionName. Error: $_"
     }
 
-    $getTargetResourceResult = Get-TargetResource @PSBoundParameters
-    [System.Management.Automation.PSCmdlet]::CommonParameters | ForEach-Object -Process {
-        $null = $PSBoundParameters.Remove($_)
-    }
-
     $testDscParameterStateSplat = @{
-        CurrentValues       = $getTargetResourceResult
+        CurrentValues       = Get-TargetResource @PSBoundParameters
         DesiredValues       = $PSBoundParameters
-        TurnOffTypeChecking = $true
+        TurnOffTypeChecking = $false
         SortArrayValues     = $true
+        Verbose             = $VerbosePreference
     }
 
-    Test-DscParameterState @testDscParameterStateSplat
+    return Test-DscParameterState @testDscParameterStateSplat
 }
 
 Export-ModuleMember -Function *-TargetResource
