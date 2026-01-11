@@ -1,4 +1,4 @@
-function Get-xRemoteDesktopSessionHostOsVersion
+function Get-RemoteDesktopServicesDscOsVersion
 {
     [CmdletBinding()]
     [OutputType([System.Version])]
