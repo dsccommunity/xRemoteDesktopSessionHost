@@ -1,5 +1,6 @@
 # xRemoteDesktopSessionHost
 
+<!-- Update what the product or function is called /-->
 This module contains DSC resources for the management and
 configuration of Microsoft Remote Desktop Session Host (RDSH).
 
@@ -25,16 +26,19 @@ full release to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 Please check out common DSC Community [contributing guidelines](https://dsccommunity.org/guidelines/contributing).
 
-## Quality
-
-This module should meet the [PowerShell DSC Resource Kit High Quality Resource
-Module Guidelines](https://github.com/PowerShell/DscResources/blob/main/HighQualityModuleGuidelines.md).
-
-## Documentation and Examples
-
-For a full list of resources in xRemoteDesktopSessionHost and examples on their use, check out
-the [xRemoteDesktopSessionHost wiki](https://github.com/dsccommunity/xRemoteDesktopSessionHost/wiki).
-
 ## Change log
 
 A full list of changes in each version can be found in the [change log](CHANGELOG.md).
+
+## Documentation
+
+The documentation can be found in the [xRemoteDesktopSessionHost Wiki](https://github.com/dsccommunity/xRemoteDesktopSessionHost/wiki).
+The DSC resources schema files is used to automatically update the
+documentation on each PR merge.
+
+### Examples
+
+You can review the [Examples](/source/Examples) directory in the xRemoteDesktopSessionHost module
+for some general use scenarios for all of the resources that are in the module.
+
+The resource examples are also available in the [xRemoteDesktopSessionHost Wiki](https://github.com/dsccommunity/xRemoteDesktopSessionHost/wiki).
