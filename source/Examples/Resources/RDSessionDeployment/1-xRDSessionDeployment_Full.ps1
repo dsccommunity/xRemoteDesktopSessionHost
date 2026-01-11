@@ -5,8 +5,8 @@
 .COMPANYNAME DSC Community
 .COPYRIGHT DSC Community contributors. All rights reserved.
 .TAGS DSCConfiguration
-.LICENSEURI https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/main/LICENSE
-.PROJECTURI https://github.com/dsccommunity/xRemoteDesktopSessionHost
+.LICENSEURI https://github.com/dsccommunity/RemoteDesktopServicesDsc/blob/main/LICENSE
+.PROJECTURI https://github.com/dsccommunity/RemoteDesktopServicesDsc
 .ICONURI https://dsccommunity.org/images/DSC_Logo_300p.png
 .EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
@@ -15,15 +15,15 @@
 First version.
 .PRIVATEDATA 2016-Datacenter,2016-Datacenter-Server-Core
 #>
-#requires -Module xRemoteDesktopSessionHost
+#requires -Module RemoteDesktopServicesDsc
 
-configuration xRDSessionDeployment_Full
+configuration RDSessionDeployment_Full
 {
-    import-dscresource -modulename xRemoteDesktopSessionHost
+    import-dscresource -modulename RemoteDesktopServicesDsc
 
     node localhost
     {
-        xRDSessionDeployment TheBigDeployment
+        RDSessionDeployment TheBigDeployment
         {
             ConnectionBroker = 'RDBC1.contoso.com'
             WebAccessServer  = 'RDWA1.contoso.com'

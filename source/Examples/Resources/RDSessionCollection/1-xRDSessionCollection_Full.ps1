@@ -5,8 +5,8 @@
 .COMPANYNAME DSC Community
 .COPYRIGHT DSC Community contributors. All rights reserved.
 .TAGS DSCConfiguration
-.LICENSEURI https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/main/LICENSE
-.PROJECTURI https://github.com/dsccommunity/xRemoteDesktopSessionHost
+.LICENSEURI https://github.com/dsccommunity/RemoteDesktopServicesDsc/blob/main/LICENSE
+.PROJECTURI https://github.com/dsccommunity/RemoteDesktopServicesDsc
 .ICONURI https://dsccommunity.org/images/DSC_Logo_300p.png
 .EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
@@ -15,11 +15,11 @@
 First version.
 .PRIVATEDATA 2016-Datacenter,2016-Datacenter-Server-Core
 #>
-#requires -Module xRemoteDesktopSessionHost
+#requires -Module RemoteDesktopServicesDsc
 
 configuration xRDSessionCollection_Full
 {
-    Import-DscResource -modulename xRemoteDesktopSessionHost
+    Import-DscResource -modulename RemoteDesktopServicesDsc
 
     node localhost
     {

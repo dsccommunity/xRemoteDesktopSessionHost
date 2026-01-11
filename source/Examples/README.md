@@ -1,7 +1,7 @@
 # Examples
 
 This will help to understand how to setup certain scenarios with the
-xRemoteDesktopSessionHost resource module.
+RemoteDesktopServicesDsc resource module.
 
 ## Resource examples
 
@@ -13,4 +13,4 @@ These are the links to the examples for each individual resource.
 - [xRDServer](Resources/xRDServer)
 - [xRDSessionCollection](Resources/xRDSessionCollection)
 - [xRDSessionCollectionConfiguration](Resources/xRDSessionCollectionConfiguration)
-- [xRDSessionDeployment](Resources/xRDSessionDeployment)
+- [RDSessionDeployment](Resources/RDSessionDeployment)

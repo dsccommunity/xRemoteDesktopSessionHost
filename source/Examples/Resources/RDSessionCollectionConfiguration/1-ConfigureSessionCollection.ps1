@@ -5,7 +5,7 @@
 
 configuration Example
 {
-    Import-DscResource -ModuleName 'xRemoteDesktopSessionHost'
+    Import-DscResource -ModuleName 'RemoteDesktopServicesDsc'
 
     node localhost {
 
