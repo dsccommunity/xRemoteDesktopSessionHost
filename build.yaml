@@ -19,7 +19,7 @@ NestedModule:
     Path: ./output/RequiredModules/DscResource.Common
     AddToManifest: false
     Exclude: PSGetModuleInfo.xml
-  xRemoteDesktopSessionHost.Common:
+  RemoteDesktopServicesDsc.Common:
     Prefix: prefix.ps1
     VersionedOutputDirectory: false
     CopyPaths:
@@ -125,7 +125,7 @@ DscTest:
     ExcludeModuleFile:
       - Modules/DscResource.Common
       # Must exclude built module file because it should not be tested like MOF-based resources
-      - xRemoteDesktopSessionHost.psm1
+      - RemoteDesktopServicesDsc.psm1
     MainGitBranch: main
 
 ModuleBuildTasks:
