@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Update formatting.
   - Use fully qualified types.
   - Add changes from [PR #124](https://github.com/dsccommunity/xRemoteDesktopSessionHost/pull/124)
+- Update files from Plaster template.
 
 ## [2.1.0] - 2022-08-07
 
