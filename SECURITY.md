@@ -24,7 +24,7 @@ send us a direct message via Twitter (X), Slack, Discord, or find us on some
 other social platform.
 
 You should receive a response within 48 hours. If for some reason you do not,
-please follow up to other member of the community.
+please follow up to other members of the community.
 
 Please include the requested information listed below (as much as you can
 provide) to help us better understand the nature and scope of the possible issue:
