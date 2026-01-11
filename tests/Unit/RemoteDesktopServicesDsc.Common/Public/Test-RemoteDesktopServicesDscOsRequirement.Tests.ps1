@@ -24,8 +24,8 @@ BeforeDiscovery {
 }
 
 BeforeAll {
-    $script:dscModuleName = 'xRemoteDesktopSessionHost'
-    $script:subModuleName = 'xRemoteDesktopSessionHost.Common'
+    $script:dscModuleName = 'RemoteDesktopServicesDsc'
+    $script:subModuleName = 'RemoteDesktopServicesDsc.Common'
 
     $script:parentModule = Get-Module -Name $script:dscModuleName -ListAvailable | Select-Object -First 1
     $script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
@@ -48,44 +48,44 @@ AfterAll {
     Get-Module -Name $script:subModuleName -All | Remove-Module -Force
 }
 
-Describe 'Test-xRemoteDesktopSessionHostOsRequirement' {
+Describe 'Test-RemoteDesktopServicesDscOsRequirement' {
     Context 'Windows 10' {
         BeforeAll {
-            Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 10, 1, 1, 1) }
+            Mock Get-RemoteDesktopServicesDscOsVersion -MockWith { return (New-Object 'Version' 10, 1, 1, 1) }
         }
 
         It 'Should return true' {
-            Test-xRemoteDesktopSessionHostOsRequirement | Should -BeTrue
+            Test-RemoteDesktopServicesDscOsRequirement | Should -BeTrue
         }
     }
 
     Context 'Windows 8.1' {
         BeforeAll {
-            Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 6, 3, 1, 1) }
+            Mock Get-RemoteDesktopServicesDscOsVersion -MockWith { return (New-Object 'Version' 6, 3, 1, 1) }
         }
 
         It 'Should return true' {
-            Test-xRemoteDesktopSessionHostOsRequirement | Should -BeTrue
+            Test-RemoteDesktopServicesDscOsRequirement | Should -BeTrue
         }
     }
 
     Context 'Windows 8' {
         BeforeAll {
-            Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 6, 2, 9200, 0) }
+            Mock Get-RemoteDesktopServicesDscOsVersion -MockWith { return (New-Object 'Version' 6, 2, 9200, 0) }
         }
 
         It 'Should return true' {
-            Test-xRemoteDesktopSessionHostOsRequirement | Should -BeTrue
+            Test-RemoteDesktopServicesDscOsRequirement | Should -BeTrue
         }
     }
 
     Context 'Windows 7' {
         BeforeAll {
-            Mock Get-xRemoteDesktopSessionHostOsVersion -MockWith { return (New-Object 'Version' 6, 1, 1, 0) }
+            Mock Get-RemoteDesktopServicesDscOsVersion -MockWith { return (New-Object 'Version' 6, 1, 1, 0) }
         }
 
         It 'Should return false' {
-            Test-xRemoteDesktopSessionHostOsRequirement | Should -BeFalse
+            Test-RemoteDesktopServicesDscOsRequirement | Should -BeFalse
         }
     }
 }

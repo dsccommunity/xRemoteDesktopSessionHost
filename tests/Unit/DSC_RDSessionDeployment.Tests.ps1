@@ -25,8 +25,8 @@ BeforeDiscovery {
 }
 
 BeforeAll {
-    $script:dscModuleName = 'xRemoteDesktopSessionHost'
-    $script:dscResourceName = 'MSFT_xRDSessionDeployment'
+    $script:dscModuleName = 'RemoteDesktopServicesDsc'
+    $script:dscResourceName = 'DSC_RDSessionDeployment'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
@@ -56,7 +56,7 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-Describe 'MSFT_xRDSessionDeployment\Get-TargetResource' -Tag 'Get' {
+Describe 'DSC_RDSessionDeployment\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
     }
@@ -219,7 +219,7 @@ Describe 'MSFT_xRDSessionDeployment\Get-TargetResource' -Tag 'Get' {
     }
 }
 
-Describe 'MSFT_xRDSessionDeployment\Set-TargetResource' -Tag 'Set' {
+Describe 'DSC_RDSessionDeployment\Set-TargetResource' -Tag 'Set' {
     Context 'When the resource is not in the desired state' {
         BeforeAll {
             Mock -CommandName Assert-Module
@@ -356,7 +356,7 @@ Describe 'MSFT_xRDSessionDeployment\Set-TargetResource' -Tag 'Set' {
     }
 }
 
-Describe 'MSFT_xRDSessionDeployment\Test-TargetResource' -Tag 'Test' {
+Describe 'DSC_RDSessionDeployment\Test-TargetResource' -Tag 'Test' {
     BeforeDiscovery {
         $testCases = @(
             @{

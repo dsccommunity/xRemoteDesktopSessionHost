@@ -25,8 +25,8 @@ BeforeDiscovery {
 }
 
 BeforeAll {
-    $script:dscModuleName = 'xRemoteDesktopSessionHost'
-    $script:dscResourceName = 'MSFT_xRDSessionCollectionConfiguration'
+    $script:dscModuleName = 'RemoteDesktopServicesDsc'
+    $script:dscResourceName = 'DSC_RDSessionCollectionConfiguration'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
@@ -56,7 +56,7 @@ AfterAll {
     Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 }
 
-Describe 'MSFT_xRDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' {
+Describe 'DSC_RDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Assert-Module
     }
@@ -152,7 +152,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' 
 
         Context 'When the server is ''Windows Server 2012 (R2)''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'6.3.9600.0'
                 }
             }
@@ -205,7 +205,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' 
 
         Context 'When the server is ''Windows Server 2016 or later''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'10.0.14393.0'
                 }
             }
@@ -258,7 +258,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' 
     }
 }
 
-Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
+Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
     BeforeAll {
         Mock -CommandName Assert-Module
     }
@@ -293,7 +293,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
 
         Context 'When the server is ''Windows Server 2012 (R2)''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'6.3.9600.0'
                 }
             }
@@ -335,7 +335,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
                 }
 
                 Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $DiskPath } -Exactly -Times 1 -Scope It
             }
@@ -343,7 +343,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
 
         Context 'When the server is ''Windows Server 2016 or later''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'10.0.14393.0'
                 }
             }
@@ -395,7 +395,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
                         }
 
                         Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
                     }
@@ -446,7 +446,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
                         }
 
                         Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
                     }
@@ -500,7 +500,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
                         }
 
                         Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
                     }
@@ -550,7 +550,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
                         }
 
                         Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                        Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $EnableUserProfileDisk -eq $true } -Exactly -Times 1 -Scope It
@@ -594,7 +594,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
                     }
 
                     Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
-                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $DisableUserProfileDisk } -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $DisableUserProfileDisk -eq $true } -Exactly -Times 1 -Scope It
@@ -604,7 +604,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
     }
 
     # Context 'Running on set on Windows Server 2016 (or higher)' {
-    #     Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+    #     Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
     #         [version]'10.0.14393.0'
     #     }
 
@@ -682,11 +682,11 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' 
     # }
 }
 
-Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test' {
+Describe 'DSC_RDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test' {
     Context 'When the resource is not in the desired state' {
         Context 'When the server is ''Windows Server 2012 (R2)''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'6.3.9600.0'
                 }
 
@@ -752,14 +752,14 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
                     Test-TargetResource @testParams | Should -BeFalse
                 }
 
-                Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
             }
         }
 
         Context 'When the server is ''Windows Server 2016 or later''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'10.0.14393.0'
                 }
 
@@ -830,7 +830,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
                         Test-TargetResource @testParams | Should -BeFalse
                     }
 
-                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                 }
             }
@@ -870,7 +870,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
                         Test-TargetResource @testParams | Should -BeFalse
                     }
 
-                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                 }
             }
@@ -880,7 +880,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
     Context 'When the resource is in the desired state' {
         Context 'When the server is ''Windows Server 2012 (R2)''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'6.3.9600.0'
                 }
 
@@ -946,14 +946,14 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
                     Test-TargetResource @testParams | Should -BeTrue
                 }
 
-                Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
             }
         }
 
         Context 'When the server is ''Windows Server 2016 or later''' {
             BeforeAll {
-                Mock -CommandName Get-xRemoteDesktopSessionHostOsVersion -MockWith {
+                Mock -CommandName Get-RemoteDesktopServicesDscOsVersion -MockWith {
                     [version]'10.0.14393.0'
                 }
             }
@@ -1026,7 +1026,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
                         Test-TargetResource @testParams | Should -BeTrue
                     }
 
-                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                 }
             }
@@ -1097,7 +1097,7 @@ Describe 'MSFT_xRDSessionCollectionConfiguration\Test-TargetResource' -Tag 'Test
                         Test-TargetResource @testParams | Should -BeTrue
                     }
 
-                    Should -Invoke -CommandName Get-xRemoteDesktopSessionHostOsVersion -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
                 }
             }
