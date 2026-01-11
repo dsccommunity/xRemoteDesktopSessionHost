@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0.0"), FriendlyName("xRDCertificateConfiguration")]
-class MSFT_xRDCertificateConfiguration : OMI_BaseResource
+class DSC_RDCertificateConfiguration : OMI_BaseResource
 {
     [key,
         Description ("The role to apply this certificate configuration to."),
@@ -17,6 +17,6 @@ class MSFT_xRDCertificateConfiguration : OMI_BaseResource
 
     [write,
         Description("Specifies the password used to decrypt the PFX file. The username is ignored."),
-        EmbeddedInstance("MSFT_Credential")
+        EmbeddedInstance("DSC_Credential")
     ] string Credential;
 };

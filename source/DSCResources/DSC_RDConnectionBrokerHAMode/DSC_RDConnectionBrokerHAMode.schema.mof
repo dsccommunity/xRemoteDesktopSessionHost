@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0.0"), FriendlyName("xRDConnectionBrokerHAMode")]
-class MSFT_xRDConnectionBrokerHAMode : OMI_BaseResource
+class DSC_RDConnectionBrokerHAMode : OMI_BaseResource
 {
     [Key, Description("Specifies the FQDN of client access name.")] string ClientAccessName;
     [write, required, Description("Specifies the primary connection string to the database.")] string DatabaseConnectionString;

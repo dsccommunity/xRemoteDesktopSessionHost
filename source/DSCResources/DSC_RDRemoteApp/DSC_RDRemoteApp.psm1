@@ -1,10 +1,10 @@
 $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
 # Import the Common Modules
-Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'RemoteDesktopServicesDsc.Common')
 Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
-if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-RemoteDesktopServicesDscOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }

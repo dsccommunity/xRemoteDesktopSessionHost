@@ -1,4 +1,4 @@
-# Localized resources for MSFT_xRDLicenseConfiguration
+# Localized resources for DSC_RDLicenseConfiguration
 
 ConvertFrom-StringData @'
 '@

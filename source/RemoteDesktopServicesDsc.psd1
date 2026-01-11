@@ -1,6 +1,6 @@
 @{
     # Script module or binary module file associated with this manifest.
-    RootModule           = 'xRemoteDesktopSessionHost.psm1'
+    RootModule           = 'RemoteDesktopServicesDsc.psm1'
 
     # Version number of this module. This is controlled by gitversion.
     moduleVersion        = '0.0.1'
@@ -47,13 +47,13 @@
             IconUri      = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
 
             # A URL to the license for this module.
-            LicenseUri   = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/main/LICENSE'
+            LicenseUri   = 'https://github.com/dsccommunity/RemoteDesktopServicesDsc/blob/main/LICENSE'
 
             # Set to a prerelease string value if the release should be a prerelease.
             Prerelease   = ''
 
             # A URL to the main website for this project.
-            ProjectUri   = 'https://github.com/dsccommunity/xRemoteDesktopSessionHost'
+            ProjectUri   = 'https://github.com/dsccommunity/RemoteDesktopServicesDsc'
 
             # ReleaseNotes of this module
             ReleaseNotes = ''

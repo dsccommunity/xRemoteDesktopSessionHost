@@ -1,10 +1,10 @@
 $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
 # Import the Common Modules
-Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'xRemoteDesktopSessionHost.Common')
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'RemoteDesktopServicesDsc.Common')
 Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
-if (-not (Test-xRemoteDesktopSessionHostOsRequirement))
+if (-not (Test-RemoteDesktopServicesDscOsRequirement))
 {
     throw 'The minimum OS requirement was not met.'
 }
@@ -161,7 +161,7 @@ function Get-TargetResource
     }
 
     # This part of the configuration only applies to Win 2016+
-    if ((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
+    if ((Get-RemoteDesktopServicesDscOsVersion).Major -ge 10)
     {
         Write-Verbose 'Running on W2016+, get UserProfileDisk configuration'
         $collectionUserProfileDisk = Get-RDSessionCollectionConfiguration -CollectionName $CollectionName -UserProfileDisk
@@ -314,7 +314,7 @@ function Set-TargetResource
     $null = $PSBoundParameters.Remove('IncludeFolderPath')
     $null = $PSBoundParameters.Remove('MaxUserProfileDiskSizeGB')
 
-    if ((Get-xRemoteDesktopSessionHostOsVersion).Major -ge 10)
+    if ((Get-RemoteDesktopServicesDscOsVersion).Major -ge 10)
     {
         Write-Verbose 'Running on W2016 or higher, prepare to set UserProfileDisk configuration'
 
@@ -516,7 +516,7 @@ function Test-TargetResource
     $null = $PSBoundParameters.Remove('Debug')
     $null = $PSBoundParameters.Remove('ConnectionBroker')
 
-    if ((Get-xRemoteDesktopSessionHostOsVersion).Major -lt 10)
+    if ((Get-RemoteDesktopServicesDscOsVersion).Major -lt 10)
     {
         Write-Verbose 'Running on W2012R2 or lower, removing properties that are not compatible'
 

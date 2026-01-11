@@ -1,5 +1,5 @@
 TOPIC
-    about_xRemoteDesktopSessionHost
+    about_RemoteDesktopServicesDsc
 
 SHORT DESCRIPTION
     DSC resources to manage Remote Desktop Services Hosts
@@ -19,7 +19,7 @@ TROUBLESHOOTING NOTE:
     Look out on the Github repository for issues and new releases.
 
 SEE ALSO
-  - https://github.com/dsccommunity/xRemoteDesktopSessionHost
+  - https://github.com/dsccommunity/RemoteDesktopServicesDsc
 
 KEYWORDS
     DSC, RDS, RDSH, RemoteDesktop
