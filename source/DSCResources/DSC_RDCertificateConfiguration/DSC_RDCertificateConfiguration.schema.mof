@@ -17,6 +17,6 @@ class DSC_RDCertificateConfiguration : OMI_BaseResource
 
     [write,
         Description("Specifies the password used to decrypt the PFX file. The username is ignored."),
-        EmbeddedInstance("DSC_Credential")
+        EmbeddedInstance("MSFT_Credential")
     ] string Credential;
 };
