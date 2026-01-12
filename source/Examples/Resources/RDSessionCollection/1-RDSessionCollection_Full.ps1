@@ -23,7 +23,7 @@ configuration xRDSessionCollection_Full
 
     node localhost
     {
-        xRDSessionCollection WeLoveDsc
+        RDSessionCollection WeLoveDsc
         {
             ConnectionBroker = 'RDCB1.contoso.com'
             CollectionName   = 'WeLoveDsc'

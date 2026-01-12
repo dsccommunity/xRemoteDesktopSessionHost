@@ -9,7 +9,7 @@ configuration Example
 
     node localhost {
 
-        xRDConnectionBrokerHAMode MyGateway {
+        RDConnectionBrokerHAMode MyGateway {
             ConnectionBroker         = 'RDCB1'
             DatabaseConnectionString = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
             ClientAccessName         = 'rdsfarm.contoso.com'

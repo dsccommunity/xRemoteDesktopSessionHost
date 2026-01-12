@@ -10,7 +10,7 @@ configuration Example
 
     node localhost {
 
-        xRDLicenseConfiguration MyLicenseServer {
+        RDLicenseConfiguration MyLicenseServer {
             ConnectionBroker = 'connectionbroker.server.fqdn'
             LicenseMode      = 'PerUser'
             LicenseServer    = 'license.server.fqdn'

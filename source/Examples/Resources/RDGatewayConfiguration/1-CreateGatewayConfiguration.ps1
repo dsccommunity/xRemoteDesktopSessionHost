@@ -9,7 +9,7 @@ configuration Example
 
     node localhost {
 
-        xRDGatewayConfiguration MyGateway {
+        RDGatewayConfiguration MyGateway {
             ConnectionBroker     = 'connectionbroker.server.fqdn'
             GatewayServer        = 'gateway.server.fqdn'
             GatewayMode          = 'Automatic'

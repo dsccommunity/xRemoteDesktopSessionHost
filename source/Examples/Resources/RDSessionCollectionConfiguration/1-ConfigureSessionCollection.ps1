@@ -9,7 +9,7 @@ configuration Example
 
     node localhost {
 
-        xRDSessionCollectionConfiguration 'ExampleApplications' {
+        RDSessionCollectionConfiguration 'ExampleApplications' {
             CollectionName                 = 'ExampleApplications'
             CollectionDescription          = 'A collection to deploy example applications'
             ConnectionBroker               = 'connectionbroker.server.fqdn'

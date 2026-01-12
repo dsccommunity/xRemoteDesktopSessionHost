@@ -9,7 +9,7 @@ configuration Example
 
     node localhost {
 
-        xRDServer RemoteDesktopSessionHost {
+        RDServer RemoteDesktopSessionHost {
             ConnectionBroker = 'connectionbroker.server.fqdn'
             Server           = 'sessionhost.server.fqdn'
             Role             = 'RDS-RD-Server'

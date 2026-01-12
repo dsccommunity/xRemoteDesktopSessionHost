@@ -10,7 +10,7 @@ configuration Example
 
     node localhost {
 
-        xRDRemoteApp 'Notepad' {
+        RDRemoteApp 'Notepad' {
             Alias               = 'PowerShell without Profile'
             CollectionName      = 'BD_Python_Apps'
             CommandLineSetting  = 'Require'
