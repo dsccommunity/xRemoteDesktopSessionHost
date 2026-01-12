@@ -7,10 +7,10 @@ RemoteDesktopServicesDsc resource module.
 
 These are the links to the examples for each individual resource.
 
-- [xRDGatewayConfiguration](Resources/xRDGatewayConfiguration)
-- [xRDLicenseConfiguration](Resources/xRDLicenseConfiguration)
-- [xRDRemoteApp](Resources/xRDRemoteApp)
-- [xRDServer](Resources/xRDServer)
-- [xRDSessionCollection](Resources/xRDSessionCollection)
-- [xRDSessionCollectionConfiguration](Resources/xRDSessionCollectionConfiguration)
+- [RDGatewayConfiguration](Resources/RDGatewayConfiguration)
+- [RDLicenseConfiguration](Resources/RDLicenseConfiguration)
+- [RDRemoteApp](Resources/RDRemoteApp)
+- [RDServer](Resources/RDServer)
+- [RDSessionCollection](Resources/RDSessionCollection)
+- [RDSessionCollectionConfiguration](Resources/RDSessionCollectionConfiguration)
 - [RDSessionDeployment](Resources/RDSessionDeployment)
