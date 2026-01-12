@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **The module _xRemoteDesktopSessionHost_ will be renamed to _RemoteDesktopServicesDsc_
   ([issue #117](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues/117)).
-  The version `v2.1.1` will be the the last release of _xRemoteDesktopSessionHost_.
-  Version `v3.0.0` will be released as _RemoteDesktopServicesDsc_, it will be
-  released shortly after the `v2.1.1` release to be able to start transition
+  The version `v3.0.0` will be the the last release of _xRemoteDesktopSessionHost_.
+  Version `v4.0.0` will be released as _RemoteDesktopServicesDsc_, it will be
+  released shortly after the `v3.0.0` release to be able to start transition
   to the new module. The prefix 'x' will be removed from all resources in
   _RemoteDesktopServicesDsc_.**
 
