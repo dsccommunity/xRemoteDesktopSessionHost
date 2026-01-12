@@ -17,7 +17,7 @@ First version.
 #>
 #requires -Module RemoteDesktopServicesDsc
 
-configuration xRDSessionCollection_Full
+configuration RDSessionCollection_Full
 {
     Import-DscResource -modulename RemoteDesktopServicesDsc
 
