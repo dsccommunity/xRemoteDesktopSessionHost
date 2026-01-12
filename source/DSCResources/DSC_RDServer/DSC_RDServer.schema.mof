@@ -1,4 +1,4 @@
-[ClassVersion("1.1.0.0"), FriendlyName("xRDServer")]
+[ClassVersion("1.1.0.0"), FriendlyName("RDServer")]
 class DSC_RDServer : OMI_BaseResource
 {
     [write] string ConnectionBroker;

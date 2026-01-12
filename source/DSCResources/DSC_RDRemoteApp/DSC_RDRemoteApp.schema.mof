@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xRDRemoteApp")]
+[ClassVersion("1.0.0.0"), FriendlyName("RDRemoteApp")]
 class DSC_RDRemoteApp : OMI_BaseResource
 {
     [key, Description("Specifies an alias for the RemoteApp program.")] string Alias;

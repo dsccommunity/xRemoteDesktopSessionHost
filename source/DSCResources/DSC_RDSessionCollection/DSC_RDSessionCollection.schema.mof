@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xRDSessionCollection")]
+[ClassVersion("1.0.0.0"), FriendlyName("RDSessionCollection")]
 class DSC_RDSessionCollection : OMI_BaseResource
 {
     [key, Description("Specifies a name for the session collection. ")] string CollectionName;

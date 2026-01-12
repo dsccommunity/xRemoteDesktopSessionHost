@@ -1,4 +1,4 @@
-[ClassVersion("1.1.0.0"), FriendlyName("xRDLicenseConfiguration")]
+[ClassVersion("1.1.0.0"), FriendlyName("RDLicenseConfiguration")]
 class DSC_RDLicenseConfiguration : OMI_BaseResource
 {
     [key]   string ConnectionBroker;

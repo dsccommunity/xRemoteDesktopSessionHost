@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xRDConnectionBrokerHAMode")]
+[ClassVersion("1.0.0.0"), FriendlyName("RDConnectionBrokerHAMode")]
 class DSC_RDConnectionBrokerHAMode : OMI_BaseResource
 {
     [Key, Description("Specifies the FQDN of client access name.")] string ClientAccessName;

@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xRDCertificateConfiguration")]
+[ClassVersion("1.0.0.0"), FriendlyName("RDCertificateConfiguration")]
 class DSC_RDCertificateConfiguration : OMI_BaseResource
 {
     [key,
