@@ -1,4 +1,4 @@
-# Localized resources for DSC_RDCertificateConfiguration
+# Localized resources for DSC_RDConnectionBrokerHAMode  
 
 ConvertFrom-StringData @'
     VerboseConfigureHAMode = Set RD Connection Broker {0} for high availability mode using Client Access name {1}.

@@ -1,4 +1,4 @@
-# Localized resources for DSC_RDSessionCollection
+# Localized resources for DSC_RDLicenseConfiguration
 
 ConvertFrom-StringData @'
 '@

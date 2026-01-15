@@ -387,7 +387,7 @@ Describe 'DSC_RDGatewayConfiguration\Set-TargetResource' -Tag 'Set' {
     }
 }
 
-Describe 'DSC_RDLicenseConfiguration\Test-TargetResource' -Tag 'Test' {
+Describe 'DSC_RDGatewayConfiguration\Test-TargetResource' -Tag 'Test' {
     Context 'When the resource is in the desired state' {
         Context 'When ''GatewayMode'' is not Custom' {
             BeforeAll {

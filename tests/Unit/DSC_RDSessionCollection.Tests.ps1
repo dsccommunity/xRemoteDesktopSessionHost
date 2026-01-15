@@ -142,7 +142,7 @@ Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
         }
     }
 
-    Context 'When the resource is present' {
+    Context 'When the resource is not present' {
         Context 'When no matches are returned (default behavior)' {
             BeforeAll {
                 Mock -CommandName Get-RDSessionCollection
