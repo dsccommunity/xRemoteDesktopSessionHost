@@ -1,14 +1,14 @@
-# Welcome to the xRemoteDesktopSessionHost wiki
+# Welcome to the RemoteDesktopServicesDsc wiki
 
-<sup>*xRemoteDesktopSessionHost v#.#.#*</sup>
+<sup>*RemoteDesktopServicesDsc v#.#.#*</sup>
 
-Here you will find all the information you need to make use of the xRemoteDesktopSessionHost
+Here you will find all the information you need to make use of the RemoteDesktopServicesDsc
 DSC resources in the latest release. This includes details of the resources
 that are available, current capabilities and known issues, and information
-to help plan a DSC based implementation of xRemoteDesktopSessionHost.
+to help plan a DSC based implementation of RemoteDesktopServicesDsc.
 
 Please leave comments, feature requests, and bug reports for this module in
-the [issues section](https://github.com/dsccommunity/xRemoteDesktopSessionHost/issues)
+the [issues section](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues)
 for this repository.
 
 ## Deprecated resources
@@ -27,18 +27,18 @@ To get started either:
   following command:
 
 ```powershell
-Install-Module -Name xRemoteDesktopSessionHost -Repository PSGallery
+Install-Module -Name RemoteDesktopServicesDsc -Repository PSGallery
 ```
 
-- Download xRemoteDesktopSessionHost from the [PowerShell Gallery](http://www.powershellgallery.com/packages/xRemoteDesktopSessionHost/)
+- Download RemoteDesktopServicesDsc from the [PowerShell Gallery](http://www.powershellgallery.com/packages/RemoteDesktopServicesDsc/)
   and then unzip it to one of your PowerShell modules folders (such as
   `$env:ProgramFiles\WindowsPowerShell\Modules`).
 
-To confirm installation, run the below command and ensure you see the xRemoteDesktopSessionHost
+To confirm installation, run the below command and ensure you see the RemoteDesktopServicesDsc
 DSC resources available:
 
 ```powershell
-Get-DscResource -Module xRemoteDesktopSessionHost
+Get-DscResource -Module RemoteDesktopServicesDsc
 ```
 
 ## Prerequisites
@@ -52,4 +52,4 @@ and Windows Server 2012 R2.
 
 ## Change log
 
-A full list of changes in each version can be found in the [change log](https://github.com/dsccommunity/xRemoteDesktopSessionHost/blob/main/CHANGELOG.md).
+A full list of changes in each version can be found in the [change log](https://github.com/dsccommunity/RemoteDesktopServicesDsc/blob/main/CHANGELOG.md).

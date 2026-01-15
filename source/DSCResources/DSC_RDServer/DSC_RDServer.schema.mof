@@ -1,0 +1,12 @@
+[ClassVersion("1.1.0.0"), FriendlyName("RDServer")]
+class DSC_RDServer : OMI_BaseResource
+{
+    [write] string ConnectionBroker;
+    [key]   string Server;
+
+    [key,
+    ValueMap{"RDS-Connection-Broker","RDS-Virtualization","RDS-RD-Server","RDS-Web-Access","RDS-Gateway","RDS-Licensing"},
+    Values{  "RDS-Connection-Broker","RDS-Virtualization","RDS-RD-Server","RDS-Web-Access","RDS-Gateway","RDS-Licensing"}] string Role;
+
+    [write] string GatewayExternalFqdn;
+};

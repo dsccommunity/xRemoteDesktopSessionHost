@@ -145,6 +145,7 @@ stages:
             inputs:
               buildType: 'current'
               targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
+              itemPattern: '$(testArtifactName)_*/**'
 
           - task: PowerShell@2
             name: merge
