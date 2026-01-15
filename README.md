@@ -8,7 +8,7 @@ configuration of Microsoft Remote Desktop Session Host (RDSH).
 ![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/RemoteDesktopServicesDsc/10/main)
 [![codecov](https://codecov.io/gh/dsccommunity/RemoteDesktopServicesDsc/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/RemoteDesktopServicesDsc)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/RemoteDesktopServicesDsc/10/main)](https://dsccommunity.visualstudio.com/RemoteDesktopServicesDsc/_test/analytics?definitionId=10&contextType=build)
-[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/RemoteDesktopServicesDsc?label=RemoteDesktopServicesDsc%20Preview)](https://www.powershellgallery.com/packages/RemoteDesktopServicesDsc/)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/v/RemoteDesktopServicesDsc?label=RemoteDesktopServicesDsc%20Preview&include_prelreleases)](https://www.powershellgallery.com/packages/RemoteDesktopServicesDsc/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/RemoteDesktopServicesDsc?label=RemoteDesktopServicesDsc)](https://www.powershellgallery.com/packages/RemoteDesktopServicesDsc/)
 
 ## Code of Conduct
