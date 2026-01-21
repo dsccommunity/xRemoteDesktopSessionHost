@@ -2,7 +2,7 @@
 
 <!-- Update what the product or function is called /-->
 This module contains DSC resources for the management and
-configuration of Microsoft Remote Desktop Session Host (RDSH).
+configuration of Microsoft Remote Desktop Services (RDS).
 
 [![Build Status](https://dev.azure.com/dsccommunity/RemoteDesktopServicesDsc/_apis/build/status/dsccommunity.RemoteDesktopServicesDsc?branchName=main)](https://dev.azure.com/dsccommunity/RemoteDesktopServicesDsc/_build/latest?definitionId=10&branchName=main)
 ![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/RemoteDesktopServicesDsc/10/main)

@@ -5,7 +5,7 @@ SHORT DESCRIPTION
     DSC resources to manage Remote Desktop Services Hosts
 
 LONG DESCRIPTION
-    This module is meant to enable DSC configured RDSH (Remote Desktop Session Hosts).
+    This module is meant to enable DSC configured RDS (Remote Desktop Services).
     It allows for setting up a connection broker, configuring licensing and deployment
     of remote applications.
 

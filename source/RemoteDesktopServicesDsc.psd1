@@ -18,7 +18,7 @@
     Copyright            = 'Copyright the DSC Community contributors. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description          = 'Module with DSC Resources for Remote Desktop Session Host'
+    Description          = 'Module with DSC Resources for Remote Desktop Services'
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion    = '5.0'
