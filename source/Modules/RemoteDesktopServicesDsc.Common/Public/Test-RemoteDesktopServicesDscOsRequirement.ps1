@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Verifies that the operating system meets the Remote Desktop Session Host requirement.
+        Verifies that the operating system meets the Remote Desktop st requirement.
 
     .DESCRIPTION
         Returns $true when Get-RemoteDesktopServicesDscOsVersion reports at least Windows Server 2012 (6.2.9200.0); otherwise returns $false.
