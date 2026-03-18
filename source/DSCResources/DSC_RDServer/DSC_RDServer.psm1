@@ -40,7 +40,7 @@ function Get-TargetResource
         $GatewayExternalFqdn # only for RDS-Gateway
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     $result = @{
         ConnectionBroker    = $null
@@ -128,7 +128,7 @@ function Set-TargetResource
         $GatewayExternalFqdn # only for RDS-Gateway
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     if ($Role -eq 'RDS-Gateway')
     {

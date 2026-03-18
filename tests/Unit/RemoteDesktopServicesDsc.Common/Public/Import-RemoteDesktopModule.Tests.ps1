@@ -1,0 +1,186 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
+
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'RemoteDesktopServicesDsc'
+    $script:subModuleName = 'RemoteDesktopServicesDsc.Common'
+
+    $script:parentModule = Get-Module -Name $script:dscModuleName -ListAvailable | Select-Object -First 1
+    $script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
+
+    $script:subModulePath = Join-Path -Path $script:subModulesFolder -ChildPath $script:subModuleName
+
+    Import-Module -Name $script:subModulePath -Force -ErrorAction 'Stop'
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:subModuleName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:subModuleName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:subModuleName
+}
+
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:subModuleName -All | Remove-Module -Force
+}
+
+Describe 'Import-RemoteDesktopModule' {
+    Context 'When the RDMS service is not present' {
+        BeforeAll {
+            Mock -CommandName Get-Service
+            Mock -CommandName Start-Service
+            Mock -CommandName Start-Sleep
+            Mock -CommandName Get-Module -MockWith { $false }
+            Mock -CommandName Import-Module
+        }
+
+        It 'Should not attempt to start the service' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Start-Service -Exactly -Times 0 -Scope It
+        }
+
+        It 'Should import the RemoteDesktop module globally' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Import-Module -ParameterFilter {
+                $Name -eq 'RemoteDesktop' -and $Global -eq $true -and $Force -eq $true
+            } -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the RDMS service is stopped' {
+        BeforeAll {
+            Mock -CommandName Get-Service -MockWith {
+                [PSCustomObject] @{
+                    Status = 'Stopped'
+                }
+            }
+
+            Mock -CommandName Start-Service
+            Mock -CommandName Start-Sleep
+            Mock -CommandName Get-Module -MockWith { $false }
+            Mock -CommandName Import-Module
+        }
+
+        It 'Should start the RDMS service' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Start-Service -ParameterFilter {
+                $Name -eq 'RDMS'
+            } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Start-Sleep -Exactly -Times 1 -Scope It
+        }
+
+        It 'Should import the RemoteDesktop module' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Import-Module -ParameterFilter {
+                $Name -eq 'RemoteDesktop' -and $Global -eq $true
+            } -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the RDMS service fails to start' {
+        BeforeAll {
+            Mock -CommandName Get-Service -MockWith {
+                [PSCustomObject] @{
+                    Status = 'Stopped'
+                }
+            }
+
+            Mock -CommandName Start-Service -MockWith {
+                throw 'Throwing from Start-Service mock'
+            }
+
+            Mock -CommandName Start-Sleep
+            Mock -CommandName Get-Module -MockWith { $false }
+            Mock -CommandName Import-Module
+        }
+
+        It 'Should throw an error' {
+            { Import-RemoteDesktopModule } | Should -Throw -ExpectedMessage 'Throwing from Start-Service mock'
+
+            Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-Module -Exactly -Times 0 -Scope It
+        }
+    }
+
+    Context 'When the RDMS service is already running' {
+        BeforeAll {
+            Mock -CommandName Get-Service -MockWith {
+                [PSCustomObject] @{
+                    Status = 'Running'
+                }
+            }
+
+            Mock -CommandName Start-Service
+            Mock -CommandName Start-Sleep
+            Mock -CommandName Get-Module -MockWith { $false }
+            Mock -CommandName Import-Module
+        }
+
+        It 'Should not attempt to start the service' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Start-Service -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Start-Sleep -Exactly -Times 0 -Scope It
+        }
+
+        It 'Should import the RemoteDesktop module' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Import-Module -ParameterFilter {
+                $Name -eq 'RemoteDesktop' -and $Global -eq $true
+            } -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the RemoteDesktop module is already loaded' {
+        BeforeAll {
+            Mock -CommandName Get-Service -MockWith {
+                [PSCustomObject] @{
+                    Status = 'Running'
+                }
+            }
+
+            Mock -CommandName Start-Service
+            Mock -CommandName Start-Sleep
+            Mock -CommandName Get-Module -MockWith { $true }
+            Mock -CommandName Import-Module
+        }
+
+        It 'Should not import the module again' {
+            Import-RemoteDesktopModule
+
+            Should -Invoke -CommandName Get-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-Module -Exactly -Times 0 -Scope It
+        }
+    }
+}

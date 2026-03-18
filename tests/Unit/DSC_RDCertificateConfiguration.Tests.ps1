@@ -59,7 +59,7 @@ AfterAll {
 
 Describe 'DSC_RDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the system is in the desired state' {
@@ -94,7 +94,7 @@ Describe 'DSC_RDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                 $result.Credential.UserName | Should -Be $testParams.Credential.UserName
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDCertificate -Exactly -Times 1 -Scope It
         }
     }
@@ -126,7 +126,7 @@ Describe 'DSC_RDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
                 $result.Credential.UserName | Should -BeNullOrEmpty
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDCertificate -Exactly -Times 1 -Scope It
         }
     }
@@ -134,7 +134,7 @@ Describe 'DSC_RDCertificateConfiguration\Get-TargetResource' -Tag 'Get' {
 
 Describe 'DSC_RDCertificateConfiguration\Test-TargetResource' -Tag 'Test' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the system is in the desired state' {
@@ -258,7 +258,7 @@ Describe 'DSC_RDCertificateConfiguration\Test-TargetResource' -Tag 'Test' {
 
 Describe 'DSC_RDCertificateConfiguration\Set-TargetResource' -Tag 'Set' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When setting the resource' {
@@ -280,7 +280,7 @@ Describe 'DSC_RDCertificateConfiguration\Set-TargetResource' -Tag 'Set' {
                 $null = Set-TargetResource @testParams
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Set-RDCertificate -Exactly -Times 1 -Scope It
         }
     }
@@ -305,7 +305,7 @@ Describe 'DSC_RDCertificateConfiguration\Set-TargetResource' -Tag 'Set' {
                 $null = Set-TargetResource @testParams
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Set-RDCertificate -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Write-Error -Exactly -Times 1 -Scope It
         }

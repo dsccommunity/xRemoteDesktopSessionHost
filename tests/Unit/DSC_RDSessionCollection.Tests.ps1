@@ -58,7 +58,7 @@ AfterAll {
 
 Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the resource is present' {
@@ -98,7 +98,7 @@ Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
                     { Get-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             }
         }
@@ -135,7 +135,7 @@ Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
                     $result.Force | Should -Be $testParams.Force
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionHost -Exactly -Times 1 -Scope It
             }
@@ -169,7 +169,7 @@ Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
                     $result.Force | Should -Be $testParams.Force
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             }
         }
@@ -211,7 +211,7 @@ Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
                     $result.Force | Should -Be $testParams.Force
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             }
         }
@@ -220,7 +220,7 @@ Describe 'DSC_RDSessionCollection\Get-TargetResource' -Tag 'Get' {
 
 Describe 'DSC_RDSessionCollection\Set-TargetResource' -Tag 'Set' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the resource is present' {

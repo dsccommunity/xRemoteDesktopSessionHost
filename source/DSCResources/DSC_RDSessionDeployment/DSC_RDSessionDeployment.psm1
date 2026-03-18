@@ -33,21 +33,7 @@ function Get-TargetResource
 
     Write-Verbose 'Getting list of RD Server roles.'
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
-
-    # Start service RDMS is needed because otherwise a reboot loop could happen due to
-    # the RDMS Service being on Delay-Start by default, and DSC kicks in too quickly after a reboot.
-    if ((Get-Service -Name RDMS -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status) -ne 'Running')
-    {
-        try
-        {
-            Start-Service -Name RDMS -ErrorAction Stop
-        }
-        catch
-        {
-            Write-Warning "Failed to start RDMS service. Error: '$_'."
-        }
-    }
+    Import-RemoteDesktopModule
 
     $deployed = Get-RDServer -ConnectionBroker $ConnectionBroker -ErrorAction SilentlyContinue
 
@@ -80,7 +66,7 @@ function Set-TargetResource
         $WebAccessServer
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     $currentStatus = Get-TargetResource @PSBoundParameters
 

@@ -42,7 +42,7 @@ function Get-TargetResource
 
     Write-Verbose -Message 'Getting information about RDSH collection.'
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     $params = @{
         ConnectionBroker = $ConnectionBroker
@@ -109,7 +109,7 @@ function Set-TargetResource
         $Force
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     $currentStatus = Get-TargetResource @PSBoundParameters
 

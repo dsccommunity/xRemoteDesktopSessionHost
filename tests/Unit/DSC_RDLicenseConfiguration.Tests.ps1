@@ -59,7 +59,7 @@ AfterAll {
 Describe 'DSC_RDLicenseConfiguration\Get-TargetResource' -Tag 'Get' {
     Context 'When the resource exists' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDLicenseConfiguration -MockWith {
                 [PSCustomObject] @{
                     LicenseServer = [System.String[]] @('LicenseServer1', 'LicenseServer2')
@@ -85,14 +85,14 @@ Describe 'DSC_RDLicenseConfiguration\Get-TargetResource' -Tag 'Get' {
                 $result.LicenseMode | Should -Be $testParams.LicenseMode
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDLicenseConfiguration -Exactly -Times 1 -Scope It
         }
     }
 
     Context 'When the resource does not exist' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDLicenseConfiguration
         }
 
@@ -173,7 +173,7 @@ Describe 'DSC_RDLicenseConfiguration\Test-TargetResource' -Tag 'Test' {
 Describe 'DSC_RDLicenseConfiguration\Set-TargetResource' -Tag 'Set' {
     Context 'When the resource is updated' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Set-RDLicenseConfiguration
         }
 
@@ -191,7 +191,7 @@ Describe 'DSC_RDLicenseConfiguration\Set-TargetResource' -Tag 'Set' {
                     Set-TargetResource @testParams
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Set-RDLicenseConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
                     $null -ne $LicenseServer
                 }
@@ -211,7 +211,7 @@ Describe 'DSC_RDLicenseConfiguration\Set-TargetResource' -Tag 'Set' {
                     Set-TargetResource @testParams
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Set-RDLicenseConfiguration -Exactly -Times 1 -Scope It -ParameterFilter {
                     $null -eq $LicenseServer
                 }

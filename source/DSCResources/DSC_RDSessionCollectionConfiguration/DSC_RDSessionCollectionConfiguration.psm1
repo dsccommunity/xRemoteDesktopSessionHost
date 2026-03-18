@@ -124,7 +124,7 @@ function Get-TargetResource
         $ExcludeFilePath
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     Write-Verbose "Getting currently configured RDSH Collection properties for collection $CollectionName"
 
@@ -294,7 +294,7 @@ function Set-TargetResource
 
     Write-Verbose 'Setting DSC collection properties'
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     try
     {

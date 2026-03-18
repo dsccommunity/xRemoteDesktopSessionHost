@@ -58,7 +58,7 @@ AfterAll {
 
 Describe 'DSC_RDServer\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the resource is present' {
@@ -93,7 +93,7 @@ Describe 'DSC_RDServer\Get-TargetResource' -Tag 'Get' {
                         $result.GatewayExternalFqdn | Should -BeNullOrEmpty
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
                 }
             }
@@ -116,7 +116,7 @@ Describe 'DSC_RDServer\Get-TargetResource' -Tag 'Get' {
                         $result.GatewayExternalFqdn | Should -BeNullOrEmpty
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
                 }
             }
@@ -150,7 +150,7 @@ Describe 'DSC_RDServer\Get-TargetResource' -Tag 'Get' {
                     $result.GatewayExternalFqdn | Should -Be $testParams.GatewayExternalFqdn
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDDeploymentGatewayConfiguration -Exactly -Times 1 -Scope It
             }
@@ -180,7 +180,7 @@ Describe 'DSC_RDServer\Get-TargetResource' -Tag 'Get' {
                     $result.GatewayExternalFqdn | Should -BeNullOrEmpty
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
             }
         }
@@ -214,7 +214,7 @@ Describe 'DSC_RDServer\Get-TargetResource' -Tag 'Get' {
                     $result.GatewayExternalFqdn | Should -BeNullOrEmpty
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
             }
         }
@@ -315,7 +315,7 @@ Describe 'DSC_RDServer\Test-TargetResource' -Tag 'Test' {
 
 Describe 'DSC_RDServer\Set-TargetResource' -Tag 'Set' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When adding a resource' {
@@ -343,7 +343,7 @@ Describe 'DSC_RDServer\Set-TargetResource' -Tag 'Set' {
                         $null = Set-TargetResource @testParams
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
                 }
@@ -376,7 +376,7 @@ Describe 'DSC_RDServer\Set-TargetResource' -Tag 'Set' {
                         $null = Set-TargetResource @testParams
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
                 }
@@ -408,7 +408,7 @@ Describe 'DSC_RDServer\Set-TargetResource' -Tag 'Set' {
                         { Set-TargetResource @testParams } | Should -Throw
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Assert-BoundParameter -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
                 }
@@ -433,7 +433,7 @@ Describe 'DSC_RDServer\Set-TargetResource' -Tag 'Set' {
                         $null = Set-TargetResource @testParams
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
                 }
             }
@@ -452,7 +452,7 @@ Describe 'DSC_RDServer\Set-TargetResource' -Tag 'Set' {
                         $null = Set-TargetResource @testParams
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Add-RDServer -Exactly -Times 1 -Scope It
                 }
             }

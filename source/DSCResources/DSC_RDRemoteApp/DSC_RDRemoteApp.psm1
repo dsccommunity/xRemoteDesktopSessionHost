@@ -74,7 +74,7 @@ function Get-TargetResource
         $ShowInWebAccess
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     try
     {
@@ -180,7 +180,7 @@ function Set-TargetResource
 
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     try
     {
@@ -275,7 +275,7 @@ function Test-TargetResource
 
     Write-Verbose 'Testing if RemoteApp is published.'
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     try
     {

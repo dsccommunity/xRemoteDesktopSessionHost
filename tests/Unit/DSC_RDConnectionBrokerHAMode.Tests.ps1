@@ -60,7 +60,7 @@ Describe 'DSC_RDConnectionBrokerHAMode\Get-TargetResource' -Tag 'Get' {
     Context 'When the resource is in the desired state' {
         Context 'When the connection broker is not local' {
             BeforeAll {
-                Mock -CommandName Assert-Module
+                Mock -CommandName Import-RemoteDesktopModule
                 Mock -CommandName Get-RDConnectionBrokerHighAvailability -MockWith {
                     @{
                         ConnectionBroker                  = 'RDCB1'
@@ -95,14 +95,14 @@ Describe 'DSC_RDConnectionBrokerHAMode\Get-TargetResource' -Tag 'Get' {
                     $result.DatabaseFilePath | Should -Be $testParams.DatabaseFilePath
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDConnectionBrokerHighAvailability -Exactly -Times 1 -Scope It
             }
         }
 
         Context 'When the connection broker is local' {
             BeforeAll {
-                Mock -CommandName Assert-Module
+                Mock -CommandName Import-RemoteDesktopModule
                 Mock -CommandName Get-RDConnectionBrokerHighAvailability -MockWith {
                     @{
                         ConnectionBroker                  = Get-ComputerName
@@ -136,7 +136,7 @@ Describe 'DSC_RDConnectionBrokerHAMode\Get-TargetResource' -Tag 'Get' {
                     $result.DatabaseFilePath | Should -Be $testParams.DatabaseFilePath
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDConnectionBrokerHighAvailability -Exactly -Times 1 -Scope It
             }
         }
@@ -144,7 +144,7 @@ Describe 'DSC_RDConnectionBrokerHAMode\Get-TargetResource' -Tag 'Get' {
 
     Context 'When the resource is not in the desired state' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDConnectionBrokerHighAvailability
         }
 
@@ -170,7 +170,7 @@ Describe 'DSC_RDConnectionBrokerHAMode\Get-TargetResource' -Tag 'Get' {
                 $result.DatabaseFilePath | Should -BeNullOrEmpty
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDConnectionBrokerHighAvailability -Exactly -Times 1 -Scope It
         }
     }
@@ -243,7 +243,7 @@ Describe 'DSC_RDConnectionBrokerHAMode\Test-TargetResource' -Tag 'Test' {
 Describe 'DSC_RDConnectionBrokerHAMode\Set-TargetResource' -Tag 'Set' {
     Context 'When Set-RDConnectionBrokerHighAvailability runs successfully' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Set-RDConnectionBrokerHighAvailability
         }
 
@@ -262,7 +262,7 @@ Describe 'DSC_RDConnectionBrokerHAMode\Set-TargetResource' -Tag 'Set' {
                 $null = Set-TargetResource @testParams
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Set-RDConnectionBrokerHighAvailability -Exactly -Times 1 -Scope It
         }
     }

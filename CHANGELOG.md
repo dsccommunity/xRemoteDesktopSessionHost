@@ -1,9 +1,33 @@
-# Changelog for xRemoteDesktopSessionHost
+# Changelog for RemoteDesktopServices
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Fixed
+
+- All DSC resources now import the RemoteDesktop CDXML module with
+  `Import-Module -Global` instead of `Assert-Module -ImportModule`. The
+  CDXML proxy commands were not visible inside `wmiprvse.exe` because
+  `Assert-Module` imported into its own function scope. This caused every
+  resource to fail with `The term 'Get-RDServer' is not recognized` when
+  applied by the LCM on Windows Server 2022/2025.
+- The RDMS service is now started before importing the RemoteDesktop module
+  in every resource function. Previously, only `DSC_RDSessionDeployment`
+  `Get-TargetResource` started the service, and only after the import
+  attempt, causing failures after reboot when the delayed-start service had
+  not yet registered its WMI namespace.
+
+### Changed
+
+- Added shared helper function `Import-RemoteDesktopModule` to the
+  `RemoteDesktopServicesDsc.Common` module to avoid duplicating the
+  RDMS-start-and-import logic across all 9 DSC resources.
+- Removed the now-redundant inline RDMS service start block from
+  `DSC_RDSessionDeployment` `Get-TargetResource`.
+
+## [4.0.0] - 2026-01-21
 
 ### Changed
 

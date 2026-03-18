@@ -44,7 +44,7 @@ function Get-TargetResource
         $ClientAccessName
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     Write-Verbose -Message ($script:localizedData.VerboseGetHAMode -f $ConnectionBroker, $ClientAccessName)
 
@@ -95,7 +95,7 @@ function Set-TargetResource
         $ClientAccessName
     )
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     Write-Verbose -Message ($script:localizedData.VerboseConfigureHAMode -f $ConnectionBroker, $ClientAccessName)
 

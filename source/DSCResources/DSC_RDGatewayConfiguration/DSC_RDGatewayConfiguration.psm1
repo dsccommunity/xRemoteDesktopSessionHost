@@ -53,7 +53,7 @@ function Get-TargetResource
 
     Write-Verbose "Getting RD Gateway configuration from broker '$ConnectionBroker'..."
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     $result = $null
 
@@ -133,7 +133,7 @@ function Set-TargetResource
 
     Write-Verbose "Starting RD Gateway configuration for the RD deployment at broker '$ConnectionBroker'..."
 
-    Assert-Module -ModuleName 'RemoteDesktop' -ImportModule
+    Import-RemoteDesktopModule
 
     $customModeParams = @(
         'ExternalFqdn',

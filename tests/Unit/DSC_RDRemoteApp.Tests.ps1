@@ -59,7 +59,7 @@ AfterAll {
 Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
     Context 'When the resource exists' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-RDRemoteApp -MockWith {
                 @{
@@ -117,7 +117,7 @@ Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
                 $result.ShowInWebAccess | Should -Be $testParams.ShowInWebAccess
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
         }
@@ -125,7 +125,7 @@ Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
 
     Context 'When the resource does not exist' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-RDRemoteApp
         }
@@ -167,7 +167,7 @@ Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
                 $result.ShowInWebAccess | Should -BeNullOrEmpty
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
         }
@@ -175,7 +175,7 @@ Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
 
     Context 'When the collection does not exist' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection -MockWith {
                 throw 'Mock Error'
             }
@@ -206,7 +206,7 @@ Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
                 { Get-TargetResource @testParams } | Should -Throw -ExpectedMessage "Failed to lookup RD Session Collection $($testParams.CollectionName). Error: Mock Error"
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
         }
     }
@@ -215,7 +215,7 @@ Describe 'DSC_RDRemoteApp\Get-TargetResource' -Tag 'Get' {
 Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
     Context 'When the resource should be created' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-RDRemoteApp
             Mock -CommandName New-RDRemoteApp
@@ -246,7 +246,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
                 $null = Set-TargetResource @testParams
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 1 -Scope It
@@ -257,7 +257,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
 
     Context 'When the resource should be removed' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-RDRemoteApp -MockWith {
                 @{
@@ -293,7 +293,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
                 $null = Set-TargetResource @testParams
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 0 -Scope It
@@ -304,7 +304,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
 
     Context 'When the resource should be updated' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-RDRemoteApp -MockWith {
                 @{
@@ -340,7 +340,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
                 $null = Set-TargetResource @testParams
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 0 -Scope It
@@ -351,7 +351,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
 
     Context 'When the collection does not exist' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection -MockWith {
                 throw 'Mock Error'
             }
@@ -385,7 +385,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
                 { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Mock Error'
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDRemoteApp -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName New-RDRemoteApp -Exactly -Times 0 -Scope It
@@ -398,7 +398,7 @@ Describe 'DSC_RDRemoteApp\Set-TargetResource' -Tag 'Set' {
 Describe 'DSC_RDRemoteApp\Test-TargetResource' -Tag 'Test' {
     Context 'When the resource is in the desired state' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-TargetResource -MockWith {
                 @{
@@ -442,7 +442,7 @@ Describe 'DSC_RDRemoteApp\Test-TargetResource' -Tag 'Test' {
                 Test-TargetResource @testParams | Should -BeTrue
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
         }
@@ -450,7 +450,7 @@ Describe 'DSC_RDRemoteApp\Test-TargetResource' -Tag 'Test' {
 
     Context 'When the resource is not in the desired state' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection
             Mock -CommandName Get-TargetResource -MockWith {
                 @{
@@ -542,7 +542,7 @@ Describe 'DSC_RDRemoteApp\Test-TargetResource' -Tag 'Test' {
                     Test-TargetResource @testParams | Should -BeFalse
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-TargetResource -Exactly -Times 1 -Scope It
             }
@@ -551,7 +551,7 @@ Describe 'DSC_RDRemoteApp\Test-TargetResource' -Tag 'Test' {
 
     Context 'When the collection does not exist' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName Get-RDSessionCollection -MockWith {
                 throw 'Mock Error'
             }
@@ -582,7 +582,7 @@ Describe 'DSC_RDRemoteApp\Test-TargetResource' -Tag 'Test' {
                 { Test-TargetResource @testParams } | Should -Throw -ExpectedMessage 'Failed to lookup RD Session Collection TestCollection. Error: Mock Error'
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Get-TargetResource -Exactly -Times 0 -Scope It
         }

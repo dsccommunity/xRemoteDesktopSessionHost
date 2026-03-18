@@ -58,7 +58,7 @@ AfterAll {
 
 Describe 'DSC_RDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the resource is present' {
@@ -260,7 +260,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Get-TargetResource' -Tag 'Get' {
 
 Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the session collection does not exist' {
@@ -281,7 +281,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                 { Set-TargetResource @testParams } | Should -Throw
             }
 
-            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
         }
     }
 
@@ -334,7 +334,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                     $null = Set-TargetResource @testParams
                 }
 
-                Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $DiskPath } -Exactly -Times 1 -Scope It
@@ -394,7 +394,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                             { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
                         }
 
-                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
@@ -445,7 +445,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                             { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
                         }
 
-                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
@@ -499,7 +499,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                             { Set-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord.Exception.Message
                         }
 
-                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
@@ -549,7 +549,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                             $null = Set-TargetResource @testParams
                         }
 
-                        Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                        Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                         Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $EnableUserProfileDisk } -Exactly -Times 1 -Scope It
@@ -593,7 +593,7 @@ Describe 'DSC_RDSessionCollectionConfiguration\Set-TargetResource' -Tag 'Set' {
                         $null = Set-TargetResource @testParams
                     }
 
-                    Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-RemoteDesktopServicesDscOsVersion -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Get-RDSessionCollection -Exactly -Times 1 -Scope It
                     Should -Invoke -CommandName Set-RDSessionCollectionConfiguration -ParameterFilter { $null -eq $DisableUserProfileDisk } -Exactly -Times 1 -Scope It

@@ -58,43 +58,33 @@ AfterAll {
 
 Describe 'DSC_RDSessionDeployment\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
-        Mock -CommandName Assert-Module
+        Mock -CommandName Import-RemoteDesktopModule
     }
 
     Context 'When the resource is not present' {
         BeforeAll {
-            Mock -CommandName Get-Service
-            Mock -CommandName Start-Service -MockWith {
-                throw 'Cannot find any service with service name ''RDMS''.'
-            }
-
             Mock -CommandName Get-RDServer
         }
 
-        Context 'When the RDMS service is not present' {
-            It 'Should return the correct result' {
-                InModuleScope -ScriptBlock {
-                    Set-StrictMode -Version 1.0
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-                    $testParams = @{
-                        SessionHost      = 'sessionhost.lan'
-                        ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = 'webaccess.lan'
-                    }
-
-                    $result = Get-TargetResource @testParams -WarningVariable serviceWarning -WarningAction SilentlyContinue
-
-                    $result.SessionHost | Should -BeNullOrEmpty
-                    $result.ConnectionBroker | Should -BeNullOrEmpty
-                    $result.WebAccessServer | Should -BeNullOrEmpty
-
-                    $serviceWarning | Should -BeLike "Failed to start RDMS service. Error: 'Cannot find any service with service name 'RDMS'.'."
+                $testParams = @{
+                    SessionHost      = 'sessionhost.lan'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    WebAccessServer  = 'webaccess.lan'
                 }
 
-                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
+                $result = Get-TargetResource @testParams
+
+                $result.SessionHost | Should -BeNullOrEmpty
+                $result.ConnectionBroker | Should -BeNullOrEmpty
+                $result.WebAccessServer | Should -BeNullOrEmpty
             }
+
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
         }
     }
 
@@ -120,101 +110,27 @@ Describe 'DSC_RDSessionDeployment\Get-TargetResource' -Tag 'Get' {
                     )
                 }
             }
-
-            Mock -CommandName Start-Service
-            Mock -CommandName Get-Service -MockWith {
-                [PSCustomObject] @{
-                    Status = 'Stopped'
-                }
-            }
         }
 
-        Context 'When the RDMS service is stopped' {
-            It 'Should return the correct result' {
-                InModuleScope -ScriptBlock {
-                    Set-StrictMode -Version 1.0
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-                    $testParams = @{
-                        SessionHost      = [System.String[]] 'sessionhost.lan'
-                        ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = [System.String[]] 'webaccess.lan'
-                    }
-
-                    $result = Get-TargetResource @testParams
-
-                    $result.SessionHost | Should -Be $testParams.SessionHost
-                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
-                    $result.WebAccessServer | Should -Be $testParams.WebAccessServer
+                $testParams = @{
+                    SessionHost      = [System.String[]] 'sessionhost.lan'
+                    ConnectionBroker = 'connectionbroker.lan'
+                    WebAccessServer  = [System.String[]] 'webaccess.lan'
                 }
 
-                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
-            }
-        }
+                $result = Get-TargetResource @testParams
 
-        Context 'When the RDMS service fails to start' {
-            BeforeAll {
-                Mock -CommandName Start-Service -MockWith {
-                    throw 'Throwing from Start-Service mock'
-                }
+                $result.SessionHost | Should -Be $testParams.SessionHost
+                $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
+                $result.WebAccessServer | Should -Be $testParams.WebAccessServer
             }
 
-            It 'Should return the correct result' {
-                InModuleScope -ScriptBlock {
-                    Set-StrictMode -Version 1.0
-
-                    $testParams = @{
-                        SessionHost      = 'sessionhost.lan'
-                        ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = 'webaccess.lan'
-                    }
-
-                    $result = Get-TargetResource @testParams -WarningVariable serviceWarning -WarningAction SilentlyContinue
-
-                    $result.SessionHost | Should -Be $testParams.SessionHost
-                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
-                    $result.WebAccessServer | Should -Be $testParams.WebAccessServer
-
-                    $serviceWarning | Should -BeLike "Failed to start RDMS service. Error: 'Throwing from Start-Service mock'."
-                }
-
-                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Start-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
-            }
-        }
-
-        Context 'When the RDMS service is already running' {
-            BeforeAll {
-                Mock -CommandName Get-Service -MockWith {
-                    [PSCustomObject]@{
-                        Status = 'Running'
-                    }
-                }
-            }
-
-            It 'Should return the correct result' {
-                InModuleScope -ScriptBlock {
-                    Set-StrictMode -Version 1.0
-
-                    $testParams = @{
-                        SessionHost      = 'sessionhost.lan'
-                        ConnectionBroker = 'connectionbroker.lan'
-                        WebAccessServer  = 'webaccess.lan'
-                    }
-
-                    $result = Get-TargetResource @testParams
-
-                    $result.SessionHost | Should -Be $testParams.SessionHost
-                    $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
-                    $result.WebAccessServer | Should -Be $testParams.WebAccessServer
-                }
-
-                Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName Start-Service -Exactly -Times 0 -Scope It
-                Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
-            }
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-RDServer -Exactly -Times 1 -Scope It
         }
     }
 }
@@ -222,7 +138,7 @@ Describe 'DSC_RDSessionDeployment\Get-TargetResource' -Tag 'Get' {
 Describe 'DSC_RDSessionDeployment\Set-TargetResource' -Tag 'Set' {
     Context 'When the resource is not in the desired state' {
         BeforeAll {
-            Mock -CommandName Assert-Module
+            Mock -CommandName Import-RemoteDesktopModule
             Mock -CommandName New-RDSessionDeployment
             Mock -CommandName Add-RDServer
             Mock -CommandName Remove-RDServer
