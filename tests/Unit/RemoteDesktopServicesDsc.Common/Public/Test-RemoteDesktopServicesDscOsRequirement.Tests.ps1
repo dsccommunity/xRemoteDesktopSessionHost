@@ -31,9 +31,16 @@ BeforeAll {
     # built module from the build output rather than a version on PSModulePath.
     $script:repoRoot = Join-Path -Path $PSScriptRoot -ChildPath '../../../../' -Resolve
     $script:builtModuleRoot = Join-Path -Path $script:repoRoot -ChildPath 'output/builtModule' -Resolve
-    $script:parentModuleBase = Get-ChildItem -Path (Join-Path -Path $script:builtModuleRoot -ChildPath $script:dscModuleName) -Directory |
+    $script:parentModuleSearchPath = Join-Path -Path $script:builtModuleRoot -ChildPath $script:dscModuleName
+    $script:parentModuleBase = Get-ChildItem -Path $script:parentModuleSearchPath -Directory |
+        Sort-Object -Property LastWriteTime -Descending |
         Select-Object -First 1 |
         Select-Object -ExpandProperty FullName
+
+    if (-not $script:parentModuleBase)
+    {
+        throw "No built module directory found under '$script:parentModuleSearchPath' for module '$script:dscModuleName'. Run '.\build.ps1 -ResolveDependency -Tasks build' first."
+    }
     $script:subModulesFolder = Join-Path -Path $script:parentModuleBase -ChildPath 'Modules'
 
     $script:subModulePath = Join-Path -Path $script:subModulesFolder -ChildPath $script:subModuleName
