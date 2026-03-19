@@ -88,7 +88,6 @@ Describe 'Import-RemoteDesktopModule' {
         BeforeAll {
             Mock -CommandName Get-Service
             Mock -CommandName Start-Service
-            Mock -CommandName Start-Sleep
             Mock -CommandName Get-Module -MockWith { $false }
             Mock -CommandName Import-Module
         }
@@ -112,13 +111,18 @@ Describe 'Import-RemoteDesktopModule' {
     Context 'When the RDMS service is stopped' {
         BeforeAll {
             Mock -CommandName Get-Service -MockWith {
-                [PSCustomObject] @{
+                $mockService = [PSCustomObject] @{
                     Status = 'Stopped'
                 }
+
+                $mockService | Add-Member -MemberType ScriptMethod -Name 'WaitForStatus' -Value {
+                    param ($Status, $Timeout)
+                }
+
+                return $mockService
             }
 
             Mock -CommandName Start-Service
-            Mock -CommandName Start-Sleep
             Mock -CommandName Get-Module -MockWith { $false }
             Mock -CommandName Import-Module
         }
@@ -129,7 +133,6 @@ Describe 'Import-RemoteDesktopModule' {
             Should -Invoke -CommandName Start-Service -ParameterFilter {
                 $Name -eq 'RDMS'
             } -Exactly -Times 1 -Scope It
-            Should -Invoke -CommandName Start-Sleep -Exactly -Times 1 -Scope It
         }
 
         It 'Should import the RemoteDesktop module' {
@@ -144,16 +147,21 @@ Describe 'Import-RemoteDesktopModule' {
     Context 'When the RDMS service fails to start' {
         BeforeAll {
             Mock -CommandName Get-Service -MockWith {
-                [PSCustomObject] @{
+                $mockService = [PSCustomObject] @{
                     Status = 'Stopped'
                 }
+
+                $mockService | Add-Member -MemberType ScriptMethod -Name 'WaitForStatus' -Value {
+                    param ($Status, $Timeout)
+                }
+
+                return $mockService
             }
 
             Mock -CommandName Start-Service -MockWith {
                 throw 'Throwing from Start-Service mock'
             }
 
-            Mock -CommandName Start-Sleep
             Mock -CommandName Get-Module -MockWith { $false }
             Mock -CommandName Import-Module
         }
@@ -175,7 +183,6 @@ Describe 'Import-RemoteDesktopModule' {
             }
 
             Mock -CommandName Start-Service
-            Mock -CommandName Start-Sleep
             Mock -CommandName Get-Module -MockWith { $false }
             Mock -CommandName Import-Module
         }
@@ -185,7 +192,6 @@ Describe 'Import-RemoteDesktopModule' {
 
             Should -Invoke -CommandName Get-Service -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Start-Service -Exactly -Times 0 -Scope It
-            Should -Invoke -CommandName Start-Sleep -Exactly -Times 0 -Scope It
         }
 
         It 'Should import the RemoteDesktop module' {
@@ -206,7 +212,6 @@ Describe 'Import-RemoteDesktopModule' {
             }
 
             Mock -CommandName Start-Service
-            Mock -CommandName Start-Sleep
             Mock -CommandName Get-Module -MockWith { $true }
             Mock -CommandName Import-Module
         }
