@@ -84,7 +84,7 @@ function Set-TargetResource
 
     $currentStatus = Get-TargetResource @PSBoundParameters
 
-    if ($null -eq $currentStatus)
+    if ($null -eq $currentStatus -or -not $currentStatus.ConnectionBroker)
     {
         Write-Verbose 'Initiating new RDSH deployment.'
         $parameters = @{

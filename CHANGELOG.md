@@ -5,6 +5,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- DSC_RDSessionDeployment
+  - Fixed `Set-TargetResource` so it correctly calls `New-RDSessionDeployment`
+    when no deployment exists. The `$null` check on the return value of
+    `Get-TargetResource` was always `$false` because the function returns an
+    empty hashtable, not `$null` - [issue #138](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/138).
+
 ## [4.0.0] - 2026-01-21
 
 ### Changed

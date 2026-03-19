@@ -230,7 +230,13 @@ Describe 'DSC_RDSessionDeployment\Set-TargetResource' -Tag 'Set' {
 
         Context 'When the deployment does not exist' {
             BeforeAll {
-                Mock -CommandName Get-TargetResource
+                Mock -CommandName Get-TargetResource -MockWith {
+                    @{
+                        SessionHost      = [System.String[]] @()
+                        ConnectionBroker = ''
+                        WebAccessServer  = [System.String[]] @()
+                    }
+                }
             }
 
             It 'Should call the correct mocks' {
