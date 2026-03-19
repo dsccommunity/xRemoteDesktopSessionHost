@@ -10,11 +10,24 @@
         This function starts the RDMS service (required for the WMI namespace the CDXML
         module connects to) and imports the module with -Global so the commands are
         available in all scopes.
+
+    .INPUTS
+        None
+
+    .OUTPUTS
+        None
+
+    .EXAMPLE
+        Import-RemoteDesktopModule
+
+        Starts the RDMS service if it is not running and imports the RemoteDesktop
+        module into the global scope so that its commands are available to DSC resources.
 #>
 
 function Import-RemoteDesktopModule
 {
     [CmdletBinding()]
+    [OutputType()]
     param ()
 
     $rdmsService = Get-Service -Name RDMS -ErrorAction SilentlyContinue
@@ -22,7 +35,7 @@ function Import-RemoteDesktopModule
     if ($null -ne $rdmsService -and $rdmsService.Status -ne 'Running')
     {
         Start-Service -Name RDMS -ErrorAction Stop
-        Start-Sleep -Seconds 2
+        $rdmsService.WaitForStatus('Running', [TimeSpan]::FromSeconds(30))
     }
 
     if (-not (Get-Module -Name RemoteDesktop))
