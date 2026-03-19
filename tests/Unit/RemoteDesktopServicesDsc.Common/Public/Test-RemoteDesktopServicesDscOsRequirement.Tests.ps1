@@ -27,8 +27,14 @@ BeforeAll {
     $script:dscModuleName = 'RemoteDesktopServicesDsc'
     $script:subModuleName = 'RemoteDesktopServicesDsc.Common'
 
-    $script:parentModule = Get-Module -Name $script:dscModuleName -ListAvailable | Select-Object -First 1
-    $script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
+    # Derive the repository root from $PSScriptRoot so the test always loads the
+    # built module from the build output rather than a version on PSModulePath.
+    $script:repoRoot = Join-Path -Path $PSScriptRoot -ChildPath '../../../../' -Resolve
+    $script:builtModuleRoot = Join-Path -Path $script:repoRoot -ChildPath 'output/builtModule' -Resolve
+    $script:parentModuleBase = Get-ChildItem -Path (Join-Path -Path $script:builtModuleRoot -ChildPath $script:dscModuleName) -Directory |
+        Select-Object -First 1 |
+        Select-Object -ExpandProperty FullName
+    $script:subModulesFolder = Join-Path -Path $script:parentModuleBase -ChildPath 'Modules'
 
     $script:subModulePath = Join-Path -Path $script:subModulesFolder -ChildPath $script:subModuleName
 
