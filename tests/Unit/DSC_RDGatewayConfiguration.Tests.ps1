@@ -84,6 +84,8 @@ Describe 'DSC_RDGatewayConfiguration\Get-TargetResource' -Tag 'Get' {
                     $result.ConnectionBroker | Should -Be $testParams.ConnectionBroker
                     $result.GatewayMode | Should -Be 'Automatic'
                 }
+
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             }
         }
 
@@ -117,6 +119,8 @@ Describe 'DSC_RDGatewayConfiguration\Get-TargetResource' -Tag 'Get' {
                     $result.UseCachedCredentials | Should -BeTrue
                     $result.BypassLocal | Should -BeFalse
                 }
+
+                Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
             }
         }
     }
@@ -144,6 +148,8 @@ Describe 'DSC_RDGatewayConfiguration\Get-TargetResource' -Tag 'Get' {
                 $result.UseCachedCredentials | Should -BeNullOrEmpty
                 $result.BypassLocal | Should -BeNullOrEmpty
             }
+
+            Should -Invoke -CommandName Import-RemoteDesktopModule -Exactly -Times 1 -Scope It
         }
     }
 }
