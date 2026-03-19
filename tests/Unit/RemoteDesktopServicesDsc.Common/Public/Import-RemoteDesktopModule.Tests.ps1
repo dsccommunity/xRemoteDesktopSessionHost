@@ -54,6 +54,35 @@ AfterAll {
     Get-Module -Name $script:subModuleName -All | Remove-Module -Force
 }
 
+Describe 'Import-RemoteDesktopModule - Parameter Set Contract' {
+    BeforeAll {
+        $script:command = Get-Command -Name 'Import-RemoteDesktopModule'
+    }
+
+    It 'Should be a function' {
+        $script:command.CommandType | Should -Be 'Function'
+    }
+
+    It 'Should have exactly one parameter set named __AllParameterSets' {
+        $script:command.ParameterSets | Should -HaveCount 1
+        $script:command.ParameterSets[0].Name | Should -Be '__AllParameterSets'
+    }
+
+    It 'Should have no required parameters' {
+        $requiredParams = $script:command.ParameterSets[0].Parameters |
+            Where-Object { $_.IsMandatory -and $_.Name -notin [System.Management.Automation.Cmdlet]::CommonParameters }
+
+        $requiredParams | Should -BeNullOrEmpty
+    }
+
+    It 'Should have no custom parameters beyond common parameters' {
+        $customParams = $script:command.Parameters.Keys |
+            Where-Object { $_ -notin [System.Management.Automation.Cmdlet]::CommonParameters }
+
+        $customParams | Should -BeNullOrEmpty
+    }
+}
+
 Describe 'Import-RemoteDesktopModule' {
     Context 'When the RDMS service is not present' {
         BeforeAll {
