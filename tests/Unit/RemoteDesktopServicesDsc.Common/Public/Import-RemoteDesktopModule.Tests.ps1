@@ -136,7 +136,7 @@ Describe 'Import-RemoteDesktopModule' {
             Import-RemoteDesktopModule
 
             Should -Invoke -CommandName Import-Module -ParameterFilter {
-                $Name -eq 'RemoteDesktop' -and $Global -eq $true
+                $Name -eq 'RemoteDesktop' -and $Global -eq $true -and $Force -eq $true
             } -Exactly -Times 1 -Scope It
         }
     }
@@ -192,7 +192,7 @@ Describe 'Import-RemoteDesktopModule' {
             Import-RemoteDesktopModule
 
             Should -Invoke -CommandName Import-Module -ParameterFilter {
-                $Name -eq 'RemoteDesktop' -and $Global -eq $true
+                $Name -eq 'RemoteDesktop' -and $Global -eq $true -and $Force -eq $true
             } -Exactly -Times 1 -Scope It
         }
     }
