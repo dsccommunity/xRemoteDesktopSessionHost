@@ -75,7 +75,6 @@ class RDSessionDeployment : ResourceBase
 
         return @{
             SessionHost      = [System.String[]] ($deployed.Where({ $_.Roles -contains 'RDS-RD-SERVER' })).Server
-            ConnectionBroker = ($deployed.Where({ $_.Roles -contains 'RDS-CONNECTION-BROKER' })).Server
             WebAccessServer  = [System.String[]] ($deployed.Where({ $_.Roles -contains 'RDS-WEB-ACCESS' })).Server
         }
     }

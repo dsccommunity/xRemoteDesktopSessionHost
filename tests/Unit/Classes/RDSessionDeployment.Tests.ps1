@@ -463,7 +463,6 @@ Describe 'RDSessionDeployment\GetCurrentState()' -Tag 'HiddenMember' {
                     }
                 )
 
-                $currentState.ConnectionBroker | Should -Be 'connectionbroker.lan'
                 $currentState.SessionHost | Should -Be 'sessionhost.lan'
                 $currentState.WebAccessServer | Should -Be 'webaccess.lan'
             }
