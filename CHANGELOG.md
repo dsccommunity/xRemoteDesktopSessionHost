@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - WebAccessServer is now NOT a required parameter, mirroring the use
       of the underlying cmdlet.
 
+### Fixed
+
+- `RDSessionDeployment`
+  - Let base class add the key properties [Issue #153](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/153).
+
 ## [4.1.0] - 2026-03-23
 
 ### Fixed
