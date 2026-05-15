@@ -123,6 +123,7 @@ class RDConnectionBrokerHAMode : ResourceBase
     #>
     hidden [void] Modify([System.Collections.Hashtable] $properties)
     {
+        # If the ActiveManagementServer property is not empty, then the configuration is currently active and cannot be modified.
         if (-not [string]::IsNullOrEmpty($this.ActiveManagementServer))
         {
             New-InvalidOperationException -Message $this.localizedData.RDConnectionBrokerHAMode_ConfigurationCannotBeModified
