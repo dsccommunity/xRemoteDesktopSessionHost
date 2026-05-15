@@ -28,6 +28,9 @@
     .PARAMETER ConnectionBroker
         Specifies the FQDN of a server to host the RD Connection Broker role service.
 
+    .PARAMETER ActiveManagementServer
+        Returns the FQDN of the server that is currently active for management tasks.
+
     .PARAMETER Reasons
         Returns the reason a property is not in desired state.
 #>
