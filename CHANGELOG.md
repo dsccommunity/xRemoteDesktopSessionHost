@@ -8,16 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `RDSessionDeployment`
-  - Converted to class-based resource [Issue #151](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/151).
+  - Converted to class-based resource [issue #151](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/151).
     - WebAccessServer is now NOT a required parameter, mirroring the use
       of the underlying cmdlet.
 - `RDConnectionBrokerHAMode`
-  - Converted to class-based resource [Issue #144](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/144).
+  - Converted to class-based resource [issue #144](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/144).
 
 ### Fixed
 
 - `RDSessionDeployment`
-  - Let base class add the key properties [Issue #153](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/153).
+  - Let base class add the key properties [issue #153](https://github.com/dsccommunity/RemoteDesktopServicesDsc/issues/153).
 
 ## [4.1.0] - 2026-03-23
 
