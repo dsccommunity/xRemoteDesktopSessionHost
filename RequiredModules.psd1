@@ -12,6 +12,7 @@
     Pester                         = 'latest'
     Plaster                        = 'latest'
     ModuleBuilder                  = 'latest'
+    Configuration                  = 'latest' # temporary until PSGallery upload is fixed
     ChangelogManagement            = 'latest'
     Sampler                        = 'latest'
     'Sampler.GitHubTasks'          = 'latest'
