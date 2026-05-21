@@ -154,6 +154,6 @@ class RDConnectionBrokerHAMode : ResourceBase
         }
 
         # Module Import in verbose mode outputs lots of data, so redirecting to null.
-        Import-RemoteDesktopModule 4>&1 > $null
+        Import-RemoteDesktopModule 4> $null
     }
 }
