@@ -71,9 +71,6 @@ class RDConnectionBrokerHAMode : ResourceBase
     {
         $this.ExcludeDscProperties = @(
             'ConnectionBroker'
-            'DatabaseConnectionString'
-            'DatabaseSecondaryConnectionString'
-            'DatabaseFilePath'
         )
     }
 

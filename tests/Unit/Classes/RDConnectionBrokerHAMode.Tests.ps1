@@ -192,7 +192,9 @@ Describe 'RDConnectionBrokerHAMode\Get()' -Tag 'Get' {
 
                     $currentState.ActiveManagementServer | Should -Be 'connectionbroker.lan'
 
-                    $currentState.Reasons | Should -HaveCount 0 # Resource cannot 'update' it's either configured or not.
+                    $currentState.Reasons | Should -HaveCount 1
+                    $currentState.Reasons[0].Code | Should -Be 'RDConnectionBrokerHAMode:RDConnectionBrokerHAMode:DatabaseFilePath'
+                    $currentState.Reasons[0].Phrase | Should -Be 'The property DatabaseFilePath should be "C:\RDFiles\RemoteDesktopDeployment.mdf", but was "C:\RDFiles\RemoteDesktopDeployment1.mdf"'
                 }
             }
         }
