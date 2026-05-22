@@ -26,7 +26,7 @@
         Returns the reason a property is not in desired state.
 #>
 
-[DscResource()]
+[DscResource(RunAsCredential = 'Optional')]
 class RDSessionDeployment : ResourceBase
 {
     [DscProperty(Key)]
