@@ -330,6 +330,7 @@ Describe 'RDConnectionBrokerHAMode\Test()' -Tag 'Test' {
                     DatabaseConnectionString          = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB1;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     DatabaseSecondaryConnectionString = 'DRIVER=SQL Server Native Client 11.0;SERVER=RDDB2;Trusted_Connection=Yes;APP=Remote Desktop Services Connection Broker;Database=RDS'
                     DatabaseFilePath                  = 'C:\RDFiles\RemoteDesktopDeployment.mdf'
+                    ActiveManagementServer            = 'managementserver.lan'
                 }
 
                 $script:mockInstance |
