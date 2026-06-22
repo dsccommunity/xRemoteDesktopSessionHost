@@ -16,11 +16,11 @@
     .PARAMETER ClientAccessName
         Specifies the Client Access Name for the RD Connection Broker HA deployment.
 
+    .PARAMETER DatabaseSecondaryConnectionString
+            Specifies the secondary database connection string for the RD Connection Broker HA deployment.
+
     .PARAMETER DatabaseConnectionString
         Specifies the primary database connection string for the RD Connection Broker HA deployment.
-
-    .PARAMETER DatabaseSecondaryConnectionString
-        Specifies the secondary database connection string for the RD Connection Broker HA deployment.
 
     .PARAMETER DatabaseFilePath
         Specifies the file path for the RD Connection Broker HA database.
@@ -43,13 +43,13 @@ class RDConnectionBrokerHAMode : ResourceBase
     [System.String]
     $ClientAccessName
 
-    [DscProperty()]
-    [System.String]
-    $ConnectionBroker
-
     [DscProperty(Mandatory)]
     [System.String]
     $DatabaseConnectionString
+
+    [DscProperty()]
+    [System.String]
+    $ConnectionBroker
 
     [DscProperty()]
     [System.String]
@@ -88,8 +88,10 @@ class RDConnectionBrokerHAMode : ResourceBase
 
     [System.Boolean] Test()
     {
-        # Call the base method to test all of the properties that should be enforced.
-        return ([ResourceBase] $this).Test()
+        $null = ([ResourceBase] $this).Test()
+
+        # If the ActiveManagementServer is empty then there is no configuration set.
+        return -not [string]::IsNullOrWhiteSpace($this.ActiveManagementServer)
     }
 
     # Base method Get() call this method to get the current state as a Hashtable.
